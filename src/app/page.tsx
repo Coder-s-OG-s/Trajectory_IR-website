@@ -3,7 +3,7 @@ import { DashboardShowcase } from '@/components/dashboard-showcase';
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-[#fafafa] text-zinc-950 font-sans overflow-hidden antialiased">
+    <div className="relative min-h-screen bg-[#fafafa] text-zinc-950 font-sans overflow-hidden antialiased pb-20">
       
       {/* Soft Pastel Background Mesh Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[650px] pointer-events-none opacity-80">
@@ -43,8 +43,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-12 pb-24 text-center">
+      {/* Hero & Main Content Section (Wide Free Room Layout) */}
+      <main className="relative z-10 max-w-[1240px] mx-auto px-6 pt-12 pb-24 text-center">
         
         {/* Top Pill Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold text-zinc-900 bg-white border border-zinc-200/90 shadow-sm backdrop-blur-sm mb-8">
@@ -79,7 +79,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Workable Dashboard Showcase Component (Optimized Clean Contrast) */}
+        {/* Separated Floating Dashboard Showcase Component */}
         <DashboardShowcase />
 
       </main>
@@ -94,7 +94,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-6 font-medium">
             <Link href="/docs" className="hover:text-zinc-950 no-underline transition-colors">Documentation</Link>
-            <Link href="/docs/infrastructure" className="hover:text-zinc-950 no-underline transition-colors">Infrastructure</Link>
+            <Link href="/docs/infrastructure" className="hover:text-zinc-950 no-underline transition-colors">Architecture</Link>
             <Link href="/docs/api" className="hover:text-zinc-950 no-underline transition-colors">API Reference</Link>
             <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-950 no-underline transition-colors">GitHub</a>
           </div>
