@@ -9,8 +9,8 @@ export default function Home() {
       <div className="absolute top-12 left-1/4 w-[450px] h-[450px] bg-[#ccff00]/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#00f0ff]/10 rounded-full blur-[130px] pointer-events-none" />
 
-      {/* Floating Dark Pill Navigation Header (Perfect Spacing & Zero Overlap) */}
-      <header className="relative z-30 max-w-6xl mx-auto pt-6 px-4 bg-transparent border-0 outline-none shadow-none w-full">
+      {/* Floating Dark Pill Navigation Header (Fixed/Sticky on Scroll) */}
+      <header className="sticky top-4 z-50 max-w-6xl mx-auto px-4 bg-transparent border-0 outline-none shadow-none w-full">
         <div className="w-full bg-[#111113]/95 border border-white/10 shadow-2xl backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between gap-6">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-2.5 no-underline flex-shrink-0 group">
