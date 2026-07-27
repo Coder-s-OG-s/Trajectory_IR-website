@@ -13,8 +13,48 @@ type TabId =
   | 'seals-audit' 
   | 'block-and-gate';
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+}
+
 export function DashboardShowcase() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [query, setQuery] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isThinking, setIsThinking] = useState(false);
+
+  const handleSend = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const promptText = query.trim() || `Tell me about ${activeTab.replace('-', ' ')} in Trajectory IR`;
+    
+    // Append User Message
+    const updatedHistory: ChatMessage[] = [...chatHistory, { role: 'user', text: promptText }];
+    setChatHistory(updatedHistory);
+    setQuery('');
+    setIsThinking(true);
+
+    // Simulate AI response logic
+    setTimeout(() => {
+      let answer = '';
+      const lower = promptText.toLowerCase();
+
+      if (lower.includes('dbos') || activeTab === 'dbos-context') {
+        answer = 'Trajectory IR wraps agent step functions inside an embedded DBOS workflow transaction engine. When a crash occurs mid-execution, DBOS recovers state from local SQLite/PostgreSQL CAS storage without re-running completed side-effects.';
+      } else if (lower.includes('seal') || lower.includes('jcs') || activeTab === 'jcs-sealer') {
+        answer = 'RFC 8785 JSON Canonicalization Scheme (JCS) normalizes payload whitespace, key ordering, and number formatting into a deterministic byte stream before SHA256 hashing. This guarantees tamper-proof decision seals.';
+      } else if (lower.includes('gate') || lower.includes('block') || activeTab === 'block-and-gate') {
+        answer = 'When an agent attempts a NON_IDEMPOTENT_WRITE operation (e.g. cloud deployment or database drop) and crashes, Trajectory IR holds execution in a BLOCKED state until a human operator explicitly approves or rejects the step.';
+      } else if (lower.includes('export') || lower.includes('tir') || activeTab === 'tir-exporter') {
+        answer = 'Every trajectory can be exported as a portable .tir ZIP package archive containing manifest.json, metadata.jsonl, SHA256 seals, and binary CAS artifacts for offline compliance audit and replay.';
+      } else {
+        answer = `Trajectory IR is the durable semantic layer for autonomous AI agents. Across ${activeTab.replace('-', ' ')}, every tool decision is canonicalized, cryptographically sealed, and checkpointed for crash-safe execution.`;
+      }
+
+      setChatHistory([...updatedHistory, { role: 'assistant', text: answer }]);
+      setIsThinking(false);
+    }, 400);
+  };
 
   return (
     <div className="mt-16 text-left max-w-[1200px] mx-auto w-full antialiased">
@@ -93,7 +133,7 @@ export function DashboardShowcase() {
           </div>
         </div>
 
-        {/* 2. Right Floating Main Dashboard Card (Separated Card with Wide Room) */}
+        {/* 2. Right Floating Main Dashboard Card */}
         <div className="flex-1 w-full bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between min-h-[540px]">
           
           {/* TAB 1: OVERVIEW */}
@@ -107,8 +147,6 @@ export function DashboardShowcase() {
 
               {/* 4 Wide Pastel Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                
-                {/* Pure Operations */}
                 <div className="p-4 rounded-2xl border border-purple-100 bg-purple-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-purple-950">Pure Operations</div>
@@ -119,7 +157,6 @@ export function DashboardShowcase() {
                   </button>
                 </div>
 
-                {/* Read Operations */}
                 <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-rose-950">Extraction API</div>
@@ -130,7 +167,6 @@ export function DashboardShowcase() {
                   </button>
                 </div>
 
-                {/* Idempotent Writes */}
                 <div className="p-4 rounded-2xl border border-sky-100 bg-sky-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-sky-950">Answers API</div>
@@ -141,7 +177,6 @@ export function DashboardShowcase() {
                   </button>
                 </div>
 
-                {/* Non-Idempotent Writes */}
                 <div className="p-4 rounded-2xl border border-amber-100 bg-amber-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-amber-950">Agent API</div>
@@ -151,14 +186,11 @@ export function DashboardShowcase() {
                     Explore Research API
                   </button>
                 </div>
-
               </div>
 
               {/* Get Started Separated Pill Cards Section */}
               <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-3">Get Started</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                
-                {/* API Key Pill Card */}
                 <div className="p-3.5 rounded-2xl border border-zinc-200/80 bg-white shadow-sm flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2.5">
                     <span className="text-blue-500 font-bold text-base">🔑</span>
@@ -172,7 +204,6 @@ export function DashboardShowcase() {
                   </span>
                 </div>
 
-                {/* Usage Stats Pill Card */}
                 <div className="p-3.5 rounded-2xl border border-zinc-200/80 bg-white shadow-sm flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2.5">
                     <span className="text-emerald-500 font-bold text-base">📊</span>
@@ -188,7 +219,6 @@ export function DashboardShowcase() {
                   </div>
                 </div>
 
-                {/* Quick Links Pill Card */}
                 <div className="p-3.5 rounded-2xl border border-zinc-200/80 bg-white shadow-sm flex items-center justify-around gap-2 text-xs">
                   <Link href="/docs" className="no-underline text-zinc-950 font-bold hover:underline flex items-center gap-1">
                     📄 Docs ↗
@@ -197,12 +227,11 @@ export function DashboardShowcase() {
                     🌐 Toolkit ↗
                   </Link>
                 </div>
-
               </div>
             </div>
           )}
 
-          {/* TAB 2: DBOS CONTEXT */}
+          {/* OTHER TABS */}
           {activeTab === 'dbos-context' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -227,7 +256,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 3: JCS SEALER */}
           {activeTab === 'jcs-sealer' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -246,7 +274,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 4: OBSERVATION LOG */}
           {activeTab === 'observation-log' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -287,7 +314,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 5: TIR EXPORTER */}
           {activeTab === 'tir-exporter' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -307,7 +333,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 6: DURABLE STATE */}
           {activeTab === 'durable-state' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -324,7 +349,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 7: SEALS AUDIT */}
           {activeTab === 'seals-audit' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -342,7 +366,6 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* TAB 8: BLOCK AND GATE */}
           {activeTab === 'block-and-gate' && (
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -367,20 +390,48 @@ def run_durable_agent():
             </div>
           )}
 
-          {/* Floating Bottom Prompt Box (Separated Floating Card) */}
-          <div className="relative p-4 rounded-2xl border border-zinc-200/90 bg-white shadow-lg flex items-center justify-between gap-4">
+          {/* Interactive AI Chat Answers Container */}
+          {chatHistory.length > 0 && (
+            <div className="mb-4 space-y-3 max-h-48 overflow-y-auto p-4 rounded-2xl bg-zinc-50 border border-zinc-200/90 shadow-inner">
+              {chatHistory.map((msg, idx) => (
+                <div key={idx} className={`flex items-start gap-2.5 text-xs ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.role === 'assistant' && (
+                    <div className="w-5 h-5 rounded-full bg-zinc-950 text-white flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                      ✨
+                    </div>
+                  )}
+                  <div className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-zinc-950 text-white rounded-tr-none font-medium'
+                      : 'bg-white border border-zinc-200 text-zinc-900 shadow-sm rounded-tl-none font-normal'
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {isThinking && (
+                <div className="flex items-center gap-2 text-xs text-zinc-500 italic">
+                  <span className="animate-spin">✨</span> Thinking...
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Interactive Editable Prompt Box */}
+          <form onSubmit={handleSend} className="relative p-4 rounded-2xl border border-zinc-200/90 bg-white shadow-lg flex items-center justify-between gap-4">
             <input 
               type="text" 
-              placeholder={`Ask about ${activeTab.replace('-', ' ')} or Trajectory IR durable architecture...`}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Ask anything about ${activeTab.replace('-', ' ')} or Trajectory IR durable architecture...`}
               className="w-full bg-transparent border-none outline-none text-xs text-zinc-900 font-medium placeholder-zinc-400"
-              readOnly
             />
             <div className="flex items-center gap-2">
-              <button className="w-7 h-7 rounded-xl bg-zinc-950 text-white flex items-center justify-center text-xs font-bold shadow-sm hover:bg-black">
+              <button type="submit" className="w-7 h-7 rounded-xl bg-zinc-950 text-white flex items-center justify-center text-xs font-bold shadow-sm hover:bg-black transition-colors">
                 ↑
               </button>
             </div>
-          </div>
+          </form>
 
         </div>
 
