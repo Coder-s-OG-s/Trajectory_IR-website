@@ -22,6 +22,8 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "1.13.16",
+    "@cloudflare/workers-types": "^4.20240208.0",
     "@tailwindcss/postcss": "^4",
     "@types/mdx": "^2.0.14",
     "@types/node": "^20",
@@ -30,6 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^3.28.2"
   }
 }
