@@ -1,0 +1,48 @@
+---
+title: Decorators
+description: Function decorators provided by the Trajectory-IR SDK.
+---
+
+## `@Trajectory.tool()`
+
+Registers a Python function as a durable tool within the Trajectory-IR runtime. The decorated function is automatically wrapped inside a DBOS durable step.
+
+```python
+@Trajectory.tool(
+    effect_class: EffectClass = EffectClass.PURE,
+    idempotency_key: Optional[str] = None,
+    timeout_seconds: int = 300,
+)
+def my_tool(...) -> Any:
+    ...
+```
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `effect_class` | `EffectClass` | `PURE` | Safety classification. See [EffectClass](/docs/api/effect-class). |
+| `idempotency_key` | `str \| None` | `None` | Required for `IDEMPOTENT_WRITE`. Auto-generated UUID if omitted. |
+| `timeout_seconds` | `int` | `300` | Maximum execution time before the tool is forcefully terminated. |
+
+### Behavior
+
+1. Before execution, the tool payload is canonicalized (RFC 8785 JCS) and hashed (SHA256).
+2. A `DECISION_SEAL` is written to the metadata log.
+3. The function body executes inside a DBOS durable step.
+4. On completion, an `Observation` node is automatically appended.
+
+### Example
+
+```python
+from trajectory_ir.runtime import Trajectory
+from trajectory_ir.effects import EffectClass
+
+@Trajectory.tool(
+    effect_class=EffectClass.IDEMPOTENT_WRITE,
+    timeout_seconds=60,
+)
+def update_config(key: str, value: str) -> dict:
+    """Updates a configuration value with idempotent PUT semantics."""
+    return api.put(f"/config/{key}", json={"value": value})
+```

@@ -1,0 +1,66 @@
+---
+title: .tir Export
+description: Exporting trajectories as portable .tir packages for auditing, replay, and compliance.
+---
+
+## Overview
+
+A `.tir` package is a portable, self-contained archive of an entire agent trajectory. It bundles the metadata log, node hashes, and optionally the raw artifacts into a single file that can be shared, audited, or replayed.
+
+## Export Modes
+
+| Mode | Contents | Use Case |
+|------|----------|----------|
+| `"full"` | Complete metadata + all binary artifacts | Full audit trail, forensic replay |
+| `"thin"` | Metadata + hashes only (no binaries) | Lightweight sharing, CI/CD verification |
+| `"redacted"` | Metadata with `SENSITIVE` fields stripped/hashed | Compliance exports, external sharing |
+
+## Usage
+
+```python
+from trajectory_ir.runtime import Trajectory
+
+traj = Trajectory.start(tenant_id="demo-user")
+
+# ... run tools, append observations ...
+
+# Full export
+path = traj.export(mode="full")
+print(f"Exported to: {path}")
+# Output: Exported to: ~/.trajectory-ir/exports/a1b2c3d4.tir
+
+# Thin export (metadata only)
+thin_path = traj.export(mode="thin", output_path="./my-trajectory.tir")
+
+# Redacted export (strips PII)
+redacted_path = traj.export(mode="redacted")
+```
+
+## Package Structure
+
+A `.tir` file is a standard ZIP archive containing:
+
+```
+my-trajectory.tir/
+├── manifest.json        # Package metadata, version, export mode
+├── metadata.jsonl       # The full node log (JSONL format)
+├── seals/               # Decision seals (SHA256 hashes)
+│   ├── node-001.seal
+│   └── node-002.seal
+└── artifacts/           # Binary artifacts (only in "full" mode)
+    ├── blob-a1b2c3.bin
+    └── blob-d4e5f6.bin
+```
+
+## Verification
+
+You can verify the integrity of any `.tir` package:
+
+```python
+from trajectory_ir.verify import verify_package
+
+result = verify_package("./my-trajectory.tir")
+print(result.is_valid)       # True
+print(result.nodes_verified) # 42
+print(result.seal_mismatches) # 0
+```

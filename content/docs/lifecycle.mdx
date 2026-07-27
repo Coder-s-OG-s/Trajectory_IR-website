@@ -1,0 +1,57 @@
+---
+title: Trajectory Lifecycle
+description: A complete step-by-step workflow of the Trajectory IR process.
+---
+
+Trajectory IR represents the complete closed loop of an AI agent's execution. To ensure safety, reproducibility, and crash recovery, every interaction is securely handled in a strictly defined step-by-step lifecycle. 
+
+This page serves as a deep dive into every phase of the IR (Incident Response / Information Retrieval) trajectory process.
+
+## The Complete Optimized Workflow
+
+import { Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+
+### 1. Initialization & Context Loading (Input Phase)
+Before an agent takes any action, the Trajectory runtime initializes the environment and loads the current semantic state.
+* **Inputs:** `tenant_id`, `trajectory_id`, `environment_variables`, and the current agent context (system prompts, user inputs).
+* **Processes:** The runtime spins up a unique DBOS durable execution context and fetches any relevant historical `Node` data from the local SQLite or PostgreSQL store.
+* **Outputs:** An active `Trajectory` object pinned to a specific execution session.
+
+### 2. Decision Formulation & Hashing (Thought Phase)
+The AI model infers the next required action based on the state. 
+* **Inputs:** Model context.
+* **Processes:** The AI formulates a plan, usually mapped to specific predefined **tools**.
+* **Outputs:** A JSON payload containing the planned tool execution. This payload is immediately canonicalized using **RFC 8785 (JCS)** and hashed via SHA256 to create a deterministic Node Identity.
+
+### 3. Decision Sealing (Gate Phase)
+This is the most critical step in the Trajectory IR process. Before executing any code that could have side-effects, the system "seals" the decision into the database.
+* **Inputs:** The hashed Node Identity.
+* **Processes:** The runtime writes a `DECISION_SEAL` to the IR Metadata Log.
+* **Outputs:** A cryptographic seal that guarantees the plan is locked in place. If a crash happens after this seal but before completion, the system knows *exactly* what was intended without re-prompting the LLM.
+
+### 4. Tool Execution & Effect Classification (Process Phase)
+The system executes the sealed plan.
+* **Inputs:** The sealed tool payload and arguments.
+* **Processes:** The tool's `EffectClass` is evaluated. 
+  * `PURE` / `READ_ONLY`: Executes instantly.
+  * `IDEMPOTENT_WRITE`: Executes securely with a unique idempotency key.
+  * `NON_IDEMPOTENT_WRITE`: Executes under the strictest Block-and-Gate parameters.
+* **Outputs:** The raw result or error from the tool execution.
+
+### 5. Observation Appending (Output Phase)
+Once the tool completes, the result is appended to the trajectory log so the agent can learn from it.
+* **Inputs:** Tool execution result.
+* **Processes:** A new `Observation` node is generated, hashed, and appended to the metadata log.
+* **Outputs:** The updated Trajectory state. The loop repeats back to Phase 1 until the agent completes its overarching goal.
+
+</Steps>
+
+## Crash Recovery Mechanics
+If the agent server crashes during **Phase 4** (Tool Execution), the system halts. Upon restarting the server:
+1. The engine checks the Metadata Log and finds a dangling `DECISION_SEAL`.
+2. It evaluates the `EffectClass` of the interrupted tool.
+3. If it was a safe operation (`READ_ONLY`), it re-executes. If it was a `NON_IDEMPOTENT_WRITE` (like sending an email or scaling a cluster), the execution is **halted** and manual intervention is requested via the `BLOCKED_NEEDS_GATE` protocol.
+
+By meticulously following this optimized lifecycle, Trajectory IR guarantees that agents never cause accidental duplicate side effects during production outages.

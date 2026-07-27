@@ -1,0 +1,48 @@
+---
+title: EffectClass Enum
+description: Strict safety classification enum for every tool operation in Trajectory-IR.
+---
+
+## Overview
+
+The `EffectClass` enum defines the safety boundary for each tool registered in the Trajectory-IR runtime. It is the core mechanism that determines how the system handles crashes, retries, and human intervention.
+
+```python
+from trajectory_ir.effects import EffectClass
+```
+
+## Values
+
+| Value | Risk Level | Retry on Crash? | Description |
+|-------|-----------|-----------------|-------------|
+| `PURE` | 🟢 None | ✅ Yes | A pure computation with zero side effects (e.g., math, formatting). |
+| `READ_ONLY` | 🟢 Low | ✅ Yes | Reads external state but does not modify it (e.g., database SELECT, API GET). |
+| `IDEMPOTENT_WRITE` | 🟡 Medium | ✅ Yes (with key) | Writes that are safe to retry with the same idempotency key (e.g., PUT with ETag). |
+| `NON_IDEMPOTENT_WRITE` | 🔴 Critical | ❌ **BLOCKED** | Dangerous writes that cannot be safely retried (e.g., sending an email, scaling a cluster). Triggers Block-and-Gate. |
+
+## Usage
+
+```python
+from trajectory_ir.runtime import Trajectory
+from trajectory_ir.effects import EffectClass
+
+# Safe: can be retried on crash
+@Trajectory.tool(effect_class=EffectClass.READ_ONLY)
+def get_user(user_id: str) -> dict:
+    return db.query(f"SELECT * FROM users WHERE id = {user_id}")
+
+# Dangerous: triggers Block-and-Gate on crash
+@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
+def deploy_to_production(service: str) -> str:
+    return cloud.deploy(service)
+```
+
+## Block-and-Gate Protocol
+
+When a `NON_IDEMPOTENT_WRITE` tool is interrupted mid-execution:
+
+1. The runtime detects the dangling `DECISION_SEAL` on restart.
+2. Instead of re-executing, it enters `BLOCKED_NEEDS_GATE` state.
+3. A human operator (or policy engine) must explicitly approve or reject the retry.
+
+This prevents catastrophic duplicate side-effects like double-deploying, double-charging, or sending duplicate notifications.

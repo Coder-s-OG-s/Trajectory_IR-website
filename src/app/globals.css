@@ -1,0 +1,233 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source "../content";
+@source "../node_modules/fumadocs-ui/dist/**/*.js";
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  
+  --color-primary: #ff3e00;
+}
+
+@layer base {
+  :root {
+    --color-fd-primary: #ff3e00;
+  }
+  
+  .dark {
+    --color-fd-background: #1a1a1a;
+    --color-fd-card: #222222;
+    --color-fd-popover: #222222;
+    --color-fd-muted: #333333;
+    --color-fd-foreground: #e0e0e0;
+    --color-fd-border: #333333;
+    --color-fd-primary: #ff3e00;
+  }
+
+  body {
+    background-color: var(--color-fd-background);
+    color: var(--color-fd-foreground);
+    font-family: var(--font-sans);
+  }
+
+  /* Make the main markdown content use the serif font */
+  .prose p, .prose li, .prose blockquote {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+  
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    font-family: var(--font-sans);
+  }
+
+  /* Fluid Orange Flowing Steps Line */
+  @keyframes fluid-flow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 0% 200%; }
+  }
+
+  .fd-step {
+    border-inline-start-color: transparent !important;
+    position: relative;
+  }
+  
+  /* Create an animated pseudo-element to replace the border */
+  .fd-step::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #ff3e00, #ffb347, #ff3e00);
+    background-size: 100% 200%;
+    animation: fluid-flow 3s linear infinite;
+    z-index: 0;
+  }
+
+  /* Style the dot to match the orange flow */
+  .fd-step > h3::before {
+    background-color: #ff3e00 !important;
+    border-color: #ffb347 !important;
+    box-shadow: 0 0 8px rgba(255, 62, 0, 0.6);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- Flush sidebar to the very left edge ---- */
+
+  /* 1. Force the aside to align children left instead of right */
+  #nd-sidebar {
+    align-items: start !important;
+  }
+
+  /* 2. Make sidebar children fill full width */
+  #nd-sidebar > * {
+    width: 100% !important;
+  }
+
+  /* 3. Remove inner padding from sidebar header, scroll area, and footer */
+  #nd-sidebar > div {
+    padding-left: 0.25rem !important;
+  }
+
+  /* 4. Remove the outer grid left margin by collapsing the first column */
+  #nd-docs-layout {
+    grid-template-columns: 0px var(--fd-sidebar-col) minmax(0, 1fr) !important;
+  }
+
+  /* 5. Flush header to left edge */
+  header {
+    padding-left: 0.25rem !important;
+  }
+
+  /* ---- Orange Active Sidebar Items with Surrounded Box ---- */
+
+  /* Active sidebar link: orange text + highlighted box */
+  #nd-sidebar a[data-active="true"],
+  #nd-sidebar a[aria-current="page"] {
+    color: #ff3e00 !important;
+    background-color: rgba(255, 62, 0, 0.12) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+  }
+
+  /* ALWAYS highlight "Trajectory-IR" (the /docs index link) with orange box */
+  #nd-sidebar a[href="/docs"] {
+    color: #ff3e00 !important;
+    background-color: rgba(255, 62, 0, 0.12) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+  }
+
+  .dark #nd-sidebar a[href="/docs"] {
+    background-color: rgba(255, 62, 0, 0.15) !important;
+  }
+
+  /* Hover state for all sidebar links */
+  #nd-sidebar a:hover {
+    color: #ff3e00 !important;
+    transition: color 0.15s ease;
+  }
+
+  /* ---- Orange Search Box Styling ---- */
+
+  /* Sidebar search trigger button */
+  #nd-sidebar button[data-search],
+  button[data-search-full] {
+    border: 1px solid rgba(255, 62, 0, 0.4) !important;
+    background-color: rgba(255, 62, 0, 0.05) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  #nd-sidebar button[data-search]:hover,
+  button[data-search-full]:hover {
+    border-color: #ff3e00 !important;
+    box-shadow: 0 0 12px rgba(255, 62, 0, 0.25) !important;
+  }
+
+  /* Search dialog modal input */
+  [data-search-dialog] input,
+  [role="dialog"] input[type="text"],
+  [role="dialog"] input[type="search"],
+  .fd-dialog input {
+    border: 2px solid rgba(255, 62, 0, 0.4) !important;
+    border-radius: 10px !important;
+    caret-color: #ff3e00 !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  [data-search-dialog] input:focus,
+  [role="dialog"] input[type="text"]:focus,
+  [role="dialog"] input[type="search"]:focus,
+  .fd-dialog input:focus {
+    border-color: #ff3e00 !important;
+    box-shadow: 0 0 0 3px rgba(255, 62, 0, 0.15) !important;
+    outline: none !important;
+  }
+
+  /* Search results - highlight matched items */
+  [data-search-dialog] a[data-active="true"],
+  [role="dialog"] [data-active="true"],
+  [cmdk-item][data-selected="true"] {
+    background-color: rgba(255, 62, 0, 0.12) !important;
+    color: #ff3e00 !important;
+  }
+
+  /* Search dialog container */
+  [data-search-dialog],
+  [role="dialog"][data-search] {
+    border: 1px solid rgba(255, 62, 0, 0.2) !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 62, 0, 0.08) !important;
+  }
+
+  /* ---- TOC (On this page) Active Highlight ---- */
+  [data-toc] a[data-active="true"],
+  nav[aria-label="Table of Contents"] a[data-active="true"] {
+    color: #ff3e00 !important;
+    font-weight: 600 !important;
+    border-left-color: #ff3e00 !important;
+  }
+
+  [data-toc] a:hover,
+  nav[aria-label="Table of Contents"] a:hover {
+    color: #ff3e00 !important;
+  }
+
+  /* ---- Copy Button on Code Blocks ---- */
+  pre button[data-copy],
+  pre .fd-copy-button,
+  pre button[aria-label="Copy"] {
+    color: var(--color-fd-muted-foreground, #888) !important;
+    opacity: 0.6 !important;
+    transition: opacity 0.2s, color 0.2s !important;
+  }
+
+  pre:hover button[data-copy],
+  pre:hover .fd-copy-button,
+  pre:hover button[aria-label="Copy"] {
+    opacity: 1 !important;
+  }
+
+  pre button[data-copy]:hover,
+  pre .fd-copy-button:hover,
+  pre button[aria-label="Copy"]:hover {
+    color: #ff3e00 !important;
+    opacity: 1 !important;
+  }
+
+  /* ---- Code Block Orange Accents ---- */
+  pre {
+    border: 1px solid var(--color-fd-border, #333) !important;
+    border-radius: 12px !important;
+  }
+
+  pre:hover {
+    border-color: rgba(255, 62, 0, 0.3) !important;
+    transition: border-color 0.2s ease !important;
+  }
+}
