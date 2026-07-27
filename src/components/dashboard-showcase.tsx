@@ -150,7 +150,7 @@ export function DashboardShowcase() {
                 <div className="p-4 rounded-2xl border border-purple-100 bg-purple-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-purple-950">Pure Operations</div>
-                    <div className="text-xs text-purple-800/80 font-medium mt-1">PURE — zero side-effects</div>
+                    <div className="text-xs text-purple-800/80 font-medium mt-1">PURE: zero side effects</div>
                   </div>
                   <button onClick={() => setActiveTab('dbos-context')} className="mt-4 text-xs font-bold text-purple-900 px-3 py-1.5 rounded-xl bg-white border border-purple-200 self-start shadow-sm hover:bg-purple-100 transition-all">
                     Explore Pure API
@@ -160,7 +160,7 @@ export function DashboardShowcase() {
                 <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-rose-950">Extraction API</div>
-                    <div className="text-xs text-rose-800/80 font-medium mt-1">READ_ONLY — webpage contents</div>
+                    <div className="text-xs text-rose-800/80 font-medium mt-1">READ_ONLY: webpage contents</div>
                   </div>
                   <button onClick={() => setActiveTab('observation-log')} className="mt-4 text-xs font-bold text-rose-900 px-3 py-1.5 rounded-xl bg-white border border-rose-200 self-start shadow-sm hover:bg-rose-100 transition-all">
                     Explore Extract API
@@ -170,7 +170,7 @@ export function DashboardShowcase() {
                 <div className="p-4 rounded-2xl border border-sky-100 bg-sky-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-sky-950">Answers API</div>
-                    <div className="text-xs text-sky-800/80 font-medium mt-1">IDEMPOTENT — fast answers</div>
+                    <div className="text-xs text-sky-800/80 font-medium mt-1">IDEMPOTENT: fast answers</div>
                   </div>
                   <button onClick={() => setActiveTab('jcs-sealer')} className="mt-4 text-xs font-bold text-sky-900 px-3 py-1.5 rounded-xl bg-white border border-sky-200 self-start shadow-sm hover:bg-sky-100 transition-all">
                     Explore Answer API
@@ -180,7 +180,7 @@ export function DashboardShowcase() {
                 <div className="p-4 rounded-2xl border border-amber-100 bg-amber-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
                   <div>
                     <div className="font-extrabold text-sm text-amber-950">Agent API</div>
-                    <div className="text-xs text-amber-800/80 font-medium mt-1">NON_IDEMPOTENT — Research</div>
+                    <div className="text-xs text-amber-800/80 font-medium mt-1">NON_IDEMPOTENT: Research</div>
                   </div>
                   <button onClick={() => setActiveTab('block-and-gate')} className="mt-4 text-xs font-bold text-amber-900 px-3 py-1.5 rounded-xl bg-white border border-amber-200 self-start shadow-sm hover:bg-amber-100 transition-all">
                     Explore Research API
