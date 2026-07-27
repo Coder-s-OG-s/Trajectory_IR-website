@@ -151,7 +151,7 @@
     background-color: var(--color-fd-background) !important;
   }
 
-  header {
+  #nd-docs-layout header {
     background-color: var(--color-fd-background) !important;
     border-bottom: 1px solid var(--color-fd-border) !important;
     width: 100% !important;
