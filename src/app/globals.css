@@ -6,9 +6,8 @@
 @source "../node_modules/fumadocs-ui/dist/**/*.js";
 
 @theme {
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
-  
+  --font-sans: var(--font-mono), monospace;
+  --font-mono: var(--font-mono), monospace;
   --color-primary: #ff3e00;
 }
 
@@ -18,33 +17,55 @@
   }
   
   .dark {
-    --color-fd-background: #1a1a1a;
-    --color-fd-card: #222222;
-    --color-fd-popover: #222222;
-    --color-fd-muted: #333333;
-    --color-fd-foreground: #e0e0e0;
-    --color-fd-border: #333333;
+    --color-fd-background: #09090b;
+    --color-fd-card: #121215;
+    --color-fd-popover: #121215;
+    --color-fd-muted: #1c1c21;
+    --color-fd-foreground: #ededed;
+    --color-fd-border: #222227;
     --color-fd-primary: #ff3e00;
   }
 
   body {
     background-color: var(--color-fd-background);
     color: var(--color-fd-foreground);
-    font-family: var(--font-sans);
+    font-family: var(--font-mono), monospace;
+    letter-spacing: -0.01em;
   }
 
-  /* Make the main markdown content use the serif font */
-  .prose p, .prose li, .prose blockquote {
-    font-family: var(--font-serif);
-    font-size: 1.05rem;
-    line-height: 1.7;
+  /* ---- Technical Monospace Typography for All Docs Elements ---- */
+  .prose p, .prose li, .prose blockquote, .prose span, .prose div {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.95rem;
+    line-height: 1.75;
   }
   
-  .prose h1, .prose h2, .prose h3, .prose h4 {
-    font-family: var(--font-sans);
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    font-family: var(--font-mono), monospace;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 
-  /* Fluid Orange Flowing Steps Line */
+  .prose h1 {
+    font-size: 2.25rem;
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .prose h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--color-fd-border, #222);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .prose h3 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+  }
+
+  /* ---- Fluid Orange Flowing Steps Line ---- */
   @keyframes fluid-flow {
     0% { background-position: 0% 0%; }
     100% { background-position: 0% 200%; }
@@ -55,7 +76,6 @@
     position: relative;
   }
   
-  /* Create an animated pseudo-element to replace the border */
   .fd-step::before {
     content: '';
     position: absolute;
@@ -69,7 +89,6 @@
     z-index: 0;
   }
 
-  /* Style the dot to match the orange flow */
   .fd-step > h3::before {
     background-color: #ff3e00 !important;
     border-color: #ffb347 !important;
@@ -78,87 +97,119 @@
     z-index: 1;
   }
 
-  /* ---- Flush sidebar to the very left edge ---- */
-
-  /* 1. Force the aside to align children left instead of right */
+  /* ---- Flush Sidebar & Navbar Layout ---- */
   #nd-sidebar {
     align-items: start !important;
+    font-family: var(--font-mono), monospace !important;
   }
 
-  /* 2. Make sidebar children fill full width */
   #nd-sidebar > * {
     width: 100% !important;
   }
 
-  /* 3. Remove inner padding from sidebar header, scroll area, and footer */
   #nd-sidebar > div {
     padding-left: 0.25rem !important;
   }
 
-  /* 4. Remove the outer grid left margin by collapsing the first column */
   #nd-docs-layout {
     grid-template-columns: 0px var(--fd-sidebar-col) minmax(0, 1fr) !important;
   }
 
-  /* 5. Flush header to left edge */
   header {
     padding-left: 0.25rem !important;
+    font-family: var(--font-mono), monospace !important;
   }
 
-  /* ---- Orange Active Sidebar Items with Surrounded Box ---- */
+  /* ---- iii.dev Style Sidebar Category & Items ---- */
 
-  /* Active sidebar link: orange text + highlighted box */
+  /* Category headers in sidebar */
+  #nd-sidebar p, #nd-sidebar .font-semibold {
+    font-family: var(--font-mono), monospace !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: #888 !important;
+  }
+
+  /* Sidebar navigation items */
+  #nd-sidebar a {
+    font-family: var(--font-mono), monospace !important;
+    font-size: 0.88rem !important;
+    padding: 0.4rem 0.6rem !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+  }
+
+  /* Active sidebar item card */
   #nd-sidebar a[data-active="true"],
-  #nd-sidebar a[aria-current="page"] {
-    color: #ff3e00 !important;
-    background-color: rgba(255, 62, 0, 0.12) !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-  }
-
-  /* ALWAYS highlight "Trajectory-IR" (the /docs index link) with orange box */
+  #nd-sidebar a[aria-current="page"],
   #nd-sidebar a[href="/docs"] {
-    color: #ff3e00 !important;
-    background-color: rgba(255, 62, 0, 0.12) !important;
-    border-radius: 8px !important;
+    color: #ffffff !important;
+    background-color: #1a1a1e !important;
+    border: 1px solid #2a2a30 !important;
     font-weight: 600 !important;
   }
 
-  .dark #nd-sidebar a[href="/docs"] {
-    background-color: rgba(255, 62, 0, 0.15) !important;
-  }
-
-  /* Hover state for all sidebar links */
   #nd-sidebar a:hover {
     color: #ff3e00 !important;
-    transition: color 0.15s ease;
+    background-color: rgba(255, 62, 0, 0.05) !important;
   }
 
-  /* ---- Orange Search Box Styling ---- */
+  /* ---- iii.dev Style "On this page" TOC Right Sidebar ---- */
+  [data-toc], nav[aria-label="Table of Contents"], .fd-toc {
+    font-family: var(--font-mono), monospace !important;
+  }
 
-  /* Sidebar search trigger button */
+  [data-toc] p, nav[aria-label="Table of Contents"] p {
+    font-family: var(--font-mono), monospace !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  [data-toc] a, nav[aria-label="Table of Contents"] a {
+    font-family: var(--font-mono), monospace !important;
+    font-size: 0.82rem !important;
+    color: #888 !important;
+    border-left: 2px solid transparent !important;
+    padding-left: 0.75rem !important;
+    transition: all 0.15s ease !important;
+  }
+
+  [data-toc] a[data-active="true"],
+  nav[aria-label="Table of Contents"] a[data-active="true"] {
+    color: #ff3e00 !important;
+    font-weight: 700 !important;
+    border-left-color: #ff3e00 !important;
+  }
+
+  [data-toc] a:hover,
+  nav[aria-label="Table of Contents"] a:hover {
+    color: #ffffff !important;
+  }
+
+  /* ---- Orange Search Trigger & Modal ---- */
   #nd-sidebar button[data-search],
   button[data-search-full] {
-    border: 1px solid rgba(255, 62, 0, 0.4) !important;
-    background-color: rgba(255, 62, 0, 0.05) !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    border: 1px solid #2a2a30 !important;
+    background-color: #121215 !important;
+    font-family: var(--font-mono), monospace !important;
+    border-radius: 8px !important;
   }
 
   #nd-sidebar button[data-search]:hover,
   button[data-search-full]:hover {
     border-color: #ff3e00 !important;
-    box-shadow: 0 0 12px rgba(255, 62, 0, 0.25) !important;
   }
 
-  /* Search dialog modal input */
   [data-search-dialog] input,
   [role="dialog"] input[type="text"],
   [role="dialog"] input[type="search"],
   .fd-dialog input {
-    border: 2px solid rgba(255, 62, 0, 0.4) !important;
-    border-radius: 10px !important;
+    border: 1px solid #333 !important;
+    border-radius: 8px !important;
     caret-color: #ff3e00 !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    font-family: var(--font-mono), monospace !important;
   }
 
   [data-search-dialog] input:focus,
@@ -166,11 +217,9 @@
   [role="dialog"] input[type="search"]:focus,
   .fd-dialog input:focus {
     border-color: #ff3e00 !important;
-    box-shadow: 0 0 0 3px rgba(255, 62, 0, 0.15) !important;
     outline: none !important;
   }
 
-  /* Search results - highlight matched items */
   [data-search-dialog] a[data-active="true"],
   [role="dialog"] [data-active="true"],
   [cmdk-item][data-selected="true"] {
@@ -178,56 +227,28 @@
     color: #ff3e00 !important;
   }
 
-  /* Search dialog container */
-  [data-search-dialog],
-  [role="dialog"][data-search] {
-    border: 1px solid rgba(255, 62, 0, 0.2) !important;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 62, 0, 0.08) !important;
+  /* ---- Code Blocks (Monospace + Border) ---- */
+  pre {
+    border: 1px solid #222227 !important;
+    border-radius: 8px !important;
+    background-color: #0d0d10 !important;
+    font-family: var(--font-mono), monospace !important;
   }
 
-  /* ---- TOC (On this page) Active Highlight ---- */
-  [data-toc] a[data-active="true"],
-  nav[aria-label="Table of Contents"] a[data-active="true"] {
-    color: #ff3e00 !important;
-    font-weight: 600 !important;
-    border-left-color: #ff3e00 !important;
+  pre code {
+    font-family: var(--font-mono), monospace !important;
+    font-size: 0.9rem !important;
   }
 
-  [data-toc] a:hover,
-  nav[aria-label="Table of Contents"] a:hover {
-    color: #ff3e00 !important;
-  }
-
-  /* ---- Copy Button on Code Blocks ---- */
   pre button[data-copy],
   pre .fd-copy-button,
   pre button[aria-label="Copy"] {
-    color: var(--color-fd-muted-foreground, #888) !important;
-    opacity: 0.6 !important;
-    transition: opacity 0.2s, color 0.2s !important;
-  }
-
-  pre:hover button[data-copy],
-  pre:hover .fd-copy-button,
-  pre:hover button[aria-label="Copy"] {
-    opacity: 1 !important;
+    color: #777 !important;
   }
 
   pre button[data-copy]:hover,
   pre .fd-copy-button:hover,
   pre button[aria-label="Copy"]:hover {
     color: #ff3e00 !important;
-    opacity: 1 !important;
-  }
-
-  /* ---- Code Block Orange Accents ---- */
-  pre {
-    border: 1px solid var(--color-fd-border, #333) !important;
-    border-radius: 12px !important;
-  }
-
-  pre:hover {
-    border-color: rgba(255, 62, 0, 0.3) !important;
-    transition: border-color 0.2s ease !important;
   }
 }

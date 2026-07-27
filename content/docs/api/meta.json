@@ -1,0 +1,10 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "trajectory",
+    "effect-class",
+    "decorators",
+    "tir-export"
+  ]
+}

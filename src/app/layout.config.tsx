@@ -2,35 +2,38 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import React from 'react';
 
 /**
- * Shared layout configurations
+ * Shared layout configurations for iii.dev style header
  */
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: 'var(--font-mono), monospace', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
         <img 
           src="/logo.png" 
           alt="Trajectory IR Logo" 
-          style={{ width: '1.5rem', height: '1.5rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
+          style={{ width: '1.4rem', height: '1.4rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
           className="transition-transform duration-300 hover:scale-110"
         />
-        <span>
-          <span style={{ color: 'var(--color-fd-foreground)' }}>Trajectory </span>
-          <span style={{ color: '#ff3e00' }}>IR</span>
-        </span>
-        <span style={{ 
-          fontSize: '0.55rem', 
-          padding: '0.15rem 0.4rem', 
-          borderRadius: '9999px', 
-          backgroundColor: 'rgba(255, 62, 0, 0.12)', 
-          color: '#ff3e00', 
-          border: '1px solid rgba(255, 62, 0, 0.3)',
-          fontWeight: 600,
-          letterSpacing: '0.06em',
-          lineHeight: 1,
+        <span>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
+        
+        {/* Version Dropdown Selector Badge */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.2rem',
+          fontSize: '0.75rem',
+          fontFamily: 'var(--font-mono), monospace',
+          color: '#888',
+          backgroundColor: '#121215',
+          border: '1px solid #222227',
+          borderRadius: '6px',
+          padding: '0.15rem 0.45rem',
+          cursor: 'pointer',
+          marginLeft: '0.2rem',
         }}>
-          v0.1.x
-        </span>
+          <span>0.1.x</span>
+          <span style={{ fontSize: '0.65rem' }}>∨</span>
+        </div>
       </div>
     ),
     transparentMode: 'top',
@@ -42,23 +45,18 @@ export const baseOptions: BaseLayoutProps = {
       active: 'nested-url',
     },
     {
-      text: 'Tutorial',
+      text: 'Tutorials',
       url: '#',
       active: 'none',
     },
     {
-      text: 'Packages',
-      url: '#',
-      active: 'none',
+      text: 'SDK & Engine Reference',
+      url: '/docs/api',
+      active: 'nested-url',
     },
     {
-      text: 'Playground',
-      url: '#',
-      active: 'none',
-    },
-    {
-      text: 'Blog',
-      url: '#',
+      text: 'Changelog',
+      url: '/docs/changelog',
       active: 'none',
     },
   ],
