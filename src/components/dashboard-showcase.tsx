@@ -150,13 +150,10 @@ export function DashboardShowcase({ xp, addXp }: DashboardShowcaseProps) {
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4">
                 <h3 className="text-2xl font-bold text-zinc-950 tracking-tight">
                   Web Data &amp; Execution Infrastructure for AI Applications
                 </h3>
-                <span className="text-xs font-mono font-bold bg-amber-100 text-amber-950 px-3 py-1 rounded-full shadow-sm">
-                  🏆 MATIKS ARENA
-                </span>
               </div>
 
               <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-4">
