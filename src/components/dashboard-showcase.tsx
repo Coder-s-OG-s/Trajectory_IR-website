@@ -18,23 +18,30 @@ interface ChatMessage {
   text: string;
 }
 
-export function DashboardShowcase() {
+interface DashboardShowcaseProps {
+  xp: number;
+  addXp: (amount: number) => void;
+}
+
+export function DashboardShowcase({ xp, addXp }: DashboardShowcaseProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
 
+  // Matiks Workout Modes State inside Endpoint Cards
+  const [activeWorkout, setActiveWorkout] = useState<'none' | 'pure-sprint' | 'dom-puzzle' | 'cache-duel' | 'gate-intercept'>('none');
+  const [workoutResult, setWorkoutResult] = useState<string | null>(null);
+
   const handleSend = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const promptText = query.trim() || `Tell me about ${activeTab.replace('-', ' ')} in Trajectory IR`;
     
-    // Append User Message
     const updatedHistory: ChatMessage[] = [...chatHistory, { role: 'user', text: promptText }];
     setChatHistory(updatedHistory);
     setQuery('');
     setIsThinking(true);
 
-    // Simulate AI response logic
     setTimeout(() => {
       let answer = '';
       const lower = promptText.toLowerCase();
@@ -56,12 +63,17 @@ export function DashboardShowcase() {
     }, 400);
   };
 
+  const completeWorkout = (mode: string, xpEarned: number, feedback: string) => {
+    addXp(xpEarned);
+    setWorkoutResult(feedback);
+  };
+
   return (
     <div className="mt-16 text-left max-w-[1200px] mx-auto w-full antialiased">
       {/* Separated Floating Layout: Left Independent Sidebar + Right Floating Dashboard Card */}
       <div className="flex flex-col md:flex-row items-start gap-8 w-full">
         
-        {/* 1. Left Independent Sidebar (Floating free room layout) */}
+        {/* 1. Left Independent Sidebar */}
         <div className="w-full md:w-64 flex-shrink-0 p-2 text-xs font-semibold text-zinc-700">
           <div className="flex items-center justify-between mb-6 px-2">
             <div className="flex items-center gap-2.5">
@@ -70,7 +82,7 @@ export function DashboardShowcase() {
             </div>
           </div>
 
-          {/* Sidebar Menu Items (Workable Interactive Buttons) */}
+          {/* Sidebar Menu Items */}
           <div className="space-y-5">
             <button
               onClick={() => setActiveTab('overview')}
@@ -138,57 +150,202 @@ export function DashboardShowcase() {
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div>
-              <h3 className="text-2xl font-bold text-zinc-950 tracking-tight mb-6">
-                Web Data &amp; Execution Infrastructure for AI Applications
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold text-zinc-950 tracking-tight">
+                  Web Data &amp; Execution Infrastructure for AI Applications
+                </h3>
+                <span className="text-xs font-mono font-bold bg-amber-100 text-amber-950 px-3 py-1 rounded-full shadow-sm">
+                  🏆 MATIKS ARENA
+                </span>
+              </div>
 
-              <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-4">Our Endpoints &amp; Execution Planes</div>
+              <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-4">
+                Our Endpoints &amp; Interactive Systems Workouts
+              </div>
 
-              {/* 4 Wide Pastel Cards Grid */}
+              {/* 4 Wide Pastel Cards Grid (Matiks Workout Modes) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="p-4 rounded-2xl border border-purple-100 bg-purple-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
+                
+                {/* 1. Pure Operations */}
+                <div className="p-4 rounded-2xl border border-purple-200 bg-purple-50/50 flex flex-col justify-between min-h-[160px] shadow-sm hover:shadow-md transition-all">
                   <div>
                     <div className="font-extrabold text-sm text-purple-950">Pure Operations</div>
                     <div className="text-xs text-purple-800/80 font-medium mt-1">PURE: zero side effects</div>
                   </div>
-                  <button onClick={() => setActiveTab('dbos-context')} className="mt-4 text-xs font-bold text-purple-900 px-3 py-1.5 rounded-xl bg-white border border-purple-200 self-start shadow-sm hover:bg-purple-100 transition-all">
-                    Explore Pure API
+                  <button 
+                    onClick={() => { setActiveWorkout('pure-sprint'); setWorkoutResult(null); }} 
+                    className="mt-4 text-xs font-bold text-white bg-purple-900 px-3 py-2 rounded-xl self-start shadow-sm hover:bg-purple-950 transition-all flex items-center gap-1.5"
+                  >
+                    ⚡ Speed Sprint
                   </button>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
+                {/* 2. Extraction API */}
+                <div className="p-4 rounded-2xl border border-rose-200 bg-rose-50/50 flex flex-col justify-between min-h-[160px] shadow-sm hover:shadow-md transition-all">
                   <div>
                     <div className="font-extrabold text-sm text-rose-950">Extraction API</div>
                     <div className="text-xs text-rose-800/80 font-medium mt-1">READ_ONLY: webpage contents</div>
                   </div>
-                  <button onClick={() => setActiveTab('observation-log')} className="mt-4 text-xs font-bold text-rose-900 px-3 py-1.5 rounded-xl bg-white border border-rose-200 self-start shadow-sm hover:bg-rose-100 transition-all">
-                    Explore Extract API
+                  <button 
+                    onClick={() => { setActiveWorkout('dom-puzzle'); setWorkoutResult(null); }} 
+                    className="mt-4 text-xs font-bold text-white bg-rose-900 px-3 py-2 rounded-xl self-start shadow-sm hover:bg-rose-950 transition-all flex items-center gap-1.5"
+                  >
+                    🧩 DOM Puzzle
                   </button>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-sky-100 bg-sky-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
+                {/* 3. Answers API */}
+                <div className="p-4 rounded-2xl border border-sky-200 bg-sky-50/50 flex flex-col justify-between min-h-[160px] shadow-sm hover:shadow-md transition-all">
                   <div>
                     <div className="font-extrabold text-sm text-sky-950">Answers API</div>
                     <div className="text-xs text-sky-800/80 font-medium mt-1">IDEMPOTENT: fast answers</div>
                   </div>
-                  <button onClick={() => setActiveTab('jcs-sealer')} className="mt-4 text-xs font-bold text-sky-900 px-3 py-1.5 rounded-xl bg-white border border-sky-200 self-start shadow-sm hover:bg-sky-100 transition-all">
-                    Explore Answer API
+                  <button 
+                    onClick={() => { setActiveWorkout('cache-duel'); setWorkoutResult(null); }} 
+                    className="mt-4 text-xs font-bold text-white bg-sky-900 px-3 py-2 rounded-xl self-start shadow-sm hover:bg-sky-950 transition-all flex items-center gap-1.5"
+                  >
+                    ⏱️ Cache Hit Challenge
                   </button>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-amber-100 bg-amber-50/50 flex flex-col justify-between min-h-[140px] shadow-sm">
+                {/* 4. Agent API */}
+                <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 flex flex-col justify-between min-h-[160px] shadow-sm hover:shadow-md transition-all">
                   <div>
                     <div className="font-extrabold text-sm text-amber-950">Agent API</div>
                     <div className="text-xs text-amber-800/80 font-medium mt-1">NON_IDEMPOTENT: Research</div>
                   </div>
-                  <button onClick={() => setActiveTab('block-and-gate')} className="mt-4 text-xs font-bold text-amber-900 px-3 py-1.5 rounded-xl bg-white border border-amber-200 self-start shadow-sm hover:bg-amber-100 transition-all">
-                    Explore Research API
+                  <button 
+                    onClick={() => { setActiveWorkout('gate-intercept'); setWorkoutResult(null); }} 
+                    className="mt-4 text-xs font-bold text-white bg-amber-900 px-3 py-2 rounded-xl self-start shadow-sm hover:bg-amber-950 transition-all flex items-center gap-1.5"
+                  >
+                    🚧 Gate Workout
                   </button>
                 </div>
               </div>
 
+              {/* ACTIVE WORKOUT INTERACTIVE PANEL DRAWER */}
+              {activeWorkout !== 'none' && (
+                <div className="mb-8 p-5 rounded-2xl border-2 border-zinc-950 bg-zinc-900 text-white shadow-2xl font-sans relative">
+                  <button 
+                    onClick={() => setActiveWorkout('none')}
+                    className="absolute top-3 right-3 text-zinc-400 hover:text-white font-mono text-xs font-bold"
+                  >
+                    ✕ CLOSE
+                  </button>
+
+                  {/* Workout 1: Speed Sprint (Pure vs Impure) */}
+                  {activeWorkout === 'pure-sprint' && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-mono bg-purple-500 text-white px-2 py-0.5 rounded font-bold">MODE 1: SPEED SPRINT</span>
+                        <span className="text-xs text-zinc-400">Classify execution purity in 3 seconds</span>
+                      </div>
+                      <div className="font-mono text-xs bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-purple-300 mb-4">
+                        <code>def calculate_hash(data: dict): return hashlib.sha256(jcs_canonicalize(data)).hexdigest()</code>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => completeWorkout('pure-sprint', 100, '⚡ PERFECT: 3x Combo Streak! Function is 100% PURE with zero side-effects (+100 XP)')}
+                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-xs shadow-md transition-all"
+                        >
+                          PURE (Zero Side Effects)
+                        </button>
+                        <button 
+                          onClick={() => setWorkoutResult('❌ INCORRECT: SHA256 hashing on immutable inputs is strictly PURE!')}
+                          className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-xs shadow-md transition-all"
+                        >
+                          IMPURE (Has Side Effects)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Workout 2: DOM Puzzle Match */}
+                  {activeWorkout === 'dom-puzzle' && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-mono bg-rose-500 text-white px-2 py-0.5 rounded font-bold">MODE 2: DOM PUZZLE MATCH</span>
+                        <span className="text-xs text-zinc-400">Select target node for zero token waste</span>
+                      </div>
+                      <div className="font-mono text-xs bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-rose-300 mb-4">
+                        <code>&lt;main class=&quot;article-body&quot;&gt;&lt;p&gt;Target Web Content&lt;/p&gt;&lt;/main&gt;</code>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => completeWorkout('dom-puzzle', 100, '🎯 100% PRECISION: Clean READ_ONLY extraction node matched (+100 XP)')}
+                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-xs shadow-md transition-all"
+                        >
+                          Target: main.article-body
+                        </button>
+                        <button 
+                          onClick={() => setWorkoutResult('❌ HIGH TOKEN WASTE: Selecting entire body causes 90% unneeded token noise.')}
+                          className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold rounded-xl text-xs transition-all"
+                        >
+                          Target: body
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Workout 3: Cache Hit Challenge */}
+                  {activeWorkout === 'cache-duel' && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-mono bg-sky-500 text-black px-2 py-0.5 rounded font-bold">MODE 3: CACHE HIT DUEL</span>
+                        <span className="text-xs text-zinc-400">Idempotency Stream incoming: GET /api/v1/query?id=492</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-3">
+                        <button 
+                          onClick={() => completeWorkout('cache-duel', 100, '⏱️ 1.2s LATENCY SAVED: Cached answer returned with zero duplicate queries (+100 XP)')}
+                          className="px-4 py-2 bg-sky-400 hover:bg-sky-500 text-black font-bold rounded-xl text-xs shadow-md transition-all"
+                        >
+                          RETURN CACHED IDEMPOTENT ANSWER
+                        </button>
+                        <button 
+                          onClick={() => setWorkoutResult('❌ UNNECESSARY LATENCY: Idempotent queries should read from JCS cache.')}
+                          className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold rounded-xl text-xs transition-all"
+                        >
+                          RE-RUN LIVE SEARCH
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Workout 4: Gate Intercept Workout */}
+                  {activeWorkout === 'gate-intercept' && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-mono bg-amber-500 text-black px-2 py-0.5 rounded font-bold">MODE 4: GATE INTERCEPT</span>
+                        <span className="text-xs text-zinc-400">Agent attempted: deploy_cluster(&quot;production&quot;)</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-3">
+                        <button 
+                          onClick={() => completeWorkout('gate-intercept', 100, '🛡️ DURABILITY SHIELD UNLOCKED: Execution safely held in BLOCKED_NEEDS_GATE state (+100 XP)')}
+                          className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-black font-bold rounded-xl text-xs shadow-md transition-all"
+                        >
+                          INTERCEPT &amp; HOLD IN GATE
+                        </button>
+                        <button 
+                          onClick={() => setWorkoutResult('❌ RISK WARNING: Non-idempotent write executed without human approval!')}
+                          className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-xs transition-all"
+                        >
+                          AUTO-ALLOW WRITE
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Feedback Result Banner */}
+                  {workoutResult && (
+                    <div className="mt-4 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-emerald-400 animate-pulse">
+                      {workoutResult}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Get Started Separated Pill Cards Section */}
-              <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-3">Get Started</div>
+              <div className="text-[10px] font-extrabold tracking-wider text-zinc-400 uppercase font-mono mb-3">Get Started &amp; Live Ticker</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
                 <div className="p-3.5 rounded-2xl border border-zinc-200/80 bg-white shadow-sm flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2.5">
@@ -218,13 +375,14 @@ export function DashboardShowcase() {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-zinc-200/80 bg-white shadow-sm flex items-center justify-around gap-2 text-xs">
-                  <Link href="/docs" className="no-underline text-zinc-950 font-bold hover:underline flex items-center gap-1">
-                    📄 Docs ↗
-                  </Link>
-                  <Link href="/docs/api" className="no-underline text-zinc-950 font-bold hover:underline flex items-center gap-1">
-                    🌐 Toolkit ↗
-                  </Link>
+                <div className="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/60 shadow-sm flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                    <span>🏆 Arena XP:</span>
+                    <span className="font-mono text-amber-800 text-sm font-extrabold">{xp} XP</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-md">
+                    {xp >= 300 ? 'Durable Architect' : xp >= 150 ? 'Workflow Builder' : 'Novice'}
+                  </span>
                 </div>
               </div>
             </div>
