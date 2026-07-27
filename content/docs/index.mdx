@@ -1,32 +1,24 @@
 ---
 title: Welcome to Trajectory IR
-description: A next-generation durable execution system for AI agents that makes it possible to effortlessly compose, seal, and recover every tool execution in real-time.
+description: A next-generation durable execution system that makes it possible to effortlessly compose, seal, and observe every AI agent tool execution in real-time.
 ---
 
-Welcome to the official **Trajectory IR** documentation.
-
-Trajectory IR acts as a durable semantic layer for AI agents, wrapping every agent decision and tool execution in a portable, crash-safe format using [DBOS](https://docs.dbos.dev/).
+A next-generation durable execution system that makes it possible to effortlessly compose, seal, and observe every AI agent tool execution in real-time for the first time ever.
 
 ---
 
 ## The Problem
 
-Modern AI agents execute complex, multi-step workflows involving external APIs, database writes, and cloud infrastructure changes. When an agent crashes mid-execution (due to network blips, LLM timeouts, or server restarts):
+Modern AI agents execute multi-step workflows across LLMs, APIs, and databases. When an agent fails mid-execution:
 
-- Unsealed side-effects get re-executed, causing **duplicate charges**, **duplicate emails**, or **corrupted state**.
-- The entire agent execution history is lost, requiring expensive re-prompting of LLMs.
+- Unsealed side-effects re-execute, causing duplicate API calls, double charges, or corrupt state.
+- Execution context is wiped, requiring expensive re-prompting.
 
 ---
 
-## The Solution: Block-and-Gate Architecture
+## The Solution
 
-Trajectory IR solves agent durability by enforcing a strict 5-phase lifecycle:
-
-1. **Initialization:** Load DBOS execution context and state store.
-2. **Decision Formulation:** Formulate tool execution plan.
-3. **Decision Sealing:** Seal payload with **RFC 8785 JCS** + **SHA256**.
-4. **Effect Classification:** Execute tool based on safety boundary (`PURE`, `READ_ONLY`, `IDEMPOTENT_WRITE`, `NON_IDEMPOTENT_WRITE`).
-5. **Observation Appending:** Log SHA256 observation node into `.tir` package.
+Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects.
 
 ```python
 from trajectory_ir.runtime import Trajectory
@@ -36,23 +28,23 @@ from dbos import DBOS
 DBOS.launch()
 
 @Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
-def deploy_service(name: str):
+def deploy_server(name: str):
     return f"Deployed {name}"
 
 @DBOS.workflow()
 def run_agent():
     traj = Trajectory.start(tenant_id="prod")
-    res = deploy_service("k8s-cluster")
-    traj.append_observation(res)
+    result = deploy_server("cluster-01")
+    traj.append_observation(result)
 ```
 
 ---
 
-## Next Steps
+## Explore the Docs
 
 <Cards>
-  <Card title="Quickstart Guide" href="/docs/quickstart" description="Get up and running with local SQLite deployment in under 5 minutes." />
-  <Card title="Infrastructure Architecture" href="/docs/infrastructure" description="Deep dive into production deployment profiles and storage mechanics." />
-  <Card title="API Reference" href="/docs/api" description="Explore the full Python SDK reference and EffectClass enums." />
-  <Card title="Changelog" href="/docs/changelog" description="See the latest updates and release history." />
+  <Card title="Quickstart" href="/docs/quickstart" description="Get up and running in under 5 minutes with SQLite local profile." />
+  <Card title="Infrastructure Architecture" href="/docs/infrastructure" description="Production architecture, storage schemas, and deployment profiles." />
+  <Card title="Trajectory Lifecycle" href="/docs/lifecycle" description="Deep dive into the 5-phase sealed execution loop." />
+  <Card title="API Reference" href="/docs/api" description="Complete Python SDK reference for Trajectory class and EffectClass." />
 </Cards>

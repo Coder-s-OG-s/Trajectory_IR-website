@@ -2,7 +2,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import React from 'react';
 
 /**
- * Shared layout configurations for iii.dev style header
+ * Shared layout configurations for exact iii.dev header clone
  */
 export const baseOptions: BaseLayoutProps = {
   nav: {
@@ -14,25 +14,25 @@ export const baseOptions: BaseLayoutProps = {
           style={{ width: '1.4rem', height: '1.4rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
           className="transition-transform duration-300 hover:scale-110"
         />
-        <span>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
+        <span style={{ color: '#fafafa' }}>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
         
-        {/* Version Dropdown Selector Badge */}
+        {/* Version Dropdown Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '0.2rem',
-          fontSize: '0.75rem',
+          gap: '0.25rem',
+          fontSize: '0.72rem',
           fontFamily: 'var(--font-mono), monospace',
-          color: '#888',
-          backgroundColor: '#121215',
-          border: '1px solid #222227',
+          color: '#a1a1aa',
+          backgroundColor: '#18181b',
+          border: '1px solid #27272a',
           borderRadius: '6px',
-          padding: '0.15rem 0.45rem',
+          padding: '0.15rem 0.5rem',
           cursor: 'pointer',
           marginLeft: '0.2rem',
         }}>
           <span>0.1.x</span>
-          <span style={{ fontSize: '0.65rem' }}>∨</span>
+          <span style={{ fontSize: '0.6rem', color: '#71717a' }}>∨</span>
         </div>
       </div>
     ),

@@ -6,63 +6,64 @@
 @source "../node_modules/fumadocs-ui/dist/**/*.js";
 
 @theme {
-  --font-sans: var(--font-mono), monospace;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), monospace;
   --color-primary: #ff3e00;
 }
 
 @layer base {
-  :root {
-    --color-fd-primary: #ff3e00;
-  }
-  
-  .dark {
-    --color-fd-background: #09090b;
-    --color-fd-card: #121215;
-    --color-fd-popover: #121215;
-    --color-fd-muted: #1c1c21;
-    --color-fd-foreground: #ededed;
-    --color-fd-border: #222227;
-    --color-fd-primary: #ff3e00;
-  }
-
-  body {
-    background-color: var(--color-fd-background);
-    color: var(--color-fd-foreground);
-    font-family: var(--font-mono), monospace;
-    letter-spacing: -0.01em;
+  /* Force Dark Theme Globally on Root - iii.dev is strictly dark */
+  :root, .dark, body {
+    --color-fd-background: #09090b !important;
+    --color-fd-card: #121215 !important;
+    --color-fd-popover: #121215 !important;
+    --color-fd-muted: #1c1c21 !important;
+    --color-fd-foreground: #ededed !important;
+    --color-fd-border: #222227 !important;
+    --color-fd-primary: #ff3e00 !important;
+    background-color: #09090b !important;
+    color: #ededed !important;
+    color-scheme: dark !important;
+    font-family: var(--font-sans), system-ui, sans-serif;
   }
 
-  /* ---- Technical Monospace Typography for All Docs Elements ---- */
-  .prose p, .prose li, .prose blockquote, .prose span, .prose div {
-    font-family: var(--font-mono), monospace;
-    font-size: 0.95rem;
-    line-height: 1.75;
+  /* ---- iii.dev Typography: Clean Sans-Serif Body + Monospace Code ---- */
+  .prose p, .prose li, .prose blockquote {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #a1a1aa;
   }
   
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-    font-family: var(--font-mono), monospace;
-    letter-spacing: -0.02em;
-    font-weight: 700;
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    color: #fafafa;
   }
 
   .prose h1 {
-    font-size: 2.25rem;
-    line-height: 1.2;
+    font-size: 2.5rem;
+    line-height: 1.15;
     margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .prose h2 {
-    font-size: 1.5rem;
-    border-bottom: 1px solid var(--color-fd-border, #222);
+    font-size: 1.6rem;
+    border-bottom: 1px solid #1f1f23;
     padding-bottom: 0.5rem;
-    margin-top: 2rem;
+    margin-top: 2.25rem;
   }
 
   .prose h3 {
-    font-size: 1.2rem;
-    margin-top: 1.5rem;
+    font-size: 1.25rem;
+    margin-top: 1.75rem;
+  }
+
+  /* Inline code & code blocks stay Monospace */
+  code, pre, kbd, .font-mono {
+    font-family: var(--font-mono), monospace !important;
   }
 
   /* ---- Fluid Orange Flowing Steps Line ---- */
@@ -97,10 +98,11 @@
     z-index: 1;
   }
 
-  /* ---- Flush Sidebar & Navbar Layout ---- */
+  /* ---- Sidebar Layout ---- */
   #nd-sidebar {
     align-items: start !important;
-    font-family: var(--font-mono), monospace !important;
+    background-color: #09090b !important;
+    border-right: 1px solid #1c1c21 !important;
   }
 
   #nd-sidebar > * {
@@ -108,54 +110,56 @@
   }
 
   #nd-sidebar > div {
-    padding-left: 0.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
   #nd-docs-layout {
     grid-template-columns: 0px var(--fd-sidebar-col) minmax(0, 1fr) !important;
+    background-color: #09090b !important;
   }
 
   header {
-    padding-left: 0.25rem !important;
-    font-family: var(--font-mono), monospace !important;
+    background-color: #09090b !important;
+    border-bottom: 1px solid #1c1c21 !important;
   }
 
-  /* ---- iii.dev Style Sidebar Category & Items ---- */
+  /* ---- iii.dev Style Sidebar Categories & Active Card ---- */
 
-  /* Category headers in sidebar */
   #nd-sidebar p, #nd-sidebar .font-semibold {
     font-family: var(--font-mono), monospace !important;
-    font-size: 0.8rem !important;
-    letter-spacing: 0.05em !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
-    color: #888 !important;
+    color: #666677 !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.4rem !important;
   }
 
-  /* Sidebar navigation items */
   #nd-sidebar a {
-    font-family: var(--font-mono), monospace !important;
+    font-family: var(--font-sans), system-ui, sans-serif !important;
     font-size: 0.88rem !important;
-    padding: 0.4rem 0.6rem !important;
+    padding: 0.45rem 0.75rem !important;
     border-radius: 6px !important;
+    color: #a1a1aa !important;
     transition: all 0.15s ease !important;
   }
 
-  /* Active sidebar item card */
+  /* Active sidebar item card (dark box like iii.dev) */
   #nd-sidebar a[data-active="true"],
-  #nd-sidebar a[aria-current="page"],
-  #nd-sidebar a[href="/docs"] {
+  #nd-sidebar a[aria-current="page"] {
     color: #ffffff !important;
-    background-color: #1a1a1e !important;
-    border: 1px solid #2a2a30 !important;
+    background-color: #18181b !important;
+    border: 1px solid #27272a !important;
     font-weight: 600 !important;
   }
 
   #nd-sidebar a:hover {
-    color: #ff3e00 !important;
-    background-color: rgba(255, 62, 0, 0.05) !important;
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
   }
 
-  /* ---- iii.dev Style "On this page" TOC Right Sidebar ---- */
+  /* ---- iii.dev Style "On this page" TOC (Right Sidebar) ---- */
   [data-toc], nav[aria-label="Table of Contents"], .fd-toc {
     font-family: var(--font-mono), monospace !important;
   }
@@ -163,15 +167,16 @@
   [data-toc] p, nav[aria-label="Table of Contents"] p {
     font-family: var(--font-mono), monospace !important;
     font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    font-size: 0.82rem !important;
     letter-spacing: 0.02em !important;
+    color: #888899 !important;
   }
 
   [data-toc] a, nav[aria-label="Table of Contents"] a {
     font-family: var(--font-mono), monospace !important;
-    font-size: 0.82rem !important;
-    color: #888 !important;
-    border-left: 2px solid transparent !important;
+    font-size: 0.8rem !important;
+    color: #71717a !important;
+    border-left: 2px solid #27272a !important;
     padding-left: 0.75rem !important;
     transition: all 0.15s ease !important;
   }
@@ -188,27 +193,31 @@
     color: #ffffff !important;
   }
 
-  /* ---- Orange Search Trigger & Modal ---- */
+  /* ---- Search Trigger & Modal ---- */
   #nd-sidebar button[data-search],
   button[data-search-full] {
-    border: 1px solid #2a2a30 !important;
+    border: 1px solid #27272a !important;
     background-color: #121215 !important;
     font-family: var(--font-mono), monospace !important;
     border-radius: 8px !important;
+    color: #888899 !important;
   }
 
   #nd-sidebar button[data-search]:hover,
   button[data-search-full]:hover {
-    border-color: #ff3e00 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
   }
 
   [data-search-dialog] input,
   [role="dialog"] input[type="text"],
   [role="dialog"] input[type="search"],
   .fd-dialog input {
-    border: 1px solid #333 !important;
+    border: 1px solid #27272a !important;
+    background-color: #121215 !important;
     border-radius: 8px !important;
     caret-color: #ff3e00 !important;
+    color: #ffffff !important;
     font-family: var(--font-mono), monospace !important;
   }
 
@@ -227,23 +236,23 @@
     color: #ff3e00 !important;
   }
 
-  /* ---- Code Blocks (Monospace + Border) ---- */
+  /* ---- Code Blocks ---- */
   pre {
-    border: 1px solid #222227 !important;
-    border-radius: 8px !important;
-    background-color: #0d0d10 !important;
+    border: 1px solid #27272a !important;
+    border-radius: 10px !important;
+    background-color: #0c0c0e !important;
     font-family: var(--font-mono), monospace !important;
   }
 
   pre code {
     font-family: var(--font-mono), monospace !important;
-    font-size: 0.9rem !important;
+    font-size: 0.88rem !important;
   }
 
   pre button[data-copy],
   pre .fd-copy-button,
   pre button[aria-label="Copy"] {
-    color: #777 !important;
+    color: #71717a !important;
   }
 
   pre button[data-copy]:hover,
