@@ -12,34 +12,51 @@
 }
 
 @layer base {
-  /* Force Dark Theme Globally on Root - iii.dev is strictly dark */
-  :root, .dark, body {
-    --color-fd-background: #09090b !important;
-    --color-fd-card: #121215 !important;
-    --color-fd-popover: #121215 !important;
-    --color-fd-muted: #1c1c21 !important;
-    --color-fd-foreground: #ededed !important;
-    --color-fd-border: #222227 !important;
-    --color-fd-primary: #ff3e00 !important;
-    background-color: #09090b !important;
-    color: #ededed !important;
-    color-scheme: dark !important;
+  /* ---- Light Mode Theme Defaults ---- */
+  :root {
+    --color-fd-background: #ffffff;
+    --color-fd-card: #f8f8fa;
+    --color-fd-popover: #ffffff;
+    --color-fd-muted: #f4f4f5;
+    --color-fd-foreground: #09090b;
+    --color-fd-muted-foreground: #71717a;
+    --color-fd-border: #e4e4e7;
+    --color-fd-primary: #ff3e00;
+  }
+
+  /* ---- Dark Mode Theme Defaults ---- */
+  .dark {
+    --color-fd-background: #09090b;
+    --color-fd-card: #121215;
+    --color-fd-popover: #121215;
+    --color-fd-muted: #1c1c21;
+    --color-fd-foreground: #ededed;
+    --color-fd-muted-foreground: #a1a1aa;
+    --color-fd-border: #222227;
+    --color-fd-primary: #ff3e00;
+  }
+
+  body {
+    background-color: var(--color-fd-background);
+    color: var(--color-fd-foreground);
     font-family: var(--font-sans), system-ui, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    letter-spacing: -0.01em;
   }
 
   /* ---- iii.dev Typography: Clean Sans-Serif Body + Monospace Code ---- */
   .prose p, .prose li, .prose blockquote {
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 1.05rem;
-    line-height: 1.7;
-    color: #a1a1aa;
+    line-height: 1.75;
+    color: var(--color-fd-muted-foreground);
   }
   
   .prose h1, .prose h2, .prose h3, .prose h4 {
     font-family: var(--font-sans), system-ui, sans-serif;
     letter-spacing: -0.03em;
     font-weight: 800;
-    color: #fafafa;
+    color: var(--color-fd-foreground);
   }
 
   .prose h1 {
@@ -51,7 +68,7 @@
 
   .prose h2 {
     font-size: 1.6rem;
-    border-bottom: 1px solid #1f1f23;
+    border-bottom: 1px solid var(--color-fd-border);
     padding-bottom: 0.5rem;
     margin-top: 2.25rem;
   }
@@ -101,12 +118,27 @@
   /* ---- Sidebar Layout ---- */
   #nd-sidebar {
     align-items: start !important;
-    background-color: #09090b !important;
-    border-right: 1px solid #1c1c21 !important;
+    background-color: var(--color-fd-background) !important;
+    border-right: 1px solid var(--color-fd-border) !important;
   }
 
   #nd-sidebar > * {
     width: 100% !important;
+  }
+
+  /* Hide duplicate logo header & search box in sidebar (handled by top DualTierHeader) */
+  #nd-sidebar > div:first-child > div:first-child,
+  #nd-sidebar button,
+  #nd-sidebar [data-search],
+  #nd-sidebar a[href*="search"],
+  aside button,
+  aside [data-search] {
+    display: none !important;
+  }
+
+  /* Keep sidebar navigation links visible */
+  #nd-sidebar a {
+    display: flex !important;
   }
 
   #nd-sidebar > div {
@@ -116,12 +148,14 @@
 
   #nd-docs-layout {
     grid-template-columns: 0px var(--fd-sidebar-col) minmax(0, 1fr) !important;
-    background-color: #09090b !important;
+    background-color: var(--color-fd-background) !important;
   }
 
   header {
-    background-color: #09090b !important;
-    border-bottom: 1px solid #1c1c21 !important;
+    background-color: var(--color-fd-background) !important;
+    border-bottom: 1px solid var(--color-fd-border) !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   /* ---- iii.dev Style Sidebar Categories & Active Card ---- */
@@ -131,7 +165,7 @@
     font-size: 0.75rem !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
-    color: #666677 !important;
+    color: var(--color-fd-muted-foreground) !important;
     margin-top: 1.25rem !important;
     margin-bottom: 0.4rem !important;
   }
@@ -141,22 +175,22 @@
     font-size: 0.88rem !important;
     padding: 0.45rem 0.75rem !important;
     border-radius: 6px !important;
-    color: #a1a1aa !important;
+    color: var(--color-fd-muted-foreground) !important;
     transition: all 0.15s ease !important;
   }
 
-  /* Active sidebar item card (dark box like iii.dev) */
+  /* Active sidebar item card */
   #nd-sidebar a[data-active="true"],
   #nd-sidebar a[aria-current="page"] {
-    color: #ffffff !important;
-    background-color: #18181b !important;
-    border: 1px solid #27272a !important;
+    color: var(--color-fd-foreground) !important;
+    background-color: var(--color-fd-card) !important;
+    border: 1px solid var(--color-fd-border) !important;
     font-weight: 600 !important;
   }
 
   #nd-sidebar a:hover {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.04) !important;
+    color: var(--color-fd-foreground) !important;
+    background-color: var(--color-fd-card) !important;
   }
 
   /* ---- iii.dev Style "On this page" TOC (Right Sidebar) ---- */
@@ -169,14 +203,14 @@
     font-weight: 700 !important;
     font-size: 0.82rem !important;
     letter-spacing: 0.02em !important;
-    color: #888899 !important;
+    color: var(--color-fd-muted-foreground) !important;
   }
 
   [data-toc] a, nav[aria-label="Table of Contents"] a {
     font-family: var(--font-mono), monospace !important;
     font-size: 0.8rem !important;
-    color: #71717a !important;
-    border-left: 2px solid #27272a !important;
+    color: var(--color-fd-muted-foreground) !important;
+    border-left: 2px solid var(--color-fd-border) !important;
     padding-left: 0.75rem !important;
     transition: all 0.15s ease !important;
   }
@@ -190,34 +224,34 @@
 
   [data-toc] a:hover,
   nav[aria-label="Table of Contents"] a:hover {
-    color: #ffffff !important;
+    color: var(--color-fd-foreground) !important;
   }
 
   /* ---- Search Trigger & Modal ---- */
   #nd-sidebar button[data-search],
   button[data-search-full] {
-    border: 1px solid #27272a !important;
-    background-color: #121215 !important;
+    border: 1px solid var(--color-fd-border) !important;
+    background-color: var(--color-fd-card) !important;
     font-family: var(--font-mono), monospace !important;
     border-radius: 8px !important;
-    color: #888899 !important;
+    color: var(--color-fd-muted-foreground) !important;
   }
 
   #nd-sidebar button[data-search]:hover,
   button[data-search-full]:hover {
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    border-color: #ff3e00 !important;
+    color: var(--color-fd-foreground) !important;
   }
 
   [data-search-dialog] input,
   [role="dialog"] input[type="text"],
   [role="dialog"] input[type="search"],
   .fd-dialog input {
-    border: 1px solid #27272a !important;
-    background-color: #121215 !important;
+    border: 1px solid var(--color-fd-border) !important;
+    background-color: var(--color-fd-card) !important;
     border-radius: 8px !important;
     caret-color: #ff3e00 !important;
-    color: #ffffff !important;
+    color: var(--color-fd-foreground) !important;
     font-family: var(--font-mono), monospace !important;
   }
 
@@ -238,15 +272,21 @@
 
   /* ---- Code Blocks ---- */
   pre {
-    border: 1px solid #27272a !important;
+    border: 1px solid var(--color-fd-border) !important;
     border-radius: 10px !important;
     background-color: #0c0c0e !important;
+    color: #e4e4e7 !important;
     font-family: var(--font-mono), monospace !important;
   }
 
   pre code {
     font-family: var(--font-mono), monospace !important;
     font-size: 0.88rem !important;
+    color: #e4e4e7 !important;
+  }
+
+  pre code span[style] {
+    color: var(--shiki-dark, inherit);
   }
 
   pre button[data-copy],

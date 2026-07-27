@@ -14,7 +14,7 @@ export const baseOptions: BaseLayoutProps = {
           style={{ width: '1.4rem', height: '1.4rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
           className="transition-transform duration-300 hover:scale-110"
         />
-        <span style={{ color: '#fafafa' }}>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
+        <span style={{ color: 'var(--color-fd-foreground)' }}>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
         
         {/* Version Dropdown Badge */}
         <div style={{
