@@ -68,7 +68,6 @@ export function DashboardShowcase() {
               <img src="/logo.png" alt="Logo" className="w-6 h-6 rounded-md object-cover shadow-sm" />
               <span className="font-extrabold text-sm tracking-tight text-zinc-950">Trajectory IR</span>
             </div>
-            <div className="w-7 h-7 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-xs">⚙️</div>
           </div>
 
           {/* Sidebar Menu Items (Workable Interactive Buttons) */}
