@@ -18,20 +18,19 @@ Modern AI agents execute multi-step workflows across LLMs, APIs, and databases. 
 
 ## The Solution
 
-Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects.
+Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects over pluggable durable execution engines.
 
 ```python
 from trajectory_ir.runtime import Trajectory
 from trajectory_ir.effects import EffectClass
-from dbos import DBOS
 
-DBOS.launch()
+Trajectory.launch()
 
 @Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
 def deploy_server(name: str):
     return f"Deployed {name}"
 
-@DBOS.workflow()
+@Trajectory.workflow()
 def run_agent():
     traj = Trajectory.start(tenant_id="prod")
     result = deploy_server("cluster-01")

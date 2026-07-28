@@ -56,8 +56,8 @@ To preview your changes locally before submitting a Pull Request:
 - We use standard Next.js ESLint and Prettier for formatting. 
 - Please ensure `npm run build` succeeds locally without any MDX parsing errors before submitting a PR.
 
-## 5. AI Contribution Disclosure
+## 5. AI Contribution Disclosure & ECC Integration
 
-If you used an AI coding assistant (like Claude, ChatGPT, or Antigravity) to generate significant portions of your documentation PR:
+If you used an AI coding assistant (like Claude Code, ChatGPT, Antigravity, or our integrated Everything Claude Code [ECC] specialized subagent suite) to generate significant portions of your documentation PR:
 - **Disclosure**: Please mention it in the Pull Request description.
-- **Accountability**: You are 100% responsible for the accuracy of the documentation. Do not let the AI hallucinate APIs or core features that do not exist in the actual Trajectory IR Python engine!
+- **Accountability**: You, the human contributor, are 100% responsible for the accuracy of the documentation. Do not let AI assistants hallucinate APIs, tool effect classes, or package names (`dbos` vs non-existent names) that do not match the authoritative Trajectory IR master specification!

@@ -500,14 +500,13 @@ export function DashboardShowcase({ xp: propXp, addXp: propAddXp }: DashboardSho
               </p>
               <pre className="p-5 rounded-2xl border border-white/10 bg-black text-[#00f0ff] font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed mb-6 shadow-inner">
                 <code>{`from trajectory_ir.runtime import Trajectory
-from dbos import DBOS
+# Pluggable durable backend (e.g. DBOS or Restate)
+Trajectory.launch()
 
-DBOS.launch()
-
-@DBOS.workflow()
+@Trajectory.workflow()
 def run_durable_agent():
     traj = Trajectory.start(tenant_id="prod-tenant-01")
-    # Automatically checkpointed state
+    # Automatically checkpointed crash-safe state
     print(f"Active Workflow ID: {traj.trajectory_id}")`}</code>
               </pre>
             </div>
