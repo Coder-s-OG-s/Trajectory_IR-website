@@ -1,63 +1,59 @@
-# Contributing to the Trajectory IR Documentation
+# Contributing to Trajectory IR Documentation
 
-Thank you for your interest in improving the Trajectory IR documentation! 
+This repository houses the Next.js and Fumadocs-based portal that serves as the official documentation for Trajectory IR. Note that this repository does not contain the core execution engine or Python runtime code. For engine modifications, refer to the primary Trajectory IR engine repository.
 
-This repository houses the **Next.js and Fumadocs-based website** that serves as the official portal for Trajectory IR. It does *not* contain the core Python engine code. If you want to contribute to the core runtime, please head over to the main Trajectory-IR repository.
+## 1. Content Modification Guidelines
 
-## 1. How to Contribute Content
+All documentation content must be written in strict MDX format and stored within the `content/docs/` directory.
 
-All documentation content is written in [MDX](https://mdxjs.com/) and stored in the `content/docs/` directory.
-
-### Adding or Editing Pages
-- Create a new `.mdx` file in `content/docs/` or edit an existing one.
-- Always include the standard Fumadocs frontmatter at the top of the file:
+### Standards for New Pages
+- Construct a new `.mdx` file within the `content/docs/` directory structure.
+- The standard Fumadocs frontmatter block is mandatory for all files:
 ```yaml
 ---
-title: Your Page Title
-description: A short description for SEO.
+title: System Architecture
+description: Comprehensive overview of durable execution layers.
 ---
 ```
-- You can use standard Markdown as well as React components (like `<Callout>`) provided by Fumadocs.
 
-## 2. Developer Certificate of Origin (DCO) Sign-off
+## 2. Developer Certificate of Origin (DCO)
 
-**This is a hard requirement.** We enforce the DCO for all commits to ensure that contributors have the right to submit the code under the Apache-2.0 license.
+We strictly enforce the Developer Certificate of Origin (DCO) for all commits to maintain clear provenance and compliance under the Apache-2.0 license.
 
-Every single commit must contain the following trailer at the end of the commit message:
+Every commit submitted to this repository must contain the following trailer:
 
 ```text
-Signed-off-by: Jane Doe <jane.doe@example.com>
+Signed-off-by: Full Name <email@example.com>
 ```
 
-You can add this automatically to your commits by using the `-s` or `--signoff` flag with git:
+You can append this automatically via git:
 
 ```bash
-git commit -s -m "docs: add new section to the quickstart guide"
+git commit -s -m "docs: define state recovery mechanism"
 ```
 
-## 3. Local Development Setup
+## 3. Development Setup
 
-To preview your changes locally before submitting a Pull Request:
+To validate changes locally prior to submitting a Pull Request:
 
-1. Clone this repository.
-2. Ensure you have Node.js (v18+) installed.
-3. Install dependencies:
+1. Ensure Node.js (v18+) is installed on the host machine.
+2. Install package dependencies:
    ```bash
    npm install
    ```
-4. Run the development server:
+3. Boot the development server:
    ```bash
    npm run dev
    ```
-5. Open `http://localhost:3000` to see your changes reflected instantly via Hot Module Replacement.
 
-## 4. Formatting and Linting
+## 4. Formatting Standards
 
-- We use standard Next.js ESLint and Prettier for formatting. 
-- Please ensure `npm run build` succeeds locally without any MDX parsing errors before submitting a PR.
+- Standard Next.js ESLint and Prettier configurations are enforced.
+- Run `npm run build` locally to verify that all MDX structures parse without fatal errors prior to opening a PR.
 
-## 5. AI Contribution Disclosure & ECC Integration
+## 5. Compliance & Tooling Integration
 
-If you used an AI coding assistant (like Claude Code, ChatGPT, Antigravity, or our integrated Everything Claude Code [ECC] specialized subagent suite) to generate significant portions of your documentation PR:
-- **Disclosure**: Please mention it in the Pull Request description.
-- **Accountability**: You, the human contributor, are 100% responsible for the accuracy of the documentation. Do not let AI assistants hallucinate APIs, tool effect classes, or package names (`dbos` vs non-existent names) that do not match the authoritative Trajectory IR master specification!
+If an automated intelligence system or coding assistant (including Claude Code, ChatGPT, Antigravity, or the internal Everything Claude Code (ECC) suite) was utilized to generate material for a Pull Request:
+
+1. **Mandatory Disclosure**: You must disclose the use of such tooling within the Pull Request description.
+2. **Strict Accountability**: The human contributor assumes absolute responsibility for the technical accuracy of the submitted material. Hallucinated APIs, incorrect package references, and non-existent configuration flags will result in immediate PR rejection. Ensure all documentation strictly aligns with the authoritative Trajectory IR specification.
