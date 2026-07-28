@@ -1,22 +1,17 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import React from 'react';
 
-/**
- * Shared layout configurations for exact iii.dev header clone
- */
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: 'var(--font-mono), monospace', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-        <img 
-          src="/logo.png" 
-          alt="Trajectory IR Logo" 
+        <img
+          src="/logo.png"
+          alt="Trajectory IR Logo"
           style={{ width: '1.4rem', height: '1.4rem', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
           className="transition-transform duration-300 hover:scale-110"
         />
         <span style={{ color: 'var(--color-fd-foreground)' }}>Trajectory <span style={{ color: '#ff3e00' }}>IR</span></span>
-        
-        {/* Version Dropdown Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',

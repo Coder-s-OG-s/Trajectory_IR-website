@@ -12,7 +12,6 @@
 }
 
 @layer base {
-  /* ---- Light Mode Theme Defaults ---- */
   :root {
     --color-fd-background: #ffffff;
     --color-fd-card: #f8f8fa;
@@ -24,7 +23,6 @@
     --color-fd-primary: #ff3e00;
   }
 
-  /* ---- Dark Mode Theme Defaults ---- */
   .dark {
     --color-fd-background: #09090b;
     --color-fd-card: #121215;
@@ -44,14 +42,13 @@
     letter-spacing: -0.01em;
   }
 
-  /* ---- iii.dev Typography: Clean Sans-Serif Body + Monospace Code ---- */
   .prose p, .prose li, .prose blockquote {
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 1.05rem;
     line-height: 1.75;
     color: var(--color-fd-muted-foreground);
   }
-  
+
   .prose h1, .prose h2, .prose h3, .prose h4 {
     font-family: var(--font-sans), system-ui, sans-serif;
     letter-spacing: -0.03em;
@@ -78,12 +75,10 @@
     margin-top: 1.75rem;
   }
 
-  /* Inline code & code blocks stay Monospace */
   code, pre, kbd, .font-mono {
     font-family: var(--font-mono), monospace !important;
   }
 
-  /* ---- Fluid Orange Flowing Steps Line ---- */
   @keyframes fluid-flow {
     0% { background-position: 0% 0%; }
     100% { background-position: 0% 200%; }
@@ -93,7 +88,7 @@
     border-inline-start-color: transparent !important;
     position: relative;
   }
-  
+
   .fd-step::before {
     content: '';
     position: absolute;
@@ -115,7 +110,6 @@
     z-index: 1;
   }
 
-  /* ---- Sidebar Layout ---- */
   #nd-sidebar {
     align-items: start !important;
     background-color: var(--color-fd-background) !important;
@@ -126,7 +120,6 @@
     width: 100% !important;
   }
 
-  /* Hide duplicate logo header & search box in sidebar (handled by top DualTierHeader) */
   #nd-sidebar > div:first-child > div:first-child,
   #nd-sidebar button,
   #nd-sidebar [data-search],
@@ -136,7 +129,6 @@
     display: none !important;
   }
 
-  /* Keep sidebar navigation links visible */
   #nd-sidebar a {
     display: flex !important;
   }
@@ -158,8 +150,6 @@
     max-width: 100% !important;
   }
 
-  /* ---- iii.dev Style Sidebar Categories & Active Card ---- */
-
   #nd-sidebar p, #nd-sidebar .font-semibold {
     font-family: var(--font-mono), monospace !important;
     font-size: 0.75rem !important;
@@ -179,7 +169,6 @@
     transition: all 0.15s ease !important;
   }
 
-  /* Active sidebar item card */
   #nd-sidebar a[data-active="true"],
   #nd-sidebar a[aria-current="page"] {
     color: var(--color-fd-foreground) !important;
@@ -193,7 +182,6 @@
     background-color: var(--color-fd-card) !important;
   }
 
-  /* ---- iii.dev Style "On this page" TOC (Right Sidebar) ---- */
   [data-toc], nav[aria-label="Table of Contents"], .fd-toc {
     font-family: var(--font-mono), monospace !important;
   }
@@ -227,7 +215,6 @@
     color: var(--color-fd-foreground) !important;
   }
 
-  /* ---- Search Trigger & Modal ---- */
   #nd-sidebar button[data-search],
   button[data-search-full] {
     border: 1px solid var(--color-fd-border) !important;
@@ -270,7 +257,6 @@
     color: #ff3e00 !important;
   }
 
-  /* ---- Code Blocks ---- */
   pre {
     border: 1px solid var(--color-fd-border) !important;
     border-radius: 10px !important;
@@ -302,104 +288,96 @@
   }
 }
 
-@layer utilities {
-  /* ---- Matiks High-Voltage Animated Cyber-Grid Background ---- */
-  .bg-matiks-grid {
-    background-size: 40px 40px;
-    background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-position: 0 0;
-    animation: matiks-grid-scroll 20s linear infinite;
+
+@keyframes header-dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
   }
-  
-  @keyframes matiks-grid-scroll {
-    0% { background-position: 0 0; }
-    100% { background-position: -40px -40px; }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.header-nav-link:hover {
+  color: #666 !important;
+}
+
+.header-dropdown-item:hover {
+  background-color: #f7f7f7 !important;
+}
+
+.header-logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.35);
+}
+
+.header-apply-btn:hover {
+  background-color: #e55a1b !important;
+  border-color: #e55a1b !important;
+  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.3);
+  transform: translateY(-1px);
+}
+
+.footer-link:hover {
+  color: #ffffff !important;
+}
+
+.footer-social-icon {
+  color: #888;
+  transition: color 0.15s ease, transform 0.15s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-social-icon:hover {
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.header-mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 60;
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .header-center-group {
+    display: none !important;
   }
 
-  /* ---- Glowing & Neon Text Effects ---- */
-  .text-neon-lime {
-    color: #ccff00;
-    text-shadow: 
-      0 0 8px rgba(204, 255, 0, 0.6),
-      0 0 20px rgba(204, 255, 0, 0.35),
-      0 0 35px rgba(204, 255, 0, 0.2);
-  }
-  
-  .text-neon-cyan {
-    color: #00f0ff;
-    text-shadow: 
-      0 0 8px rgba(0, 240, 255, 0.65),
-      0 0 20px rgba(0, 240, 255, 0.4),
-      0 0 30px rgba(0, 240, 255, 0.2);
+  .header-actions {
+    display: none !important;
   }
 
-  /* ---- Shiny Sliding Gradient Text ---- */
-  .animate-text-shine {
-    background: linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #a1a1aa 20%,
-      #ccff00 50%,
-      #ffffff 80%,
-      #a1a1aa 100%
-    );
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: text-shine 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  .header-mobile-toggle {
+    display: flex !important;
   }
 
-  @keyframes text-shine {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  .footer-columns {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .header-mobile-toggle {
+    display: none !important;
   }
 
-  /* ---- Giant Button Soft Outer Glow & Hover Scale ---- */
-  .btn-matiks-lime {
-    background-color: #ccff00;
-    color: #000000;
-    font-weight: 900;
-    text-transform: uppercase;
-    box-shadow: 0 0 35px -5px rgba(204, 255, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  .btn-matiks-lime:hover {
-    transform: scale(1.035) translateY(-2px);
-    box-shadow: 0 0 50px 0px rgba(204, 255, 0, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-    background-color: #d6ff33;
-  }
-
-  /* ---- Interactive Card Hover Lift & Border Glow ---- */
-  .card-matiks-interactive {
-    background-color: #111113;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .card-matiks-interactive:hover {
-    transform: translateY(-6px) scale(1.015);
-    background-color: #16161a;
-    border-color: #ccff00;
-    box-shadow: 0 14px 40px -10px rgba(204, 255, 0, 0.25), 0 0 20px -5px rgba(204, 255, 0, 0.15) inset;
-  }
-
-  /* ---- Buttery Smooth Entrance Animation ---- */
-  .animate-matiks-entrance {
-    animation: matiks-entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes matiks-entrance {
-    0% {
-      opacity: 0;
-      transform: translateY(25px) scale(0.97);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+  .header-mobile-menu {
+    display: none !important;
   }
 }
