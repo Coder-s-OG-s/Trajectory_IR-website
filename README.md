@@ -1,61 +1,56 @@
-# Trajectory IR Documentation Website
+# Trajectory IR Documentation Portal
 
-Welcome to the official documentation portal for **Trajectory IR** (TRAJ-IR).
+This repository contains the source code for the official documentation and public-facing portal for Trajectory IR. 
 
-This repository contains the source code for the high-performance documentation website built with [Next.js](https://nextjs.org) (App Router), [Tailwind CSS v4](https://tailwindcss.com), and [Fumadocs](https://fumadocs.dev).
+The application is engineered using Next.js (App Router), Tailwind CSS v4, and Fumadocs, delivering a statically generated and highly optimized platform for technical reference material.
 
----
+## The Ideology: Durable Semantic Execution
 
-## 🌟 Key Features
+Trajectory IR is the durable semantic layer for autonomous AI agents. 
 
-- ⚡ **Next.js App Router & Fumadocs:** Lightning fast static and server-rendered documentation architecture.
-- 🎨 **Custom Theme:** Modern dark aesthetics, custom orange accents (`#ff3e00`), and fluid step animations.
-- 🔍 **Predictive Search:** Real-time predictive search powered by **Orama**.
-- 📖 **Complete Documentation:** Quickstart, Infrastructure Architecture, Trajectory Lifecycle, API Reference, Security, and Changelog.
-- 📱 **Fully Responsive:** Optimized for all screen sizes with zero horizontal overflow.
+Modern agent architectures suffer from catastrophic state loss and side-effect duplication during crashes. Trajectory IR solves this at the infrastructural level by wrapping, sealing, and recovering every single agent decision. It guarantees that an agent can be hard-killed at any point during execution and cleanly resume state without hallucinating progress or repeating destructive actions (e.g., API calls, database writes).
 
----
+This is the ultimate durability engine designed specifically for production-grade AI systems.
 
-## 🚀 Getting Started
+## Key Infrastructure
 
-### 1. Install Dependencies
-```bash
-npm install
-```
+- **Statically Optimized:** Leverages Next.js App Router for extreme performance and instantaneous page loads.
+- **Predictive Search Integration:** Powered by Orama for real-time indexing and exact-match reference extraction.
+- **Zero-Overflow Design:** Built with absolute layout constraints to ensure flawless rendering across all viewports.
+- **Authoritative MDX:** All documentation is managed via strict MDX formatting mapped through `source.config.ts`.
 
-### 2. Run Development Server
-```bash
-npm run dev
-```
+## Local Development Environment
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+To replicate the documentation build locally for development or contribution purposes:
 
----
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-## 📁 Repository Structure
+2. **Initialize Development Server**
+   ```bash
+   npm run dev
+   ```
 
-```
-├── content/docs/         # All MDX documentation files (Quickstart, Lifecycle, API, etc.)
-├── public/               # Public assets (logo, icons)
+The application will bind to `http://localhost:3000`.
+
+## Repository Architecture
+
+```text
+├── content/docs/         # Master documentation index (MDX)
+├── public/               # Static assets
 ├── src/
-│   ├── app/              # Next.js App Router layout, pages, and API routes
-│   ├── components/       # Custom React components (Under Construction Modal, etc.)
-│   └── lib/              # Source loaders and utilities
+│   ├── app/              # Next.js App Router definitions
+│   ├── components/       # Custom React component primitives
+│   └── lib/              # Source loaders and utility structures
 ├── source.config.ts      # Fumadocs MDX schema mapping
-├── CODE_OF_CONDUCT.md    # Community standards
-├── CONTRIBUTING.md      # Contribution guidelines
-├── SECURITY.md          # Vulnerability disclosure policy
-└── README.md             # Project documentation overview
+├── CODE_OF_CONDUCT.md    # Code of Conduct
+├── CONTRIBUTING.md       # Contribution guidelines and ECC policies
+├── SECURITY.md           # Security policies
+└── README.md             # Repository documentation
 ```
 
----
+## Licensing
 
-## 🤝 Contributing
-
-We welcome community contributions! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) before submitting pull requests.
-
----
-
-## 📜 License
-
-Distributed under the **Apache 2.0 License**.
+This project is distributed under the Apache 2.0 License. Refer to the LICENSE file for explicit terms and conditions.
