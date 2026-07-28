@@ -64,7 +64,6 @@ export function UnderConstructionModal() {
           boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Construction Icon */}
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚧</div>
 
         <h2

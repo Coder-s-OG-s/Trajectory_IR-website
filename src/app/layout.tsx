@@ -1,5 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
 
@@ -11,6 +11,11 @@ const inter = Inter({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-heading',
 });
 
 export const metadata = {
@@ -40,7 +45,7 @@ import { UnderConstructionModal } from '@/components/under-construction-modal';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable}`} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ defaultTheme: 'light', enableSystem: false }}>{children}</RootProvider>
         <UnderConstructionModal />

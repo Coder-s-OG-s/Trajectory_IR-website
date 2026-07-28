@@ -2,704 +2,254 @@
 
 import React, { useState } from 'react';
 
-type TabId = 
-  | 'overview' 
-  | 'dbos-context' 
-  | 'jcs-sealer' 
-  | 'observation-log' 
-  | 'tir-exporter' 
-  | 'durable-state' 
-  | 'seals-audit' 
-  | 'block-and-gate';
+type TabId = 'idempotent' | 'crash-recovery' | 'human-gate';
 
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  text: string;
+interface CodeSnippet {
+  id: TabId;
+  title: string;
+  description: string;
+  code: React.ReactNode;
+  lines: number;
+  output: string;
 }
 
-interface DashboardShowcaseProps {
-  xp?: number;
-  addXp?: (amount: number) => void;
-}
+const snippets: Record<TabId, CodeSnippet> = {
+  'idempotent': {
+    id: 'idempotent',
+    title: 'Idempotent Caching',
+    description: 'Wrap agent decisions to guarantee side-effects are never duplicated, even if the agent is called multiple times.',
+    lines: 14,
+    code: (
+      <>
+        <span className="text-blue-600">import</span> {'{ '}
+        <span className="text-[#267f99]">Trajectory</span>
+        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
+        {'\n\n'}
+        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#001080]">userId</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
+        <span className="text-green-700">{'  // This operation is pure/idempotent.\n'}</span>
+        <span className="text-green-700">{'  // Trajectory IR caches the deterministic output.\n'}</span>
+        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
+        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'fetch_user'</span>, <span className="text-[#001080]">userId</span> {'},\n'}
+        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">db</span>.<span className="text-[#001080]">users</span>.<span className="text-[#795e26]">find</span>(<span className="text-[#001080]">userId</span>){'\n'}
+        {'  );\n'}
+        {'}\n\n'}
+        <span className="text-green-700">{'// Subsequent calls return the cached JCS hash instantly.\n'}</span>
+        <span className="text-blue-600">const</span> <span className="text-[#001080]">user</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#a31515]">'123'</span>);
+      </>
+    ),
+    output: `[Trajectory IR] Operation: fetch_user
+[Trajectory IR] Executing closure...
+[Trajectory IR] Data fetched from DB.
+[Trajectory IR] Sealed with SHA256: 8f7e9c29a...
+---
+[Trajectory IR] Operation: fetch_user
+[Trajectory IR] Cache HIT (SHA256: 8f7e9c29a...)
+[Trajectory IR] Skipping closure execution.`
+  },
+  'crash-recovery': {
+    id: 'crash-recovery',
+    title: 'Crash Recovery',
+    description: 'Powered by DBOS, if your agent crashes mid-execution, it resumes exactly where it left off without re-running previous side-effects.',
+    lines: 18,
+    code: (
+      <>
+        <span className="text-blue-600">import</span> {'{ '}
+        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">Workflow</span>
+        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
+        {'\n\n'}
+        <span className="text-[#267f99]">@Workflow</span>(){'\n'}
+        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">multiStepAgentProcess</span>(<span className="text-[#001080]">data</span>: <span className="text-[#267f99]">any</span>) {'{\n'}
+        <span className="text-green-700">{'  // Step 1: Execute and seal\n'}</span>
+        {'  '}<span className="text-blue-600">const</span> <span className="text-[#001080]">step1</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
+        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">1</span> {'}, \n'}
+        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">callExternalAPI</span>(<span className="text-[#001080]">data</span>){'\n'}
+        {'  );\n\n'}
+        <span className="text-green-700">{'  // 💥 Simulate a server crash here!\n'}</span>
+        <span className="text-green-700">{'  // When restarted, Step 1 is NOT re-executed.\n\n'}</span>
+        <span className="text-green-700">{'  // Step 2: Resumes safely\n'}</span>
+        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
+        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">2</span> {'}, \n'}
+        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">processData</span>(<span className="text-[#001080]">step1</span>){'\n'}
+        {'  );\n'}
+        {'}'}
+      </>
+    ),
+    output: `[Trajectory IR] Starting Workflow: multiStepAgentProcess
+[Trajectory IR] Executing Step 1...
+[Trajectory IR] Step 1 sealed.
+[SYSTEM] Process killed (SIGTERM).
+---
+[Trajectory IR] Resuming Workflow: multiStepAgentProcess
+[Trajectory IR] Step 1 already sealed. Skipping execution.
+[Trajectory IR] Executing Step 2...
+[Trajectory IR] Workflow complete.`
+  },
+  'human-gate': {
+    id: 'human-gate',
+    title: 'Human-in-the-Loop Gate',
+    description: 'Automatically pause non-idempotent or high-risk operations until a human operator approves them.',
+    lines: 15,
+    code: (
+      <>
+        <span className="text-blue-600">import</span> {'{ '}
+        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">SecurityLevel</span>
+        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
+        {'\n\n'}
+        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">deployToProduction</span>(<span className="text-[#001080]">cluster</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
+        <span className="text-green-700">{'  // This operation is highly destructive/non-idempotent.\n'}</span>
+        <span className="text-green-700">{'  // Execution will pause and wait for human approval.\n'}</span>
+        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
+        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'deploy'</span>, <span className="text-[#001080]">cluster</span> {'},\n'}
+        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">cloud</span>.<span className="text-[#795e26]">deploy</span>(<span className="text-[#001080]">cluster</span>),{'\n'}
+        {'    { \n'}
+        {'      '}<span className="text-[#001080]">securityLevel</span>: <span className="text-[#267f99]">SecurityLevel</span>.<span className="text-[#0070c1]">HIGH_RISK</span>,{'\n'}
+        {'      '}<span className="text-[#001080]">requireApproval</span>: <span className="text-blue-600">true</span> {'\n'}
+        {'    }\n'}
+        {'  );\n'}
+        {'}'}
+      </>
+    ),
+    output: `[Trajectory IR] Operation: deploy (cluster: production)
+[Trajectory IR] WARNING: High Risk Operation Detected.
+[Trajectory IR] Status: BLOCKED_NEEDS_GATE
+[Trajectory IR] Waiting for human approval...
+---
+[Trajectory IR] Operator (admin@org.com) approved.
+[Trajectory IR] Executing closure...
+[Trajectory IR] Deployment successful.`
+  }
+};
 
-export function DashboardShowcase({ xp: propXp, addXp: propAddXp }: DashboardShowcaseProps) {
-  // Internal state if props are not supplied
-  const [internalXp, setInternalXp] = useState(750);
-  const xp = propXp !== undefined ? propXp : internalXp;
-  const addXp = (amount: number) => {
-    if (propAddXp) propAddXp(amount);
-    else setInternalXp((prev) => prev + amount);
-  };
+const TSIcon = () => (
+  <svg viewBox="0 0 128 128" width="14" height="14">
+    <path fill="#3178C6" d="M0 0h128v128H0z" />
+    <path fill="#FFF" d="M96.262 108.647c-5.748 5.76-15.006 8.784-25.045 8.784-18.068 0-29.356-8.665-31.259-21.78l12.784-7.585c1.42 7.747 8.016 12.399 18.01 12.399 7.746 0 12.807-3.415 12.807-8.136 0-14.735-37.49-5.918-37.49-31.119 0-11.233 8.706-19.344 24.385-19.344 14.59 0 25.405 6.208 28.167 19.308l-12.706 7.02c-1.426-6.398-6.953-9.52-14.97-9.52-7.067 0-11.164 3.018-11.164 7.641 0 13.972 37.487 5.733 37.487 31.267.001 4.542-1.748 8.162-5.005 11.065zM22.015 43.155V30.134h44.386v13.021H44.316v74.288h-14.36V43.155H22.015z" />
+  </svg>
+);
 
-  // Live Decisions Sealed momentum counter
-  const [decisionsSealed, setDecisionsSealed] = useState(492810);
-  const [hoveredCards, setHoveredCards] = useState<Record<string, boolean>>({});
+export function DashboardShowcase() {
+  const [activeTab, setActiveTab] = useState<TabId>('idempotent');
+  const [isRunning, setIsRunning] = useState(false);
+  const [showOutput, setShowOutput] = useState(false);
 
-  const handleCardHover = (cardId: string) => {
-    if (!hoveredCards[cardId]) {
-      setHoveredCards((prev) => ({ ...prev, [cardId]: true }));
-      addXp(25); // Award +25 XP on initial card hover
-    }
-  };
+  const activeSnippet = snippets[activeTab];
 
-  // Tab & Chat State
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
-  const [query, setQuery] = useState('');
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [isThinking, setIsThinking] = useState(false);
-
-  // Matiks Workout Modes State inside Endpoint Cards
-  const [activeWorkout, setActiveWorkout] = useState<'none' | 'pure-sprint' | 'dom-puzzle' | 'cache-duel' | 'gate-intercept'>('none');
-  const [workoutResult, setWorkoutResult] = useState<string | null>(null);
-
-  const handleSend = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const promptText = query.trim() || `Tell me about ${activeTab.replace('-', ' ')} in Trajectory IR`;
-    
-    const updatedHistory: ChatMessage[] = [...chatHistory, { role: 'user', text: promptText }];
-    setChatHistory(updatedHistory);
-    setQuery('');
-    setIsThinking(true);
-    addXp(50); // Award XP for asking questions
-
+  const handleRun = () => {
+    setShowOutput(false);
+    setIsRunning(true);
     setTimeout(() => {
-      let answer = '';
-      const lower = promptText.toLowerCase();
-
-      if (lower.includes('dbos') || activeTab === 'dbos-context') {
-        answer = 'Trajectory IR wraps agent step functions inside an embedded DBOS workflow transaction engine. When a crash occurs mid-execution, DBOS recovers state from local SQLite/PostgreSQL CAS storage without re-running completed side-effects.';
-      } else if (lower.includes('seal') || lower.includes('jcs') || activeTab === 'jcs-sealer') {
-        answer = 'RFC 8785 JSON Canonicalization Scheme (JCS) normalizes payload whitespace, key ordering, and number formatting into a deterministic byte stream before SHA256 hashing. This guarantees tamper-proof decision seals.';
-      } else if (lower.includes('gate') || lower.includes('block') || activeTab === 'block-and-gate') {
-        answer = 'When an agent attempts a NON_IDEMPOTENT_WRITE operation (e.g. cloud deployment or database drop) and crashes, Trajectory IR holds execution in a BLOCKED state until a human operator explicitly approves or rejects the step.';
-      } else if (lower.includes('export') || lower.includes('tir') || activeTab === 'tir-exporter') {
-        answer = 'Every trajectory can be exported as a portable .tir ZIP package archive containing manifest.json, metadata.jsonl, SHA256 seals, and binary CAS artifacts for offline compliance audit and replay.';
-      } else {
-        answer = `Trajectory IR is the durable semantic layer for autonomous AI agents. Across ${activeTab.replace('-', ' ')}, every tool decision is canonicalized, cryptographically sealed, and checkpointed for crash-safe execution.`;
-      }
-
-      setChatHistory([...updatedHistory, { role: 'assistant', text: answer }]);
-      setIsThinking(false);
-    }, 400);
+      setIsRunning(false);
+      setShowOutput(true);
+    }, 800);
   };
-
-  const completeWorkout = (mode: string, xpEarned: number, feedback: string) => {
-    addXp(xpEarned);
-    setDecisionsSealed((prev) => prev + 1000); // +1,000 Decisions Sealed per successful challenge
-    setWorkoutResult(feedback);
-  };
-
-  // Determine Rank Name
-  const rankTitle = xp >= 1000 ? 'SYSTEM GRANDMASTER' : xp >= 500 ? 'DURABLE ARCHITECT' : 'WORKFLOW BUILDER';
-  const progressPercent = Math.min(100, Math.round((xp / 1200) * 100));
 
   return (
-    <div className="mt-12 text-left w-full antialiased text-zinc-100 font-sans">
+    <div className="w-full max-w-4xl mx-auto mt-6 bg-white border-2 border-[#d95c20] shadow-[0_0_15px_rgba(217,92,32,0.4)] rounded-xl overflow-hidden flex flex-col md:flex-row text-left">
       
-      {/* =========================================================================================
-          LIVE MOMENTUM ARENA HUD (Floating Addictive Stats Header)
-      ========================================================================================= */}
-      <div className="w-full bg-[#111113]/90 border border-white/10 rounded-2xl py-5 px-6 mb-10 shadow-[0_0_40px_rgba(0,0,0,0.6)] backdrop-blur-md">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          
-          {/* Animated Decisions Sealed Counter */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#ccff00]/10 border border-[#ccff00]/30 flex items-center justify-center text-[#ccff00] text-2xl font-black shadow-[0_0_20px_rgba(204,255,0,0.2)] flex-shrink-0">
-              🛡️
-            </div>
-            <div>
-              <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white flex items-center gap-1.5">
-                <span>{decisionsSealed.toLocaleString()}</span>
-                <span className="text-neon-lime">+</span>
-              </div>
-              <div className="text-xs uppercase font-extrabold tracking-wider text-zinc-400 font-sans">
-                Decisions Sealed &amp; Crash-Protected Today
-              </div>
-            </div>
-          </div>
-
-          {/* Gamified Rank & XP Badge */}
-          <div className="flex items-center gap-3 bg-[#161618] px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-between md:justify-start">
-            <span className="text-2xl animate-pulse">⚡</span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-zinc-400 font-bold uppercase">Rank:</span>
-                <span className="text-xs font-mono font-black text-[#00f0ff] uppercase px-2 py-0.5 rounded bg-[#00f0ff]/10 border border-[#00f0ff]/30">
-                  {rankTitle}
-                </span>
-              </div>
-              <div className="w-40 sm:w-48 bg-zinc-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-[#ccff00] to-[#00f0ff] h-full transition-all duration-500 shadow-[0_0_12px_rgba(204,255,0,0.7)]" 
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-            </div>
-            <span className="font-mono text-xs sm:text-sm font-black text-white ml-2 whitespace-nowrap">{xp} XP</span>
-          </div>
-
+      {/* Sidebar Tabs */}
+      <div className="w-full md:w-56 bg-zinc-50 border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col">
+        <div className="px-4 py-3 border-b border-zinc-200">
+          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Features</span>
+        </div>
+        <div className="flex flex-col p-1.5 gap-0.5">
+          {Object.values(snippets).map((snippet) => (
+            <button
+              key={snippet.id}
+              onClick={() => {
+                setActiveTab(snippet.id);
+                setShowOutput(false);
+              }}
+              className={`px-3 py-2 rounded-md text-[13px] font-medium transition-all text-left ${
+                activeTab === snippet.id
+                  ? 'bg-white text-[#f26625] shadow-sm border border-zinc-200'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+              }`}
+            >
+              {snippet.title}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Separated Floating Layout: Left Independent Sidebar + Right Floating Dashboard Card */}
-      <div className="flex flex-col lg:flex-row items-start gap-8 w-full">
-        
-        {/* 1. Left Independent Sidebar (Matiks Dark Tone) */}
-        <div className="w-full lg:w-64 flex-shrink-0 p-3 text-xs font-semibold text-zinc-400 bg-[#111113]/80 border border-white/10 rounded-3xl shadow-xl backdrop-blur-md">
-          <div className="flex items-center justify-between mb-5 px-3 pt-2">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#ccff00] shadow-[0_0_10px_#ccff00]" />
-              <span className="font-black text-sm tracking-tight text-white uppercase">Execution Mode</span>
-            </div>
-          </div>
-
-          {/* Sidebar Menu Items */}
-          <div className="space-y-6">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`w-full text-left px-4 py-3 rounded-2xl transition-all flex items-center gap-3 font-extrabold text-xs uppercase tracking-wider ${
-                activeTab === 'overview'
-                  ? 'bg-[#ccff00] text-black shadow-[0_0_25px_rgba(204,255,0,0.4)]'
-                  : 'hover:bg-[#1a1a1e] text-zinc-300 hover:text-white'
-              }`}
-            >
-              <span className="text-base">📊</span> Overview &amp; Arena
-            </button>
-
-            <div>
-              <div className="text-[10px] font-mono font-bold tracking-widest text-[#00f0ff] uppercase px-3 mb-2.5">
-                // AGENT RUNTIME
-              </div>
-              <div className="space-y-1">
-                {[
-                  { id: 'dbos-context' as TabId, label: '⚡ DBOS Context' },
-                  { id: 'jcs-sealer' as TabId, label: '🔒 JCS Sealer' },
-                  { id: 'observation-log' as TabId, label: '📜 Observation Log' },
-                  { id: 'tir-exporter' as TabId, label: '📦 .tir Exporter' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-2.5 text-xs font-bold ${
-                      activeTab === item.id
-                        ? 'bg-[#1e1e24] text-[#ccff00] border border-[#ccff00]/40 shadow-sm'
-                        : 'hover:bg-[#18181d] text-zinc-400 hover:text-zinc-200'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase px-3 mb-2.5">
-                // MANAGEMENT
-              </div>
-              <div className="space-y-1">
-                {[
-                  { id: 'durable-state' as TabId, label: '🗄️ Durable State' },
-                  { id: 'seals-audit' as TabId, label: '🛡️ Seals Audit' },
-                  { id: 'block-and-gate' as TabId, label: '🚧 Block-and-Gate' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-2.5 text-xs font-bold ${
-                      activeTab === item.id
-                        ? 'bg-[#1e1e24] text-emerald-400 border border-emerald-500/40 shadow-sm'
-                        : 'hover:bg-[#18181d] text-zinc-400 hover:text-zinc-200'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* Main Content Area */}
+      <div className="flex-1 p-5 md:p-6 bg-white flex flex-col">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-zinc-900 mb-1.5">{activeSnippet.title}</h2>
+          <p className="text-zinc-500 text-[13px] leading-relaxed max-w-2xl">
+            {activeSnippet.description}
+          </p>
         </div>
 
-        {/* 2. Right Floating Main Dashboard Card */}
-        <div className="flex-1 w-full bg-[#0e0e12]/95 border border-white/10 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col justify-between min-h-[580px] backdrop-blur-lg">
+        {/* Realistic VS Code-like Editor Mockup */}
+        <div className="relative rounded-lg border border-zinc-300 bg-white overflow-hidden mb-3 shadow-sm flex flex-col">
+          {/* Title Bar / Tabs */}
+          <div className="bg-[#f3f3f3] flex items-center border-b border-zinc-200 select-none">
+            {/* macOS Traffic Lights */}
+            <div className="flex gap-2 px-4 py-2.5">
+              <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></span>
+              <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]"></span>
+              <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]"></span>
+            </div>
+            {/* Active Tab */}
+            <div className="bg-white px-4 py-1.5 border-t-2 border-t-blue-500 border-x border-x-zinc-200 flex items-center gap-2 -mb-[1px] ml-1">
+              <TSIcon />
+              <span className="text-[12px] font-sans text-zinc-700">example.ts</span>
+            </div>
+          </div>
           
-          {/* TAB 1: OVERVIEW & MATIKS ARENA GAME MODES */}
-          {activeTab === 'overview' && (
-            <div>
-              <div className="mb-8 text-left">
-                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-[1.08] mb-3">
-                  Web Data &amp; Execution Infrastructure for AI Applications
-                </h2>
-                <p className="text-sm sm:text-base text-zinc-400 font-medium">
-                  Four distinct endpoints engineered for bulletproof AI workflows. Hover over any mode to earn XP and click to test your durability score.
-                </p>
-              </div>
-
-              {/* 4 Endpoint Cards as Matiks-style game modes (2x2 Grid) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                
-                {/* 1. Pure Operations */}
-                <div 
-                  onMouseEnter={() => handleCardHover('pure')}
-                  onClick={() => { setActiveWorkout('pure-sprint'); setWorkoutResult(null); }}
-                  className="card-matiks-interactive rounded-2xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer relative overflow-hidden min-h-[180px]"
-                >
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-[#ccff00]/10 rounded-full blur-2xl group-hover:bg-[#ccff00]/25 transition-all pointer-events-none" />
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 rounded text-[10px] font-mono font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 tracking-wider">
-                        MODE 01 // PURE
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500 group-hover:text-white font-extrabold transition-colors">
-                        +25 XP HOVER
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-[#ccff00] transition-colors">
-                      Pure Operations
-                    </h3>
-                    <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-semibold leading-relaxed">
-                      PURE: zero side effects
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-3.5">
-                    <span className="font-mono text-[11px] text-zinc-400 uppercase font-bold">Guaranteed Purity</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-white/10 group-hover:bg-[#ccff00] text-zinc-200 group-hover:text-black font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                      Explore Pure API ⚡
-                    </span>
-                  </div>
-                </div>
-
-                {/* 2. Extraction API */}
-                <div 
-                  onMouseEnter={() => handleCardHover('extract')}
-                  onClick={() => { setActiveWorkout('dom-puzzle'); setWorkoutResult(null); }}
-                  className="card-matiks-interactive rounded-2xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer relative overflow-hidden min-h-[180px]"
-                >
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-[#00f0ff]/10 rounded-full blur-2xl group-hover:bg-[#00f0ff]/25 transition-all pointer-events-none" />
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 rounded text-[10px] font-mono font-black bg-[#00f0ff]/15 text-[#00f0ff] border border-[#00f0ff]/40 tracking-wider">
-                        MODE 02 // READ_ONLY
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500 group-hover:text-white font-extrabold transition-colors">
-                        +25 XP HOVER
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-[#00f0ff] transition-colors">
-                      Extraction API
-                    </h3>
-                    <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-semibold leading-relaxed">
-                      READ_ONLY: webpage contents
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-3.5">
-                    <span className="font-mono text-[11px] text-zinc-400 uppercase font-bold">Zero Infra Drift</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-white/10 group-hover:bg-[#00f0ff] text-zinc-200 group-hover:text-black font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                      Explore Extract API 🧩
-                    </span>
-                  </div>
-                </div>
-
-                {/* 3. Answers API */}
-                <div 
-                  onMouseEnter={() => handleCardHover('answers')}
-                  onClick={() => { setActiveWorkout('cache-duel'); setWorkoutResult(null); }}
-                  className="card-matiks-interactive rounded-2xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer relative overflow-hidden min-h-[180px]"
-                >
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/25 transition-all pointer-events-none" />
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 rounded text-[10px] font-mono font-black bg-yellow-500/15 text-yellow-400 border border-yellow-500/40 tracking-wider">
-                        MODE 03 // IDEMPOTENT
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500 group-hover:text-white font-extrabold transition-colors">
-                        +25 XP HOVER
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-yellow-400 transition-colors">
-                      Answers API
-                    </h3>
-                    <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-semibold leading-relaxed">
-                      IDEMPOTENT: fast answers
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-3.5">
-                    <span className="font-mono text-[11px] text-zinc-400 uppercase font-bold">Deduplicated Cache</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-white/10 group-hover:bg-yellow-400 text-zinc-200 group-hover:text-black font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                      Explore Answers API ⏱️
-                    </span>
-                  </div>
-                </div>
-
-                {/* 4. Agent API */}
-                <div 
-                  onMouseEnter={() => handleCardHover('agent')}
-                  onClick={() => { setActiveWorkout('gate-intercept'); setWorkoutResult(null); }}
-                  className="card-matiks-interactive rounded-2xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer relative overflow-hidden min-h-[180px] border-rose-500/20"
-                >
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/25 transition-all pointer-events-none" />
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 rounded text-[10px] font-mono font-black bg-rose-500/15 text-rose-400 border border-rose-500/40 tracking-wider animate-pulse">
-                        MODE 04 // NON_IDEMPOTENT
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500 group-hover:text-white font-extrabold transition-colors">
-                        +25 XP HOVER
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-rose-400 transition-colors">
-                      Agent API
-                    </h3>
-                    <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-semibold leading-relaxed">
-                      NON_IDEMPOTENT: Research
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-3.5">
-                    <span className="font-mono text-[11px] text-zinc-400 uppercase font-bold">Durable CAS Checkpoints</span>
-                    <span className="px-3.5 py-1.5 rounded-lg bg-white/10 group-hover:bg-rose-500 text-zinc-200 group-hover:text-white font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                      Explore Agent API 🚧
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* ACTIVE WORKOUT INTERACTIVE PANEL DRAWER (Matiks High-Energy Style) */}
-              {activeWorkout !== 'none' && (
-                <div className="mb-10 p-6 sm:p-7 rounded-3xl border-2 border-[#ccff00]/60 bg-[#16161a] text-white shadow-[0_0_50px_rgba(204,255,0,0.25)] font-sans relative animate-matiks-entrance">
-                  <button 
-                    onClick={() => setActiveWorkout('none')}
-                    className="absolute top-4 right-5 text-zinc-400 hover:text-white font-mono text-xs font-black px-3 py-1 rounded bg-black/40 border border-white/10"
-                  >
-                    ✕ CLOSE WORKOUT
-                  </button>
-
-                  {/* Workout 1: Speed Sprint */}
-                  {activeWorkout === 'pure-sprint' && (
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="text-xs font-mono bg-emerald-500 text-black px-2.5 py-1 rounded font-black uppercase">MODE 01: SPEED SPRINT</span>
-                        <span className="text-xs font-bold text-zinc-300">Classify execution purity in 3 seconds to earn +100 XP</span>
-                      </div>
-                      <div className="font-mono text-xs sm:text-sm bg-black p-4 rounded-xl border border-zinc-800 text-[#00f0ff] mb-5 shadow-inner">
-                        <code>def calculate_hash(data: dict): return hashlib.sha256(jcs_canonicalize(data)).hexdigest()</code>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <button 
-                          onClick={() => completeWorkout('pure-sprint', 100, '⚡ PERFECT STREAK: Function is 100% PURE with zero side-effects (+100 XP & +1,000 Sealed Decisions)')}
-                          className="btn-matiks-lime px-5 py-3 rounded-xl text-xs sm:text-sm font-black tracking-wider transition-all"
-                        >
-                          PURE (Zero Side Effects) ✓
-                        </button>
-                        <button 
-                          onClick={() => setWorkoutResult('❌ INCORRECT: SHA256 hashing on immutable inputs is strictly PURE without side-effects!')}
-                          className="px-5 py-3 bg-rose-600/80 hover:bg-rose-600 text-white font-black rounded-xl text-xs sm:text-sm transition-all shadow-md"
-                        >
-                          IMPURE (Has Side Effects)
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Workout 2: DOM Puzzle Match */}
-                  {activeWorkout === 'dom-puzzle' && (
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="text-xs font-mono bg-[#00f0ff] text-black px-2.5 py-1 rounded font-black uppercase">MODE 02: DOM PUZZLE MATCH</span>
-                        <span className="text-xs font-bold text-zinc-300">Select target node for zero token waste to earn +100 XP</span>
-                      </div>
-                      <div className="font-mono text-xs sm:text-sm bg-black p-4 rounded-xl border border-zinc-800 text-rose-300 mb-5 shadow-inner overflow-x-auto">
-                        <code>&lt;main class=&quot;article-body&quot;&gt;&lt;p&gt;Target Web Content&lt;/p&gt;&lt;/main&gt;</code>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <button 
-                          onClick={() => completeWorkout('dom-puzzle', 100, '🎯 100% PRECISION: Clean READ_ONLY extraction node matched (+100 XP & +1,000 Sealed Decisions)')}
-                          className="btn-matiks-lime px-5 py-3 rounded-xl text-xs sm:text-sm font-black tracking-wider transition-all"
-                        >
-                          Target: main.article-body ✓
-                        </button>
-                        <button 
-                          onClick={() => setWorkoutResult('❌ HIGH TOKEN WASTE: Selecting entire body causes 90% unneeded token noise.')}
-                          className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black rounded-xl text-xs sm:text-sm transition-all"
-                        >
-                          Target: body
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Workout 3: Cache Hit Challenge */}
-                  {activeWorkout === 'cache-duel' && (
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="text-xs font-mono bg-yellow-400 text-black px-2.5 py-1 rounded font-black uppercase">MODE 03: CACHE HIT DUEL</span>
-                        <span className="text-xs font-bold text-zinc-300">Idempotency Stream incoming: GET /api/v1/query?id=492</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 mt-4">
-                        <button 
-                          onClick={() => completeWorkout('cache-duel', 100, '⏱️ 1.2s LATENCY SAVED: Cached answer returned with zero duplicate queries (+100 XP & +1,000 Sealed Decisions)')}
-                          className="btn-matiks-lime px-5 py-3 rounded-xl text-xs sm:text-sm font-black tracking-wider transition-all"
-                        >
-                          RETURN CACHED IDEMPOTENT ANSWER ⚡
-                        </button>
-                        <button 
-                          onClick={() => setWorkoutResult('❌ UNNECESSARY LATENCY: Idempotent queries should always read from JCS cache.')}
-                          className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black rounded-xl text-xs sm:text-sm transition-all"
-                        >
-                          RE-RUN LIVE SEARCH
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Workout 4: Gate Intercept Workout */}
-                  {activeWorkout === 'gate-intercept' && (
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="text-xs font-mono bg-rose-500 text-white px-2.5 py-1 rounded font-black uppercase">MODE 04: GATE INTERCEPT</span>
-                        <span className="text-xs font-bold text-zinc-300">Agent attempted non-idempotent: deploy_cluster(&quot;production&quot;)</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 mt-4">
-                        <button 
-                          onClick={() => completeWorkout('gate-intercept', 100, '🛡️ DURABILITY SHIELD UNLOCKED: Execution safely held in BLOCKED_NEEDS_GATE state (+100 XP & +1,000 Sealed Decisions)')}
-                          className="btn-matiks-lime px-5 py-3 rounded-xl text-xs sm:text-sm font-black tracking-wider transition-all"
-                        >
-                          INTERCEPT &amp; HOLD IN GATE 🛡️
-                        </button>
-                        <button 
-                          onClick={() => setWorkoutResult('❌ CRITICAL RISK: Non-idempotent production write executed without human approval!')}
-                          className="px-5 py-3 bg-rose-600/80 hover:bg-rose-600 text-white font-black rounded-xl text-xs sm:text-sm transition-all shadow-md"
-                        >
-                          AUTO-ALLOW WRITE
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Feedback Result Banner */}
-                  {workoutResult && (
-                    <div className="mt-5 p-4 rounded-2xl bg-black border border-[#ccff00]/60 text-xs sm:text-sm font-mono font-extrabold text-[#ccff00] shadow-lg animate-pulse flex items-center gap-2">
-                      <span>✨</span>
-                      <span>{workoutResult}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-            </div>
-          )}
-
-          {/* OTHER TABS (Maintained with sleek dark styling) */}
-          {activeTab === 'dbos-context' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">RUNTIME</span>
-                <h3 className="text-2xl font-bold text-white uppercase">DBOS Transactional Context</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Wraps workflow execution steps inside an embedded DBOS transaction engine for automatic crash recovery without side-effect duplicates.
-              </p>
-              <pre className="p-5 rounded-2xl border border-white/10 bg-black text-[#00f0ff] font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed mb-6 shadow-inner">
-                <code>{`from trajectory_ir.runtime import Trajectory
-# Pluggable durable backend (e.g. DBOS or Restate)
-Trajectory.launch()
-
-@Trajectory.workflow()
-def run_durable_agent():
-    traj = Trajectory.start(tenant_id="prod-tenant-01")
-    # Automatically checkpointed crash-safe state
-    print(f"Active Workflow ID: {traj.trajectory_id}")`}</code>
-              </pre>
-            </div>
-          )}
-
-          {activeTab === 'jcs-sealer' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-purple-500/20 text-purple-400 border border-purple-500/40 font-bold">CRYPTOGRAPHY</span>
-                <h3 className="text-2xl font-bold text-white uppercase">RFC 8785 JCS Payload Sealer</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Canonicalizes JSON payloads into deterministic byte streams before SHA256 hashing to guarantee cryptographic seal integrity.
-              </p>
-              <div className="p-6 rounded-2xl border border-purple-500/30 bg-black/60 font-mono text-xs sm:text-sm space-y-3 mb-6 shadow-lg">
-                <div className="text-zinc-500 font-bold">// Raw Input Payload:</div>
-                <div className="text-[#ccff00] font-black">{`{"tool": "deploy", "params": {"cluster": "us-east-1"}}`}</div>
-                <div className="text-zinc-500 font-bold mt-2">// Generated Cryptographic Decision Seal:</div>
-                <div className="text-[#00f0ff] break-all font-bold">sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'observation-log' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-sky-500/20 text-sky-400 border border-sky-500/40 font-bold">CHAIN LOG</span>
-                <h3 className="text-2xl font-bold text-white uppercase">Cryptographic Node Chain</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Appends immutable execution outcomes as SHA256 linked node chains in standard JSONL format.
-              </p>
-              <div className="border border-white/10 rounded-2xl overflow-hidden text-xs font-mono mb-6 shadow-lg bg-black">
-                <table className="w-full text-left">
-                  <thead className="bg-[#18181e] text-zinc-300 text-[10px] uppercase font-black border-b border-white/10">
-                    <tr>
-                      <th className="p-3.5">Seq</th>
-                      <th className="p-3.5">Kind</th>
-                      <th className="p-3.5">SHA256 Hash</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10 text-zinc-300">
-                    <tr>
-                      <td className="p-3.5 font-extrabold text-white">001</td>
-                      <td className="p-3.5 text-purple-400 font-bold">KIND_CALL</td>
-                      <td className="p-3.5 text-[#00f0ff]">sha256: a1b2c3d4...</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3.5 font-extrabold text-white">002</td>
-                      <td className="p-3.5 text-yellow-400 font-bold">KIND_SEAL</td>
-                      <td className="p-3.5 text-[#ccff00]">sha256: e8f9g0h1...</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3.5 font-extrabold text-white">003</td>
-                      <td className="p-3.5 text-emerald-400 font-bold">KIND_OBSERVATION</td>
-                      <td className="p-3.5 text-[#00f0ff]">sha256: 789xyz12...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'tir-exporter' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold">PACKAGE EXPORT</span>
-                <h3 className="text-2xl font-bold text-white uppercase">Portable .tir Package Archive</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Export full trajectories as portable, inspectable ZIP archives for audit compliance and offline replay.
-              </p>
-              <div className="p-6 rounded-2xl border border-white/10 bg-black text-zinc-200 font-mono text-xs sm:text-sm space-y-2 mb-6 shadow-inner">
-                <div className="text-[#ccff00] font-bold text-sm sm:text-base">📁 trajectory-prod-001.tir</div>
-                <div className="pl-5 text-zinc-400">├── 📄 manifest.json</div>
-                <div className="pl-5 text-zinc-400">├── 📄 metadata.jsonl</div>
-                <div className="pl-5 text-[#00f0ff]">├── 📁 seals/ (SHA256 signatures)</div>
-                <div className="pl-5 text-emerald-400">└── 📁 artifacts/ (Binary CAS store)</div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'durable-state' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 font-bold">STORAGE</span>
-                <h3 className="text-2xl font-bold text-white uppercase">SQLite &amp; PostgreSQL CAS State</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Sharded Content-Addressable Storage (CAS) preventing bucket listing degradation on large deployments.
-              </p>
-              <div className="p-5 rounded-2xl border border-white/10 bg-black text-xs font-mono mb-6 shadow-inner">
-                <div className="text-zinc-500 font-medium mb-1.5">// Sharded CAS Object Path:</div>
-                <div className="text-[#00f0ff] font-bold text-sm break-all">s3://trajir/cas/e3/b0c44298fc1c149afbf4c8996fb9242...</div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'seals-audit' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">CONFORMANCE</span>
-                <h3 className="text-2xl font-bold text-white uppercase">Automated Seals Integrity Audit</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Runs cryptographic verification across all decision seals and observation nodes in real-time.
-              </p>
-              <div className="p-6 rounded-2xl border border-emerald-500/30 bg-black/60 text-xs sm:text-sm font-mono space-y-2.5 mb-6 shadow-lg">
-                <div className="text-emerald-400 font-black">✓ Test R01 (Safe Resume): PASSED</div>
-                <div className="text-emerald-400 font-black">✓ Test R02 (Block-and-Gate): PASSED</div>
-                <div className="text-zinc-400 font-bold pt-1.5 border-t border-white/10">Total Nodes Verified: 42 | Mismatches: 0</div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'block-and-gate' && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold">SAFETY PROTOCOL</span>
-                <h3 className="text-2xl font-bold text-white uppercase">Block-and-Gate Human Intercept</h3>
-              </div>
-              <p className="text-sm text-zinc-400 mb-6 font-medium leading-relaxed">
-                Interrupted NON_IDEMPOTENT_WRITE operations enter BLOCKED state to prevent catastrophic duplicates.
-              </p>
-              <div className="p-6 rounded-2xl border border-rose-500/30 bg-black/60 text-xs sm:text-sm font-mono space-y-3 mb-6 shadow-lg">
-                <div className="text-rose-400 font-black text-base">🛑 Execution Gate: Interrupted Tool Operation</div>
-                <div className="text-zinc-300 font-semibold">Tool: deploy_server(&quot;prod-cluster&quot;) | Status: BLOCKED_NEEDS_GATE</div>
-                <div className="flex flex-wrap items-center gap-3 pt-3">
-                  <button 
-                    onClick={() => { completeWorkout('gate-intercept', 100, '✓ GATE APPROVED: Safe execution allowed (+100 XP)'); }}
-                    className="btn-matiks-lime px-5 py-2.5 rounded-xl font-black text-xs shadow-md transition-all uppercase"
-                  >
-                    Approve Retry ✓
-                  </button>
-                  <button 
-                    onClick={() => { setWorkoutResult('🛑 EXECUTION ABORTED: Operation rejected and state protected.'); }}
-                    className="px-5 py-2.5 rounded-xl border border-white/20 bg-[#16161a] text-white font-bold hover:bg-[#1f1f25] transition-all text-xs uppercase"
-                  >
-                    Reject &amp; Abort
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Interactive AI Chat Answers Container (Matiks High-Contrast Glow) */}
-          {chatHistory.length > 0 && (
-            <div className="mb-6 space-y-3.5 max-h-60 overflow-y-auto p-5 rounded-2xl bg-[#141418] border border-white/10 shadow-inner">
-              {chatHistory.map((msg, idx) => (
-                <div key={idx} className={`flex items-start gap-3 text-xs sm:text-sm ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {msg.role === 'assistant' && (
-                    <div className="w-6 h-6 rounded-lg bg-[#ccff00] text-black flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5 shadow-[0_0_12px_rgba(204,255,0,0.5)]">
-                      ⚡
-                    </div>
-                  )}
-                  <div className={`p-3.5 rounded-2xl max-w-[85%] leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-[#ccff00] text-black rounded-tr-none font-black text-xs tracking-wide shadow-md'
-                      : 'bg-[#1b1b22] border border-white/10 text-zinc-200 shadow-sm rounded-tl-none font-medium text-xs sm:text-sm'
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
+          <div className="flex bg-white">
+            {/* Line Numbers */}
+            <div className="py-3 px-3 min-w-[36px] text-[13px] font-mono text-zinc-400 text-right select-none bg-[#f9f9f9] border-r border-zinc-100 flex flex-col leading-snug">
+              {Array.from({ length: activeSnippet.lines }).map((_, i) => (
+                <div key={i}>{i + 1}</div>
               ))}
-              {isThinking && (
-                <div className="flex items-center gap-2 text-xs font-mono text-[#00f0ff] animate-pulse">
-                  <span>⚡ Generating durable semantic response...</span>
-                </div>
-              )}
             </div>
-          )}
-
-          {/* Interactive Editable Prompt Box */}
-          <form onSubmit={handleSend} className="relative p-3.5 sm:p-4 rounded-2xl border border-white/15 focus-within:border-[#ccff00] bg-[#14141a] shadow-[0_0_30px_rgba(0,0,0,0.6)] flex items-center justify-between gap-4 transition-all">
-            <input 
-              type="text" 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Ask anything about ${activeTab.replace('-', ' ')} or Trajectory IR architecture...`}
-              className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-white font-semibold placeholder-zinc-500"
-            />
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button 
-                type="submit" 
-                className="btn-matiks-lime w-9 h-9 rounded-xl flex items-center justify-center text-base font-black transition-all"
-                title="Send Prompt (+50 XP)"
-              >
-                ↑
-              </button>
+            {/* Code */}
+            <div className="p-3 overflow-x-auto w-full bg-white select-text">
+              <div className="whitespace-pre font-mono text-[13px] text-zinc-800 leading-snug">
+                <code>{activeSnippet.code}</code>
+              </div>
             </div>
-          </form>
-
+          </div>
         </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <button
+            onClick={handleRun}
+            disabled={isRunning}
+            className={`px-4 py-1.5 rounded-md text-[13px] font-bold flex items-center gap-2 transition-all ${
+              isRunning
+                ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                : 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'
+            }`}
+          >
+            {isRunning ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-3.5 w-3.5 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Executing...
+              </>
+            ) : (
+              '▶ Run Execution'
+            )}
+          </button>
+        </div>
+
+        {/* Output Console */}
+        {showOutput && (
+          <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+              Terminal Output
+            </div>
+            <div className="p-3 rounded-lg border border-zinc-200 bg-[#f9f9f9] font-mono text-[12px] text-zinc-700 whitespace-pre-wrap leading-relaxed shadow-inner">
+              {activeSnippet.output}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
