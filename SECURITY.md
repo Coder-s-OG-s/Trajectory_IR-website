@@ -10,7 +10,9 @@ We only support the latest deployed version of the website. If you find a securi
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-If you discover a security vulnerability in this website repository, please send an e-mail to the core maintainers: `siddharthagithub0007@gmail.com`.
+To align with cloud-native security standards and our core repository governance:
+1. **Primary Secure Channel (GitHub Private Advisories)**: Please submit findings using the repository's native **Private Vulnerability Reporting** feature. Navigate to the repository's **Security** tab, select **Advisories**, and click **Report a vulnerability**. This guarantees confidential communication directly with the maintainers and safe patch creation prior to public disclosure.
+2. **Secondary Backup Channel**: If you encounter difficulty accessing private security advisories, please contact the lead maintainer directly via email at `siddharthagithub0007@gmail.com`.
 
 We will acknowledge receipt of your vulnerability report within 48 hours. 
 
