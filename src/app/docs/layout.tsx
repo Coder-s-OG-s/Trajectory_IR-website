@@ -7,7 +7,7 @@ import { SiteFooter } from '@/components/site-footer';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" style={{ '--fd-nav-height': '80px' } as React.CSSProperties}>
       <SiteHeader />
       <DocsLayout
         tree={source.pageTree}

@@ -78,8 +78,8 @@ function SocialIcons() {
 
 export function SiteFooter() {
   return (
-    <footer className="relative z-10 site-footer bg-black text-white w-full border-t border-zinc-900">
-      <div className="max-w-[1200px] mx-auto px-8 pt-16 pb-10">
+    <footer className="relative z-10 w-full pt-20">
+      <div className="max-w-[1200px] mx-auto px-8 pt-16 pb-10 border-t border-[rgba(255,255,255,0.2)]">
         
         {/* Main Layout Grid */}
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 mb-16">
@@ -90,10 +90,10 @@ export function SiteFooter() {
               <img
                 src="/logo.png"
                 alt="Trajectory IR"
-                className="w-10 h-10 rounded-md object-cover bg-white"
+                className="w-10 h-10 rounded-md object-contain mix-blend-multiply"
               />
-              <span className="text-[15px] font-medium text-white tracking-tight whitespace-nowrap">
-                The durable semantic layer for <span className="text-[#f26625] drop-shadow-[0_0_8px_rgba(242,102,37,0.8)]">AI agents.</span>
+              <span className="text-[15px] font-medium text-[#0A1128] tracking-tight whitespace-nowrap">
+                The durable semantic layer for <span className="text-blue-700 font-semibold drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">AI agents.</span>
               </span>
             </div>
           </div>
@@ -102,7 +102,7 @@ export function SiteFooter() {
           <div className="flex-grow w-full max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-10 lg:ml-auto">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <h3 className="text-[14px] font-bold text-white mb-5 tracking-wide">
+                <h3 className="text-[14px] font-bold text-[#0A1128] mb-5 tracking-wide">
                   {column.title}
                 </h3>
                 <ul className="flex flex-col gap-3">
@@ -113,14 +113,14 @@ export function SiteFooter() {
                           href={link.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[13px] text-white hover:text-zinc-300 transition-colors"
+                          className="text-[13px] text-gray-700 hover:text-blue-700 transition-colors"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="text-[13px] text-white hover:text-zinc-300 transition-colors"
+                          className="text-[13px] text-gray-700 hover:text-blue-700 transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -134,8 +134,8 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar: Copyright + Socials */}
-        <div className="border-t border-zinc-800 pt-6 flex flex-wrap items-center justify-between gap-4">
-          <span className="text-[13px] text-zinc-500">
+        <div className="border-t border-[rgba(255,255,255,0.2)] pt-6 flex flex-wrap items-center justify-between gap-4">
+          <span className="text-[13px] text-gray-700">
             © {new Date().getFullYear()} Trajectory IR
           </span>
           <SocialIcons />

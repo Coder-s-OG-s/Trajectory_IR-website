@@ -144,7 +144,7 @@ export function DashboardShowcase() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 bg-white border-2 border-[#d95c20] shadow-[0_0_15px_rgba(217,92,32,0.4)] rounded-xl overflow-hidden flex flex-col md:flex-row text-left">
+    <div className="w-full max-w-4xl mx-auto mt-6 glass-pill border border-[rgba(255,255,255,0.1)] rounded-xl overflow-hidden flex flex-col md:flex-row text-left shadow-[0_0_30px_rgba(0,0,0,0.3)]">
       
       {/* Sidebar Tabs */}
       <div className="w-full md:w-56 bg-zinc-50 border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col">
