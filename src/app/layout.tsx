@@ -19,9 +19,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://trajectory-ir.dev'),
   title: 'Trajectory IR Documentation',
-  description: 'The ultimate durable semantic layer for autonomous AI agents.',
+  description: 'An open source durable semantic layer for autonomous AI agents.',
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
@@ -29,14 +28,14 @@ export const metadata = {
   },
   openGraph: {
     title: 'Trajectory IR Documentation',
-    description: 'The ultimate durable semantic layer for autonomous AI agents.',
+    description: 'An open source durable semantic layer for autonomous AI agents.',
     siteName: 'Trajectory IR',
     images: [{ url: '/logo.png', width: 512, height: 512 }],
   },
   twitter: {
     card: 'summary' as const,
     title: 'Trajectory IR Documentation',
-    description: 'The ultimate durable semantic layer for autonomous AI agents.',
+    description: 'An open source durable semantic layer for autonomous AI agents.',
     images: ['/logo.png'],
   },
 };

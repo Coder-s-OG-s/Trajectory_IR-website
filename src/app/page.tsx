@@ -142,25 +142,33 @@ export default function Home() {
               
               {/* Left Column: Headline matching Image 2 reference */}
               <div className="lg:col-span-7 flex flex-col text-left space-y-0">
-                <h1 
+                <a
+                  href="https://github.com/Coder-s-OG-s/Trajectory-IR"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-sky-200/90 hover:text-white transition-colors no-underline mb-4 w-fit"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-300" aria-hidden="true"></span>
+                  Open Source · Apache-2.0 · View on GitHub
+                </a>
+                <h1
                   className="leading-[1.06] text-4xl sm:text-5xl md:text-6xl lg:text-[4rem]"
                   style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.035em' }}
                 >
-                  <span className="text-white font-semibold block">Build AI</span>
-                  <span className="text-white font-semibold block">systems</span>
-                  <span className="text-white font-semibold block">grounded in</span>
-                  <span className="text-sky-200/85 font-medium block">crash-safe</span>
-                  <span className="text-sky-200/85 font-medium block">execution.</span>
+                  <span className="text-white font-semibold block">An open IR</span>
+                  <span className="text-white font-semibold block">for agent</span>
+                  <span className="text-sky-200/85 font-medium block">execution</span>
+                  <span className="text-sky-200/85 font-medium block">trajectories.</span>
                 </h1>
               </div>
 
               {/* Right Column: Text & Liquid Glass CTAs Pushed to Right Side */}
               <div className="lg:col-span-5 flex flex-col items-start lg:items-end text-left lg:text-right space-y-6 pl-0 lg:pl-6">
-                <p 
+                <p
                   className="text-base sm:text-lg text-sky-100/90 leading-relaxed max-w-md font-normal"
                   style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
                 >
-                  Wrap, seal, and recover every agent decision. Never lose state. Never duplicate side-effects. The ultimate durability engine for production AI.
+                  A portable intermediate representation for agent execution trajectories, built on top of existing durable execution engines rather than replacing them. Currently at the design-spec stage.
                 </p>
 
                 <div className="flex flex-col items-start lg:items-end gap-3.5 pt-1 w-full max-w-xs">
@@ -224,14 +232,13 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Column 2: Products */}
+            {/* Column 2: How It Works */}
             <div className="md:col-span-2 flex flex-col space-y-3.5">
-              <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">Products</h4>
+              <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">How It Works</h4>
               <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Core Engine</Link></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Core IR Spec</Link></li>
                 <li><Link href="/docs/infrastructure" className="hover:text-white transition-colors no-underline">State Replay</Link></li>
-                <li><Link href="/docs/changelog" className="hover:text-white transition-colors no-underline">Crash-Safe State</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">CNCF Integration</Link></li>
+                <li><Link href="/docs/changelog" className="hover:text-white transition-colors no-underline">Crash-Safe Recovery</Link></li>
               </ul>
             </div>
 
@@ -251,18 +258,17 @@ export default function Home() {
             <div className="md:col-span-3 flex flex-col space-y-3.5">
               <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">Socials</h4>
               <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">X (Twitter)</a></li>
-                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">Instagram</a></li>
-                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">Cosmas</a></li>
-                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">GitHub</a></li>
+                <li><a href="https://github.com/Coder-s-OG-s" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">GitHub</a></li>
               </ul>
             </div>
           </div>
 
           {/* Bottom Copyright Row */}
-          <div className="max-w-[1280px] mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sky-100/50">
-            <span>Trajectory IR inc.</span>
-            <span>All rights reserved</span>
+          <div className="max-w-[1280px] mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sky-100/50 gap-2">
+            <span>Trajectory IR — Apache-2.0 licensed</span>
+            <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
+              View source on GitHub →
+            </a>
           </div>
 
           {/* Monumental Liquid Glass Display Typography */}

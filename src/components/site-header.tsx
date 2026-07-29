@@ -25,7 +25,6 @@ const navItems: NavItem[] = [
       { label: 'Semantic Layer', href: '/docs', description: 'Durable execution for AI agents' },
       { label: 'Crash-Safe State', href: '/docs/infrastructure', description: 'Automatic side-effect recovery' },
       { label: 'Replay Engine', href: '/docs/api', description: 'Deterministic step playback' },
-      { label: 'CNCF Integration', href: '/docs/quickstart', description: 'Cloud-native deployment' },
     ],
   },
   {
@@ -40,7 +39,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: 'Company',
+    label: 'Architecture',
     href: '/docs/infrastructure',
     hasDropdown: true,
     dropdownItems: [
@@ -48,10 +47,6 @@ const navItems: NavItem[] = [
       { label: 'GitHub Repo', href: 'https://github.com/Coder-s-OG-s/Trajectory-IR', description: 'Contribute & view source' },
       { label: 'Community', href: 'https://github.com/Coder-s-OG-s/Trajectory-IR/issues', description: 'Join discussions & issues' },
     ],
-  },
-  {
-    label: 'Pricing',
-    href: '/docs/quickstart',
   },
 ];
 
