@@ -6,27 +6,6 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { Mermaid } from '@/components/mermaid';
 
-// Custom Pre component to intercept Mermaid code blocks and render visual diagrams
-function CustomPre(props: any) {
-  const { children, ...rest } = props;
-  
-  if (React.isValidElement(children)) {
-    const codeProps = children.props as any;
-    const className = codeProps?.className || '';
-    const lang = codeProps?.['data-language'] || '';
-    
-    if (className.includes('language-mermaid') || lang === 'mermaid') {
-      const rawChart = typeof codeProps.children === 'string'
-        ? codeProps.children
-        : String(codeProps.children || '');
-      return <Mermaid chart={rawChart} />;
-    }
-  }
-
-  const DefaultPre = defaultMdxComponents.pre || 'pre';
-  return <DefaultPre {...props} />;
-}
-
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
@@ -72,7 +51,7 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={{ ...defaultMdxComponents, pre: CustomPre }} />
+        <MDX components={{ ...defaultMdxComponents, Mermaid }} />
       </DocsBody>
     </DocsPage>
   );
