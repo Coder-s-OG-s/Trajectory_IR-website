@@ -13,13 +13,13 @@
 
 @layer base {
   :root {
-    --color-fd-background: #ffffff;
-    --color-fd-card: #f8f8fa;
-    --color-fd-popover: #ffffff;
-    --color-fd-muted: #f4f4f5;
-    --color-fd-foreground: #09090b;
-    --color-fd-muted-foreground: #71717a;
-    --color-fd-border: #e4e4e7;
+    --color-fd-background: #09090b;
+    --color-fd-card: #121215;
+    --color-fd-popover: #121215;
+    --color-fd-muted: #1c1c21;
+    --color-fd-foreground: #ededed;
+    --color-fd-muted-foreground: #a1a1aa;
+    --color-fd-border: #222227;
     --color-fd-primary: #ff3e00;
   }
 
