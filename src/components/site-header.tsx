@@ -259,20 +259,6 @@ export function SiteHeader() {
             gap: '20px',
           }}
         >
-          <Link
-            href="/docs"
-            style={{
-              fontSize: '14px',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255, 0.85)',
-              textDecoration: 'none',
-              transition: 'color 0.15s ease',
-              fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-            }}
-            className="hover:text-white hidden sm:inline-block"
-          >
-            Sign in
-          </Link>
 
           <Link
             href="/docs/quickstart"
