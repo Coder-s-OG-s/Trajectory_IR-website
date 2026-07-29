@@ -78,24 +78,23 @@ function SocialIcons() {
 
 export function SiteFooter() {
   return (
-    <footer className="relative z-10 site-footer bg-black text-white w-full border-t border-zinc-900">
-      <div className="max-w-[1200px] mx-auto px-8 pt-16 pb-10">
+    <footer className="relative z-10 site-footer bg-[#040d1e]/95 text-white w-full border-t border-white/10 backdrop-blur-xl overflow-hidden select-none">
+      <div className="max-w-[1280px] mx-auto px-8 pt-16 pb-8">
         
         {/* Main Layout Grid */}
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 mb-16">
           
           {/* Column 1: Logo and Tagline */}
           <div className="flex-shrink-0">
-            <div className="flex items-center gap-4">
-              <img
-                src="/logo.png"
-                alt="Trajectory IR"
-                className="w-10 h-10 rounded-md object-cover bg-white"
-              />
-              <span className="text-[15px] font-medium text-white tracking-tight whitespace-nowrap">
-                The durable semantic layer for <span className="text-[#f26625] drop-shadow-[0_0_8px_rgba(242,102,37,0.8)]">AI agents.</span>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl text-white font-bold">✻</span>
+              <span className="text-[16px] font-semibold text-white tracking-tight whitespace-nowrap">
+                trajectory<span className="text-sky-200/60 font-normal">_ir</span>
               </span>
             </div>
+            <p className="text-xs text-sky-200/60 mt-3 max-w-xs leading-relaxed">
+              The durable semantic layer & crash-safe execution engine for production AI agents.
+            </p>
           </div>
 
           {/* Columns 2, 3, 4: Links */}
@@ -113,14 +112,14 @@ export function SiteFooter() {
                           href={link.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[13px] text-white hover:text-zinc-300 transition-colors"
+                          className="text-[13px] text-sky-100/70 hover:text-white transition-colors"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="text-[13px] text-white hover:text-zinc-300 transition-colors"
+                          className="text-[13px] text-sky-100/70 hover:text-white transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -134,13 +133,35 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar: Copyright + Socials */}
-        <div className="border-t border-zinc-800 pt-6 flex flex-wrap items-center justify-between gap-4">
-          <span className="text-[13px] text-zinc-500">
-            © {new Date().getFullYear()} Trajectory IR
+        <div className="border-t border-white/10 pt-6 pb-6 flex flex-wrap items-center justify-between gap-4">
+          <span className="text-[13px] text-sky-200/50">
+            © {new Date().getFullYear()} Trajectory IR. Built for Cloud Native AI.
           </span>
           <SocialIcons />
         </div>
       </div>
+
+      {/* TRENDING STARTUP FOOTER: Monumental Full-Width Display Typography */}
+      <div 
+        className="w-full overflow-hidden flex items-center justify-center pointer-events-none relative pt-4 pb-0 mt-4 h-[100px] sm:h-[150px] md:h-[200px] lg:h-[240px]"
+        aria-hidden="true"
+      >
+        <h2 
+          className="text-[7.5vw] sm:text-[9.2vw] md:text-[10.6vw] lg:text-[11.8vw] font-black uppercase tracking-tighter leading-none select-none text-center whitespace-nowrap opacity-45 w-full"
+          style={{
+            fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.3) 55%, rgba(255, 255, 255, 0) 95%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            transform: 'translateY(15%)',
+            maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
+          }}
+        >
+          TRAJECTORY_IR
+        </h2>
+      </div>
     </footer>
   );
 }
+

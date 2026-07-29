@@ -131,6 +131,7 @@ export function DashboardShowcase() {
   const [activeTab, setActiveTab] = useState<TabId>('idempotent');
   const [isRunning, setIsRunning] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
+  const outputRef = React.useRef<HTMLDivElement>(null);
 
   const activeSnippet = snippets[activeTab];
 
@@ -140,6 +141,9 @@ export function DashboardShowcase() {
     setTimeout(() => {
       setIsRunning(false);
       setShowOutput(true);
+      setTimeout(() => {
+        outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 60);
     }, 800);
   };
 
@@ -240,7 +244,7 @@ export function DashboardShowcase() {
 
         {/* Output Console */}
         {showOutput && (
-          <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div ref={outputRef} className="mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
             <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center gap-2">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
               Terminal Output
