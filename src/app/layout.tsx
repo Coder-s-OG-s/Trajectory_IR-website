@@ -45,9 +45,9 @@ import { UnderConstructionModal } from '@/components/under-construction-modal';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable}`} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider theme={{ defaultTheme: 'light', enableSystem: false }}>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>{children}</RootProvider>
         <UnderConstructionModal />
       </body>
     </html>
