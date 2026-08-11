@@ -1,0 +1,30 @@
+---
+title: Why Go Uses Temporal
+description: Why the Go SDK runs on Temporal instead of DBOS.
+---
+
+## Overview
+
+Every Trajectory-IR SDK sits on top of a pluggable durable execution backend, the driver that actually guarantees a step survives a crash without replaying a completed side effect. Python uses DBOS. Go uses Temporal. Same contract, different driver, chosen for what fits each language's runtime model.
+
+## Why not DBOS for Go
+
+DBOS's durability model leans on an embedded process talking directly to Postgres or SQLite, no separate worker fleet, no separate orchestrator to run. That's a good fit for the `local` and `server-s3` profiles the Python SDK targets, minimal moving parts, one process to reason about, and DBOS's own SDK surface is built around Python and TypeScript idioms first.
+
+The Go SDK is aimed at the same enterprise fleets the `k8s-fluid` profile is built for: long-running agent workflows spread across many worker pods, where you need real operational visibility, workflow history, replay debugging, and the ability to signal or query a running execution. That's a different set of requirements than the embedded, single-process model DBOS optimizes for.
+
+## Why Temporal fits
+
+Temporal's Go SDK isn't a port of something else, it's the primary one. Temporal grew out of Cadence, a Go-native workflow engine, so its concurrency model maps onto goroutines and channels directly instead of being adapted from a different language's runtime.
+
+That gets the Go SDK a few things without extra work:
+
+- **Worker pools that scale independently of the API layer.** A Temporal worker is a Go process that long-polls a task queue. You can run a fleet of them behind `k8s-fluid` without touching the trajectory metadata log at all.
+- **Built-in workflow history and replay.** Every `SealDecision()` / `ExecTool()` / `CommitStep()` cycle maps to a Temporal activity, so a crashed worker's in-flight decisions are visible and replayable through Temporal's own tooling, not just through the `.tir` package.
+- **Signals for the Block-and-Gate protocol.** When a `NonIdempotentWrite` tool is interrupted, clearing the gate is a Temporal signal sent into the paused workflow rather than a side-channel API call.
+
+## What stays the same
+
+The Block-and-Gate protocol, the `EffectClass` values, and the `.tir` package format don't change between backends, that contract lives above the driver layer. A trajectory sealed and exported by the Go SDK on Temporal reads back with the same guarantees as one produced by the Python SDK on DBOS, the driver is an implementation detail underneath a shared format.
+
+See [Infrastructure Design](/docs/infrastructure) for more on how deployment profiles and durable backends fit together.

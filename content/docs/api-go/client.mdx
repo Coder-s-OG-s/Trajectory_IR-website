@@ -1,0 +1,195 @@
+---
+title: Trajectory Client
+description: OpenTrajectory, Resume, and the methods on *Trajectory for the Go SDK.
+---
+
+## Overview
+
+The Go client lives in `trajir/client` and centers on a single `*Trajectory` type. You get one back from `OpenTrajectory()` or `Resume()`, then call its methods to seal, run, and commit each step.
+
+## The Trajectory type
+
+```go
+type Trajectory struct {
+    TrajectoryID string
+    TenantID     string
+    DBPath       string
+    Mode         string
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `TrajectoryID` | `string` | UUID identifying this trajectory. |
+| `TenantID` | `string` | Identifier for the tenant/user that owns the trajectory. |
+| `DBPath` | `string` | Path to the metadata store backing this trajectory. |
+| `Mode` | `string` | Execution mode the trajectory was opened with. |
+
+---
+
+## `OpenTrajectory()`
+
+Creates a new trajectory and its backing metadata store.
+
+```go
+func OpenTrajectory(tenantID string, trajectoryID string, opts Options) (*Trajectory, error)
+
+type Options struct {
+    DBPath string
+    Mode   string
+}
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `tenantID` | `string` | Identifier for the tenant/user owning the trajectory. |
+| `trajectoryID` | `string` | UUID for the trajectory. Pass `""` to auto-generate one. |
+| `opts` | `Options` | `DBPath` for the metadata store, `Mode` for the execution mode. |
+
+**Returns:** a `*Trajectory`, or an error if the store couldn't be opened.
+
+**Example:**
+```go
+import "trajir/client"
+
+traj, err := client.OpenTrajectory("demo-user", "", client.Options{
+    DBPath: "~/.trajectory-ir/local.db",
+})
+if err != nil {
+    log.Fatal(err)
+}
+defer traj.Close()
+```
+
+---
+
+## `Resume()`
+
+Reattaches to an existing trajectory after a process restart or crash, picking up wherever the metadata log left off.
+
+```go
+func Resume(trajectoryID string, dbPath string) (*Trajectory, error)
+```
+
+**Returns:** the reattached `*Trajectory`. If the log has a dangling `DECISION_SEAL` for a `NonIdempotentWrite` tool, the trajectory comes back in a `BLOCKED_NEEDS_GATE` state instead of re-running it.
+
+---
+
+## Methods
+
+### `(*Trajectory).Project()`
+
+Replays the trajectory's node log and returns its current semantic state.
+
+```go
+func (t *Trajectory) Project() (map[string]any, error)
+```
+
+### `(*Trajectory).SealDecision()`
+
+Canonicalizes a planned tool call (RFC 8785 JCS), hashes it with SHA256, and writes a `DECISION_SEAL` to the metadata log before anything runs.
+
+```go
+func (t *Trajectory) SealDecision(payload map[string]any, effectClass effects.EffectClass) (string, error)
+```
+
+**Returns:** the SHA256 hash of the canonicalized payload, the Node Identity for this decision.
+
+### `(*Trajectory).ExecTool()`
+
+Runs a closure against a seal produced by `SealDecision()`.
+
+```go
+func (t *Trajectory) ExecTool(seal string, fn func() (any, error)) (any, error)
+```
+
+If the process is interrupted mid-call and `effectClass` was `NonIdempotentWrite`, the seal is left dangling. `Resume()` won't retry it on its own.
+
+### `(*Trajectory).CommitStep()`
+
+Appends a tool's result to the trajectory log as an `Observation` node, closing out the seal from `SealDecision()`.
+
+```go
+func (t *Trajectory) CommitStep(seal string, result any, metadata map[string]any) (string, error)
+```
+
+**Returns:** the SHA256 hash of the appended `Observation` node.
+
+### `(*Trajectory).RunStep()`
+
+A convenience wrapper around `SealDecision()`, `ExecTool()`, and `CommitStep()` for the common case of running one tool call start to finish.
+
+```go
+func (t *Trajectory) RunStep(payload map[string]any, effectClass effects.EffectClass, fn func() (any, error)) (any, error)
+```
+
+**Returns:** whatever `fn` returns, after the result has already been committed to the log.
+
+### `(*Trajectory).Log()`
+
+Returns the raw node log for the trajectory, unprojected.
+
+```go
+func (t *Trajectory) Log() ([]LogEntry, error)
+```
+
+### `(*Trajectory).Backend()`
+
+Returns the identifier of the durable execution backend behind this trajectory.
+
+```go
+func (t *Trajectory) Backend() string
+```
+
+For the Go SDK this is `"temporal"`, see [Why Go Uses Temporal](/docs/api-go/durable-temporal).
+
+### `(*Trajectory).Close()`
+
+Closes the underlying metadata store connection and releases any backend worker resources. Call it (typically with `defer`) once you're done with a trajectory.
+
+```go
+func (t *Trajectory) Close() error
+```
+
+---
+
+## Example
+
+```go
+package main
+
+import (
+    "log"
+
+    "trajir/client"
+    "trajir/effects"
+)
+
+func deployServer(serverName string) (any, error) {
+    return "Success: " + serverName + " is live.", nil
+}
+
+func main() {
+    traj, err := client.OpenTrajectory("demo-user", "", client.Options{
+        DBPath: "~/.trajectory-ir/local.db",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer traj.Close()
+
+    result, err := traj.RunStep(
+        map[string]any{"tool": "deploy_server", "args": map[string]any{"server_name": "prod-web-01"}},
+        effects.NonIdempotentWrite,
+        func() (any, error) { return deployServer("prod-web-01") },
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println(result)
+}
+```

@@ -3,39 +3,73 @@ title: EffectClass Enum
 description: Strict safety classification enum for every tool operation in Trajectory-IR.
 ---
 
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
 ## Overview
 
-The `EffectClass` enum defines the safety boundary for each tool registered in the Trajectory-IR runtime. It is the core mechanism that determines how the system handles crashes, retries, and human intervention.
+`EffectClass` defines the safety boundary for each tool call in the Trajectory-IR runtime. It's the core mechanism that determines how the system handles crashes, retries, and human intervention. The classification is the same concept in every SDK, only the import differs.
 
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
 from trajectory_ir.effects import EffectClass
 ```
+</Tab>
+<Tab value="Go">
+```go
+import "trajir/effects"
+```
+</Tab>
+</Tabs>
 
 ## Values
 
-| Value | Risk Level | Retry on Crash? | Description |
-|-------|-----------|-----------------|-------------|
-| `PURE` | 🟢 None | ✅ Yes | A pure computation with zero side effects (e.g., math, formatting). |
-| `READ_ONLY` | 🟢 Low | ✅ Yes | Reads external state but does not modify it (e.g., database SELECT, API GET). |
-| `IDEMPOTENT_WRITE` | 🟡 Medium | ✅ Yes (with key) | Writes that are safe to retry with the same idempotency key (e.g., PUT with ETag). |
-| `NON_IDEMPOTENT_WRITE` | 🔴 Critical | ❌ **BLOCKED** | Dangerous writes that cannot be safely retried (e.g., sending an email, scaling a cluster). Triggers Block-and-Gate. |
+| Python | Go | Risk Level | Retry on Crash? | Description |
+|--------|----|-----------|------------------|-------------|
+| `PURE` | `Pure` | 🟢 None | ✅ Yes | A pure computation with zero side effects (e.g., math, formatting). |
+| `READ_ONLY` | `ReadOnly` | 🟢 Low | ✅ Yes | Reads external state but does not modify it (e.g., database SELECT, API GET). |
+| `IDEMPOTENT_WRITE` | `IdempotentWrite` | 🟡 Medium | ✅ Yes (with key) | Writes that are safe to retry with the same idempotency key (e.g., PUT with ETag). |
+| `NON_IDEMPOTENT_WRITE` | `NonIdempotentWrite` | 🔴 Critical | ❌ **BLOCKED** | Dangerous writes that cannot be safely retried (e.g., sending an email, scaling a cluster). Triggers Block-and-Gate. |
 
 ## Usage
 
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
-from trajectory_ir.runtime import Trajectory
+from trajectory_ir.runtime import seal_decision, exec_tool
 from trajectory_ir.effects import EffectClass
 
 # Safe: can be retried on crash
-@Trajectory.tool(effect_class=EffectClass.READ_ONLY)
 def get_user(user_id: str) -> dict:
     return db.query(f"SELECT * FROM users WHERE id = {user_id}")
 
+seal = seal_decision(traj, {"tool": "get_user", "args": {"user_id": "42"}}, EffectClass.READ_ONLY)
+exec_tool(traj, seal, get_user, "42")
+
 # Dangerous: triggers Block-and-Gate on crash
-@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
 def deploy_to_production(service: str) -> str:
     return cloud.deploy(service)
+
+seal = seal_decision(traj, {"tool": "deploy_to_production", "args": {"service": "api"}}, EffectClass.NON_IDEMPOTENT_WRITE)
+exec_tool(traj, seal, deploy_to_production, "api")
 ```
+</Tab>
+<Tab value="Go">
+```go
+import "trajir/effects"
+
+// Safe: can be retried on crash
+getUser := func() (any, error) { return db.Query("SELECT * FROM users WHERE id = ?", "42") }
+seal, _ := traj.SealDecision(map[string]any{"tool": "get_user", "args": map[string]any{"user_id": "42"}}, effects.ReadOnly)
+traj.ExecTool(seal, getUser)
+
+// Dangerous: triggers Block-and-Gate on crash
+deploy := func() (any, error) { return cloud.Deploy("api") }
+seal, _ = traj.SealDecision(map[string]any{"tool": "deploy_to_production", "args": map[string]any{"service": "api"}}, effects.NonIdempotentWrite)
+traj.ExecTool(seal, deploy)
+```
+</Tab>
+</Tabs>
 
 ## Block-and-Gate Protocol
 

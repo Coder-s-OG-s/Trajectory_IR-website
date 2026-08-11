@@ -1,0 +1,10 @@
+{
+  "title": "Go",
+  "pages": [
+    "index",
+    "client",
+    "[EffectClass Enum](/docs/api/effect-class)",
+    "durable-temporal",
+    "[.tir Export](/docs/api/tir-export)"
+  ]
+}
