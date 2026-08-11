@@ -1,66 +1,107 @@
 ---
 title: .tir Export
-description: Exporting trajectories as portable .tir packages for auditing, replay, and compliance.
+description: Exporting trajectories as portable .tir packages, and loading them back with export_tir, import_tir, and load_tir.
 ---
 
 ## Overview
 
-A `.tir` package is a portable, self-contained archive of an entire agent trajectory. It bundles the metadata log, node hashes, and optionally the raw artifacts into a single file that can be shared, audited, or replayed.
+A `.tir` package is a portable, self-contained archive of a trajectory. Export, import, and loading live in `trajectory_ir.package.tir`.
 
-## Export Modes
+## Package Modes
+
+```python
+PackageMode = Literal["thin", "fat"]
+```
 
 | Mode | Contents | Use Case |
 |------|----------|----------|
-| `"full"` | Complete metadata + all binary artifacts | Full audit trail, forensic replay |
-| `"thin"` | Metadata + hashes only (no binaries) | Lightweight sharing, CI/CD verification |
-| `"redacted"` | Metadata with `SENSITIVE` fields stripped/hashed | Compliance exports, external sharing |
+| `"thin"` | Metadata log and node hashes only, no binaries | Lightweight sharing, CI verification |
+| `"fat"` | Metadata log plus all binary artifacts | Full audit trail, forensic replay |
 
-## Usage
+There's no `"full"` mode, `"fat"` is the closest equivalent. Redaction is a separate flag, not a package mode, see `export_tir()` below.
+
+## `export_tir()`
 
 ```python
-from trajectory_ir.runtime import Trajectory
+def export_tir(
+    trajectory: Trajectory,
+    mode: PackageMode = "thin",
+    redacted: bool = False,
+    output_path: Optional[str] = None,
+) -> str:
+```
 
-traj = Trajectory.start(tenant_id="demo-user")
+### Parameters
 
-# ... run tools, append observations ...
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `trajectory` | `Trajectory` | *required* | The trajectory to export. |
+| `mode` | `PackageMode` | `"thin"` | `"thin"` or `"fat"`, see above. |
+| `redacted` | `bool` | `False` | Strip `SENSITIVE`-tagged fields from the metadata log before writing. |
+| `output_path` | `str \| None` | `None` | File path for the resulting `.tir` file. Defaults to `~/.trajectory-ir/exports/`. |
 
-# Full export
-path = traj.export(mode="full")
+**Returns:** the file path of the exported `.tir` package.
+
+**Example:**
+```python
+from trajectory_ir.package.tir import export_tir
+
+path = export_tir(traj, mode="fat")
 print(f"Exported to: {path}")
-# Output: Exported to: ~/.trajectory-ir/exports/a1b2c3d4.tir
 
-# Thin export (metadata only)
-thin_path = traj.export(mode="thin", output_path="./my-trajectory.tir")
-
-# Redacted export (strips PII)
-redacted_path = traj.export(mode="redacted")
+redacted_path = export_tir(traj, mode="thin", redacted=True, output_path="./my-trajectory.tir")
 ```
 
 ## Package Structure
 
-A `.tir` file is a standard ZIP archive containing:
-
 ```
 my-trajectory.tir/
-├── manifest.json        # Package metadata, version, export mode
-├── metadata.jsonl       # The full node log (JSONL format)
+├── manifest.json        # Package metadata, version, mode
+├── metadata.jsonl       # The node log (JSONL format)
 ├── seals/               # Decision seals (SHA256 hashes)
 │   ├── node-001.seal
 │   └── node-002.seal
-└── artifacts/           # Binary artifacts (only in "full" mode)
+└── artifacts/           # Binary artifacts (only in "fat" mode)
     ├── blob-a1b2c3.bin
     └── blob-d4e5f6.bin
 ```
 
-## Verification
+## `import_tir()`
 
-You can verify the integrity of any `.tir` package:
+Loads a `.tir` package back into a `Trajectory` you can resume or extend further.
 
 ```python
-from trajectory_ir.verify import verify_package
+def import_tir(path: str) -> Trajectory:
+```
 
-result = verify_package("./my-trajectory.tir")
-print(result.is_valid)       # True
-print(result.nodes_verified) # 42
-print(result.seal_mismatches) # 0
+**Returns:** a `Trajectory` reconstructed from the package.
+
+## `load_tir()` and `load_tir_unverified()`
+
+For read-only inspection without reconstructing a full trajectory, use `load_tir()`. By default it recomputes and checks every seal against its recorded hash.
+
+```python
+def load_tir(path: str, verify: bool = True) -> TirPackage:
+def load_tir_unverified(path: str) -> TirPackage:
+```
+
+### Parameters
+
+| Function | Parameter | Type | Default | Description |
+|----------|-----------|------|---------|-------------|
+| `load_tir` | `path` | `str` | *required* | Path to the `.tir` file. |
+| `load_tir` | `verify` | `bool` | `True` | Recompute and check every seal hash. Set to `False` to skip verification. |
+| `load_tir_unverified` | `path` | `str` | *required* | Path to the `.tir` file. Skips seal verification entirely. |
+
+**Raises:** `load_tir()` raises if any seal fails verification and `verify=True`.
+
+**Example:**
+```python
+from trajectory_ir.package.tir import load_tir, load_tir_unverified
+
+pkg = load_tir("./my-trajectory.tir")
+print(pkg.nodes)
+
+# Skip verification for a quick look at a package you suspect is corrupt
+raw = load_tir_unverified("./my-trajectory.tir")
 ```
