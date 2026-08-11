@@ -1,27 +1,45 @@
 ---
 title: .tir Export
-description: Exporting trajectories as portable .tir packages, and loading them back with export_tir, import_tir, and load_tir.
+description: Exporting trajectories as portable .tir packages, shared between the Python and Go SDKs.
 ---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 
 ## Overview
 
-A `.tir` package is a portable, self-contained archive of a trajectory. Export, import, and loading live in `trajectory_ir.package.tir`.
+A `.tir` package is a portable, self-contained archive of a trajectory. The format is shared across every SDK, a package exported from Go opens fine with the Python loader and vice versa. In Python, export, import, and loading live in `trajectory_ir.package.tir`. In Go, they live in `trajir/tir`.
 
 ## Package Modes
 
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
 PackageMode = Literal["thin", "fat"]
 ```
+</Tab>
+<Tab value="Go">
+```go
+type PackageMode string
+
+const (
+    Thin PackageMode = "thin"
+    Fat  PackageMode = "fat"
+)
+```
+</Tab>
+</Tabs>
 
 | Mode | Contents | Use Case |
 |------|----------|----------|
 | `"thin"` | Metadata log and node hashes only, no binaries | Lightweight sharing, CI verification |
 | `"fat"` | Metadata log plus all binary artifacts | Full audit trail, forensic replay |
 
-There's no `"full"` mode, `"fat"` is the closest equivalent. Redaction is a separate flag, not a package mode, see `export_tir()` below.
+There's no `"full"` mode, `"fat"` is the closest equivalent. Redaction is a separate flag, not a package mode, see below.
 
-## `export_tir()`
+## Export
 
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
 def export_tir(
     trajectory: Trajectory,
@@ -51,6 +69,37 @@ print(f"Exported to: {path}")
 
 redacted_path = export_tir(traj, mode="thin", redacted=True, output_path="./my-trajectory.tir")
 ```
+</Tab>
+<Tab value="Go">
+```go
+func Export(trajectory *client.Trajectory, mode PackageMode, redacted bool, outputPath string) (string, error)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `trajectory` | `*client.Trajectory` | The trajectory to export. |
+| `mode` | `PackageMode` | `Thin` or `Fat`, see above. |
+| `redacted` | `bool` | Strip `SENSITIVE`-tagged fields from the metadata log before writing. |
+| `outputPath` | `string` | File path for the resulting `.tir` file. Pass `""` to default to `~/.trajectory-ir/exports/`. |
+
+**Returns:** the file path of the exported `.tir` package.
+
+**Example:**
+```go
+import "trajir/tir"
+
+path, err := tir.Export(traj, tir.Fat, false, "")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Exported to:", path)
+
+redactedPath, err := tir.Export(traj, tir.Thin, true, "./my-trajectory.tir")
+```
+</Tab>
+</Tabs>
 
 ## Package Structure
 
@@ -66,26 +115,37 @@ my-trajectory.tir/
     └── blob-d4e5f6.bin
 ```
 
-## `import_tir()`
+## Import
 
-Loads a `.tir` package back into a `Trajectory` you can resume or extend further.
+Loads a `.tir` package back into a trajectory you can resume or extend further.
 
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
 def import_tir(path: str) -> Trajectory:
 ```
 
 **Returns:** a `Trajectory` reconstructed from the package.
+</Tab>
+<Tab value="Go">
+```go
+func Import(path string) (*client.Trajectory, error)
+```
 
-## `load_tir()` and `load_tir_unverified()`
+**Returns:** a `*client.Trajectory` reconstructed from the package.
+</Tab>
+</Tabs>
 
-For read-only inspection without reconstructing a full trajectory, use `load_tir()`. By default it recomputes and checks every seal against its recorded hash.
+## Read-Only Loading
 
+For read-only inspection without reconstructing a full trajectory, use the verified loader. By default it recomputes and checks every seal against its recorded hash.
+
+<Tabs items={['Python', 'Go']}>
+<Tab value="Python">
 ```python
 def load_tir(path: str, verify: bool = True) -> TirPackage:
 def load_tir_unverified(path: str) -> TirPackage:
 ```
-
-### Parameters
 
 | Function | Parameter | Type | Default | Description |
 |----------|-----------|------|---------|-------------|
@@ -105,3 +165,33 @@ print(pkg.nodes)
 # Skip verification for a quick look at a package you suspect is corrupt
 raw = load_tir_unverified("./my-trajectory.tir")
 ```
+</Tab>
+<Tab value="Go">
+```go
+func Load(path string, verify bool) (*TirPackage, error)
+func LoadUnverified(path string) (*TirPackage, error)
+```
+
+| Function | Parameter | Type | Description |
+|----------|-----------|------|-------------|
+| `Load` | `path` | `string` | Path to the `.tir` file. |
+| `Load` | `verify` | `bool` | Recompute and check every seal hash. Pass `false` to skip verification. |
+| `LoadUnverified` | `path` | `string` | Path to the `.tir` file. Skips seal verification entirely. |
+
+**Returns:** `Load` returns an error if any seal fails verification and `verify` is `true`.
+
+**Example:**
+```go
+import "trajir/tir"
+
+pkg, err := tir.Load("./my-trajectory.tir", true)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(pkg.Nodes)
+
+// Skip verification for a quick look at a package you suspect is corrupt
+raw, err := tir.LoadUnverified("./my-trajectory.tir")
+```
+</Tab>
+</Tabs>
