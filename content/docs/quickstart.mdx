@@ -1,20 +1,116 @@
 ---
 title: Quickstart
-description: Get up and running with the Trajectory IR local deployment profile in under 5 minutes.
+description: Get up and running with the Trajectory IR Go SDK, the primary onboarding path for Phase 1B, in under 5 minutes.
 ---
 
-Welcome to Trajectory IR! This guide will get you up and running with the `local` deployment profile in under 5 minutes. 
+Welcome to Trajectory IR! Go is the primary SDK as of Phase 1B, so this guide leads with the Go quickstart against the `local` deployment profile. Python is still fully supported as a reference/parity port and its quickstart is further down this page.
 
-Trajectory IR acts as a semantic layer for AI agents, wrapping your agent's execution history in a portable, crash-safe format using pluggable durable execution backends like [DBOS](https://docs.dbos.dev/) or Restate.
+Trajectory IR acts as a semantic layer for AI agents, wrapping your agent's execution history in a portable, crash-safe format. The Go SDK runs on [Temporal](/docs/api-go/durable-temporal), the Python SDK runs on [DBOS](https://docs.dbos.dev/), but the Block-and-Gate protocol, `EffectClass` values, and `.tir` export format are the same either way.
 
-## Prerequisites
+import { Steps } from 'fumadocs-ui/components/steps';
+
+## Go Quickstart
+
+### Prerequisites
+
+- Go 1.22+
+- A module to install into (`go mod init your-module-name` if you don't have one yet)
+
+<Steps>
+
+### 1. Installation
+
+```bash
+go get github.com/Coder-s-OG-s/Trajectory-IR/go
+```
+
+### 2. Your First Durable Agent
+
+Create a file called `main.go`. `OpenTrajectory` creates the trajectory's backing metadata store the first time you call it, there's no separate init step.
+
+<Callout type="info">
+**Pluggable Backend Note:** Your code only imports from `trajir/client` and `trajir/effects`. The Temporal workflow wiring lives behind `trajir/durable/temporal` and never shows up in application code, see [Codebase Mapping](/docs/infrastructure#24-codebase-mapping) if you're curious where it lives.
+</Callout>
+
+```go
+package main
+
+import (
+    "log"
+
+    "trajir/client"
+    "trajir/effects"
+)
+
+func deployServer(serverName string) (any, error) {
+    log.Printf("Deploying %s...\n", serverName)
+    return "Success: " + serverName + " is live.", nil
+}
+
+func main() {
+    // 1. Open (or create) the trajectory
+    traj, err := client.OpenTrajectory("demo-user", "", client.Options{
+        DBPath: "~/.trajectory-ir/local.db",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer traj.Close()
+
+    // 2. Check what's already happened, in case this is a restart
+    state, err := traj.Project()
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Printf("Current state: %v\n", state)
+
+    // 3. Seal the decision to call deploy_server before running it
+    seal, err := traj.SealDecision(
+        map[string]any{"tool": "deploy_server", "args": map[string]any{"server_name": "prod-web-01"}},
+        effects.NonIdempotentWrite,
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // 4. Run the tool against that seal
+    result, err := traj.ExecTool(seal, func() (any, error) { return deployServer("prod-web-01") })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // 5. Commit the result, closing out the seal
+    if _, err := traj.CommitStep(seal, result, nil); err != nil {
+        log.Fatal(err)
+    }
+    log.Println(result)
+}
+```
+
+### 3. Run and Verify
+
+```bash
+go run main.go
+```
+
+<Callout type="info">
+Because of the **Block-and-Gate** policy, if your process crashes between `SealDecision` and `CommitStep`, the seal is left dangling for a `NonIdempotentWrite` tool. The next `Resume(trajectoryID, dbPath)` call brings the trajectory back in a `BLOCKED_NEEDS_GATE` state instead of silently re-running `deploy_server`.
+</Callout>
+
+</Steps>
+
+---
+
+## Python Quickstart (secondary / reference port)
+
+<Callout type="info">
+Python was the original Phase 1A SDK. It's still maintained as a reference/parity port, new features land in the Go SDK first (or in both at once), so reach for Go above unless you have a specific reason to stay on Python.
+</Callout>
+
+### Prerequisites
 
 - Python 3.11+
 - `pip` or [Hatch](https://hatch.pypa.io/) (recommended)
-
----
-
-import { Steps } from 'fumadocs-ui/components/steps';
 
 <Steps>
 
@@ -26,73 +122,57 @@ Install the Trajectory IR SDK and the official `dbos` durable execution backend 
 pip install trajectory-ir dbos
 ```
 
-### 2. Initialize the Local Environment
+### 2. Your First Durable Agent
 
-Trajectory IR requires a relational store for its metadata (Node tracking, Seals) and a Content Addressed Storage (CAS) layer for artifacts.
-
-In the `local` profile, we use SQLite and the local filesystem:
-
-```bash
-# Initialize the local SQLite DB and sharded CAS directory
-python -m trajectory_ir init --profile local
-```
-This command creates `~/.trajectory-ir/local.db` and `~/.trajectory-ir/cas/`.
-
-### 3. Your First Durable Agent
-
-Create a file called `agent.py`. In this example, we wrap a standard tool call inside Trajectory IR's durable execution context.
-
-<Callout type="info">
-**Pluggable Backend Architecture Note:** Notice that your code imports solely from `trajectory_ir`. Under the hood, `@Trajectory.workflow()` transparently delegates crash detection and replay to the configured durable backend (such as DBOS in Phase 1A or Restate). This guarantees that switching backends in the future requires **zero modifications** to your application logic!
-</Callout>
+Create a file called `agent.py`. Like the Go SDK, `open_trajectory()` creates the trajectory's backing metadata store the first time it's called.
 
 ```python
-from trajectory_ir.runtime import Trajectory
+from trajectory_ir.runtime import open_trajectory, project, seal_decision, exec_tool, commit_step
 from trajectory_ir.effects import EffectClass
 
-# 1. Initialize the Trajectory runtime (auto-launches configured backend like DBOS)
-Trajectory.launch()
-
-# 2. Define a Tool with strict Effect Classification
-@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
 def deploy_server(server_name: str):
     print(f"Deploying {server_name}...")
     return f"Success: {server_name} is live."
 
-# 3. Create an Agent Workflow using the backend-agnostic decorator
-@Trajectory.workflow()
 def run_agent():
-    # Start a new semantic Trajectory
-    traj = Trajectory.start(tenant_id="demo-user")
-    
-    # Execute the tool (Trajectory IR wraps this in a crash-safe durable step)
-    result = deploy_server("prod-web-01")
-    
-    # Append the result to the Trajectory Log
-    traj.append_observation(result)
-    
-    # Export the trajectory as a portable .tir package
-    tir_package = traj.export(mode="thin")
-    print(f"Exported Trajectory IR: {tir_package}")
+    # 1. Open (or create) the trajectory
+    traj = open_trajectory(tenant_id="demo-user", db_path="~/.trajectory-ir/local.db")
+
+    # 2. Check what's already happened, in case this is a restart
+    state = project(traj)
+    print(f"Current state: {state}")
+
+    # 3. Seal the decision to call deploy_server before running it
+    seal = seal_decision(
+        traj,
+        payload={"tool": "deploy_server", "args": {"server_name": "prod-web-01"}},
+        effect_class=EffectClass.NON_IDEMPOTENT_WRITE,
+    )
+
+    # 4. Run the tool against that seal
+    result = exec_tool(traj, seal, deploy_server, "prod-web-01")
+
+    # 5. Commit the result, closing out the seal
+    commit_step(traj, seal, result)
+    print(result)
 
 if __name__ == "__main__":
     run_agent()
 ```
 
-### 4. Run and Verify
-
-Execute your agent:
+### 3. Run and Verify
 
 ```bash
 python agent.py
 ```
 
 <Callout type="info">
-Because of the **Block-and-Gate** policy, if your agent crashes inside `deploy_server`, the next time you run `python agent.py`, it will recognize the interrupted `NON_IDEMPOTENT_WRITE` and halt execution, requesting human intervention rather than blindly repeating the destructive action.
+Because of the **Block-and-Gate** policy, if your agent crashes between `seal_decision()` and `commit_step()`, the seal is left dangling for a `NON_IDEMPOTENT_WRITE` tool. Calling `resume(trajectory_id, db_path)` brings the trajectory back in a `BLOCKED_NEEDS_GATE` state instead of silently re-running `deploy_server`.
 </Callout>
 
 </Steps>
 
 ## What's Next?
+- Read the [Go SDK Reference](/docs/api-go) or [Python SDK Reference](/docs/api) for the full API surface.
 - Read the [Infrastructure Design](/docs/infrastructure) to learn how to scale this to `server-s3` or `k8s-fluid`.
 - Read the [Contributing Guide](https://github.com/Coder-s-OG-s/Trajectory_IR-website/blob/main/CONTRIBUTING.md) if you want to help build the project!
