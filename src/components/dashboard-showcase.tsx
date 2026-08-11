@@ -16,114 +16,113 @@ interface CodeSnippet {
 const snippets: Record<TabId, CodeSnippet> = {
   'idempotent': {
     id: 'idempotent',
-    title: 'Idempotent Caching',
-    description: 'Wrap agent decisions to guarantee side-effects are never duplicated, even if the agent is called multiple times.',
-    lines: 14,
+    title: 'Idempotent-Safe Reads',
+    description: 'Classify a call as ReadOnly and it can always be safely retried, a crash just replays the step instead of needing special handling.',
+    lines: 17,
     code: (
       <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#001080]">userId</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
-        <span className="text-green-700">{'  // This operation is pure/idempotent.\n'}</span>
-        <span className="text-green-700">{'  // Trajectory IR caches the deterministic output.\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'fetch_user'</span>, <span className="text-[#001080]">userId</span> {'},\n'}
-        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">db</span>.<span className="text-[#001080]">users</span>.<span className="text-[#795e26]">find</span>(<span className="text-[#001080]">userId</span>){'\n'}
-        {'  );\n'}
-        {'}\n\n'}
-        <span className="text-green-700">{'// Subsequent calls return the cached JCS hash instantly.\n'}</span>
-        <span className="text-blue-600">const</span> <span className="text-[#001080]">user</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#a31515]">'123'</span>);
+        <span className="text-blue-600">import</span> ({'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/client"</span>{'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/effects"</span>{'\n'}
+        {')\n\n'}
+        <span className="text-blue-600">func</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#001080]">traj</span> *<span className="text-[#267f99]">client</span>.<span className="text-[#267f99]">Trajectory</span>, <span className="text-[#001080]">userID</span> <span className="text-[#267f99]">string</span>) (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{\n'}
+        <span className="text-green-700">{'    // Reads are always safe to retry after a crash.\n'}</span>
+        {'    '}<span className="text-[#001080]">seal</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">SealDecision</span>({'\n'}
+        {'        '}<span className="text-blue-600">map</span>[<span className="text-[#267f99]">string</span>]<span className="text-[#267f99]">any</span>{'{"operation": '}<span className="text-[#a31515]">"fetch_user"</span>{', "userId": '}<span className="text-[#001080]">userID</span>{'},\n'}
+        {'        '}<span className="text-[#267f99]">effects</span>.<span className="text-[#0070c1]">ReadOnly</span>,{'\n'}
+        {'    )\n'}
+        {'    '}<span className="text-[#001080]">result</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">ExecTool</span>(<span className="text-[#001080]">seal</span>, <span className="text-blue-600">func</span>() (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{\n'}
+        {'        '}<span className="text-blue-600">return</span> <span className="text-[#001080]">db</span>.<span className="text-[#001080]">Users</span>.<span className="text-[#795e26]">Find</span>(<span className="text-[#001080]">userID</span>){'\n'}
+        {'    })\n'}
+        {'    '}<span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">CommitStep</span>(<span className="text-[#001080]">seal</span>, <span className="text-[#001080]">result</span>, <span className="text-blue-600">nil</span>){'\n'}
+        {'    '}<span className="text-blue-600">return</span> <span className="text-[#001080]">result</span>, <span className="text-blue-600">nil</span>{'\n'}
+        {'}'}
       </>
     ),
-    output: `[Trajectory IR] Operation: fetch_user
-[Trajectory IR] Executing closure...
+    output: `[Trajectory IR] SealDecision: fetch_user (ReadOnly)
+[Trajectory IR] Seal: 8f7e9c29a... (SHA256)
+[Trajectory IR] ExecTool: running closure...
 [Trajectory IR] Data fetched from DB.
-[Trajectory IR] Sealed with SHA256: 8f7e9c29a...
----
-[Trajectory IR] Operation: fetch_user
-[Trajectory IR] Cache HIT (SHA256: 8f7e9c29a...)
-[Trajectory IR] Skipping closure execution.`
+[Trajectory IR] CommitStep: Observation node appended.`
   },
   'crash-recovery': {
     id: 'crash-recovery',
     title: 'Crash Recovery',
-    description: 'Powered by DBOS, if your agent crashes mid-execution, it resumes exactly where it left off without re-running previous side-effects.',
-    lines: 18,
+    description: 'Powered by Temporal, if your agent crashes mid-execution, resuming the trajectory picks up exactly where the node log left off.',
+    lines: 19,
     code: (
       <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">Workflow</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-[#267f99]">@Workflow</span>(){'\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">multiStepAgentProcess</span>(<span className="text-[#001080]">data</span>: <span className="text-[#267f99]">any</span>) {'{\n'}
-        <span className="text-green-700">{'  // Step 1: Execute and seal\n'}</span>
-        {'  '}<span className="text-blue-600">const</span> <span className="text-[#001080]">step1</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">1</span> {'}, \n'}
-        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">callExternalAPI</span>(<span className="text-[#001080]">data</span>){'\n'}
-        {'  );\n\n'}
-        <span className="text-green-700">{'  // 💥 Simulate a server crash here!\n'}</span>
-        <span className="text-green-700">{'  // When restarted, Step 1 is NOT re-executed.\n\n'}</span>
-        <span className="text-green-700">{'  // Step 2: Resumes safely\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">2</span> {'}, \n'}
-        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">processData</span>(<span className="text-[#001080]">step1</span>){'\n'}
-        {'  );\n'}
+        <span className="text-blue-600">import</span> ({'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/client"</span>{'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/effects"</span>{'\n'}
+        {')\n\n'}
+        <span className="text-blue-600">func</span> <span className="text-[#795e26]">multiStepAgentProcess</span>(<span className="text-[#001080]">traj</span> *<span className="text-[#267f99]">client</span>.<span className="text-[#267f99]">Trajectory</span>, <span className="text-[#001080]">data</span> <span className="text-[#267f99]">any</span>) (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{\n'}
+        <span className="text-green-700">{'    // Step 1: seal, run, commit\n'}</span>
+        {'    '}<span className="text-[#001080]">seal1</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">SealDecision</span>(<span className="text-blue-600">map</span>[<span className="text-[#267f99]">string</span>]<span className="text-[#267f99]">any</span>{'{"step": '}<span className="text-[#098658]">1</span>{'}, '}<span className="text-[#267f99]">effects</span>.<span className="text-[#0070c1]">ReadOnly</span>){'\n'}
+        {'    '}<span className="text-[#001080]">step1</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">ExecTool</span>(<span className="text-[#001080]">seal1</span>, <span className="text-blue-600">func</span>() (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{ '}<span className="text-blue-600">return</span> <span className="text-[#795e26]">callExternalAPI</span>(<span className="text-[#001080]">data</span>) {'})\n'}
+        {'    '}<span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">CommitStep</span>(<span className="text-[#001080]">seal1</span>, <span className="text-[#001080]">step1</span>, <span className="text-blue-600">nil</span>){'\n\n'}
+        <span className="text-green-700">{'    // Simulate a crash here! On resume, Step 1 is not re-run.\n\n'}</span>
+        <span className="text-green-700">{'    // Step 2: resumes safely\n'}</span>
+        {'    '}<span className="text-[#001080]">seal2</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">SealDecision</span>(<span className="text-blue-600">map</span>[<span className="text-[#267f99]">string</span>]<span className="text-[#267f99]">any</span>{'{"step": '}<span className="text-[#098658]">2</span>{'}, '}<span className="text-[#267f99]">effects</span>.<span className="text-[#0070c1]">ReadOnly</span>){'\n'}
+        {'    '}<span className="text-[#001080]">step2</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">ExecTool</span>(<span className="text-[#001080]">seal2</span>, <span className="text-blue-600">func</span>() (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{ '}<span className="text-blue-600">return</span> <span className="text-[#795e26]">processData</span>(<span className="text-[#001080]">step1</span>) {'})\n'}
+        {'    '}<span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">CommitStep</span>(<span className="text-[#001080]">seal2</span>, <span className="text-[#001080]">step2</span>, <span className="text-blue-600">nil</span>){'\n'}
+        {'    '}<span className="text-blue-600">return</span> <span className="text-[#001080]">step2</span>, <span className="text-blue-600">nil</span>{'\n'}
         {'}'}
       </>
     ),
-    output: `[Trajectory IR] Starting Workflow: multiStepAgentProcess
+    output: `[Trajectory IR] OpenTrajectory: new trajectory started.
 [Trajectory IR] Executing Step 1...
-[Trajectory IR] Step 1 sealed.
+[Trajectory IR] Step 1 committed to node log.
 [SYSTEM] Process killed (SIGTERM).
 ---
-[Trajectory IR] Resuming Workflow: multiStepAgentProcess
-[Trajectory IR] Step 1 already sealed. Skipping execution.
+[Trajectory IR] Resume(trajectoryID, dbPath) reattached.
+[Trajectory IR] Step 1 already committed. Skipping re-execution.
 [Trajectory IR] Executing Step 2...
-[Trajectory IR] Workflow complete.`
+[Trajectory IR] Step 2 committed. Workflow complete.`
   },
   'human-gate': {
     id: 'human-gate',
     title: 'Human-in-the-Loop Gate',
-    description: 'Automatically pause non-idempotent or high-risk operations until a human operator approves them.',
-    lines: 15,
+    description: 'NonIdempotentWrite operations trigger Block-and-Gate on crash, halting in BLOCKED_NEEDS_GATE until a human operator approves the retry.',
+    lines: 17,
     code: (
       <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">SecurityLevel</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">deployToProduction</span>(<span className="text-[#001080]">cluster</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
-        <span className="text-green-700">{'  // This operation is highly destructive/non-idempotent.\n'}</span>
-        <span className="text-green-700">{'  // Execution will pause and wait for human approval.\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'deploy'</span>, <span className="text-[#001080]">cluster</span> {'},\n'}
-        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">cloud</span>.<span className="text-[#795e26]">deploy</span>(<span className="text-[#001080]">cluster</span>),{'\n'}
-        {'    { \n'}
-        {'      '}<span className="text-[#001080]">securityLevel</span>: <span className="text-[#267f99]">SecurityLevel</span>.<span className="text-[#0070c1]">HIGH_RISK</span>,{'\n'}
-        {'      '}<span className="text-[#001080]">requireApproval</span>: <span className="text-blue-600">true</span> {'\n'}
-        {'    }\n'}
-        {'  );\n'}
+        <span className="text-blue-600">import</span> ({'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/client"</span>{'\n'}
+        {'    '}<span className="text-[#a31515]">"trajir/effects"</span>{'\n'}
+        {')\n\n'}
+        <span className="text-blue-600">func</span> <span className="text-[#795e26]">deployToProduction</span>(<span className="text-[#001080]">traj</span> *<span className="text-[#267f99]">client</span>.<span className="text-[#267f99]">Trajectory</span>, <span className="text-[#001080]">cluster</span> <span className="text-[#267f99]">string</span>) (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{\n'}
+        <span className="text-green-700">{'    // NonIdempotentWrite triggers Block-and-Gate on crash.\n'}</span>
+        {'    '}<span className="text-[#001080]">seal</span>, _ := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">SealDecision</span>({'\n'}
+        {'        '}<span className="text-blue-600">map</span>[<span className="text-[#267f99]">string</span>]<span className="text-[#267f99]">any</span>{'{"operation": '}<span className="text-[#a31515]">"deploy"</span>{', "cluster": '}<span className="text-[#001080]">cluster</span>{'},\n'}
+        {'        '}<span className="text-[#267f99]">effects</span>.<span className="text-[#0070c1]">NonIdempotentWrite</span>,{'\n'}
+        {'    )\n'}
+        {'    '}<span className="text-[#001080]">result</span>, <span className="text-[#001080]">err</span> := <span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">ExecTool</span>(<span className="text-[#001080]">seal</span>, <span className="text-blue-600">func</span>() (<span className="text-[#267f99]">any</span>, <span className="text-[#267f99]">error</span>) {'{\n'}
+        {'        '}<span className="text-blue-600">return</span> <span className="text-[#001080]">cloud</span>.<span className="text-[#795e26]">Deploy</span>(<span className="text-[#001080]">cluster</span>){'\n'}
+        {'    })\n'}
+        {'    '}<span className="text-[#001080]">traj</span>.<span className="text-[#795e26]">CommitStep</span>(<span className="text-[#001080]">seal</span>, <span className="text-[#001080]">result</span>, <span className="text-blue-600">nil</span>){'\n'}
+        {'    '}<span className="text-blue-600">return</span> <span className="text-[#001080]">result</span>, <span className="text-[#001080]">err</span>{'\n'}
         {'}'}
       </>
     ),
-    output: `[Trajectory IR] Operation: deploy (cluster: production)
-[Trajectory IR] WARNING: High Risk Operation Detected.
+    output: `[Trajectory IR] SealDecision: deploy (NonIdempotentWrite)
+[SYSTEM] Process killed (SIGTERM) mid-deploy.
+---
+[Trajectory IR] Resume(trajectoryID, dbPath) reattached.
+[Trajectory IR] Dangling seal for a NonIdempotentWrite tool detected.
 [Trajectory IR] Status: BLOCKED_NEEDS_GATE
 [Trajectory IR] Waiting for human approval...
 ---
-[Trajectory IR] Operator (admin@org.com) approved.
-[Trajectory IR] Executing closure...
-[Trajectory IR] Deployment successful.`
+[Trajectory IR] Operator (admin@org.com) approved retry.
+[Trajectory IR] ExecTool: running closure...
+[Trajectory IR] Deployment successful. Step committed.`
   }
 };
 
-const TSIcon = () => (
+const GoIcon = () => (
   <svg viewBox="0 0 128 128" width="14" height="14">
-    <path fill="#3178C6" d="M0 0h128v128H0z" />
-    <path fill="#FFF" d="M96.262 108.647c-5.748 5.76-15.006 8.784-25.045 8.784-18.068 0-29.356-8.665-31.259-21.78l12.784-7.585c1.42 7.747 8.016 12.399 18.01 12.399 7.746 0 12.807-3.415 12.807-8.136 0-14.735-37.49-5.918-37.49-31.119 0-11.233 8.706-19.344 24.385-19.344 14.59 0 25.405 6.208 28.167 19.308l-12.706 7.02c-1.426-6.398-6.953-9.52-14.97-9.52-7.067 0-11.164 3.018-11.164 7.641 0 13.972 37.487 5.733 37.487 31.267.001 4.542-1.748 8.162-5.005 11.065zM22.015 43.155V30.134h44.386v13.021H44.316v74.288h-14.36V43.155H22.015z" />
+    <rect width="128" height="128" rx="14" fill="#00ADD8" />
+    <text x="64" y="87" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="50" fill="#fff" textAnchor="middle">Go</text>
   </svg>
 );
 
@@ -196,8 +195,8 @@ export function DashboardShowcase() {
             </div>
             {/* Active Tab */}
             <div className="bg-white px-4 py-1.5 border-t-2 border-t-blue-500 border-x border-x-zinc-200 flex items-center gap-2 -mb-[1px] ml-1">
-              <TSIcon />
-              <span className="text-[12px] font-sans text-zinc-700">example.ts</span>
+              <GoIcon />
+              <span className="text-[12px] font-sans text-zinc-700">example.go</span>
             </div>
           </div>
           
