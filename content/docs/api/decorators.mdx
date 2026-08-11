@@ -1,48 +1,103 @@
 ---
-title: Decorators
-description: Function decorators provided by the Trajectory-IR SDK.
+title: Tool Execution
+description: Sealing and running a tool call against a trajectory with seal_decision, exec_tool, and commit_step.
 ---
 
-## `@Trajectory.tool()`
+## Overview
 
-Registers a Python function as a durable tool within the Trajectory-IR runtime. The decorated function is automatically wrapped inside a DBOS durable step.
+Tools aren't registered with a decorator. Each call goes through three plain functions from `trajectory_ir.runtime`: seal the decision, run the tool, then commit the result.
+
+## `seal_decision()`
+
+Canonicalizes a planned tool call (RFC 8785 JCS), hashes it with SHA256, and writes a `DECISION_SEAL` to the trajectory's metadata log before anything runs.
 
 ```python
-@Trajectory.tool(
+def seal_decision(
+    trajectory: Trajectory,
+    payload: dict,
     effect_class: EffectClass = EffectClass.PURE,
-    idempotency_key: Optional[str] = None,
-    timeout_seconds: int = 300,
-)
-def my_tool(...) -> Any:
-    ...
+) -> str:
 ```
 
 ### Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `effect_class` | `EffectClass` | `PURE` | Safety classification. See [EffectClass](/docs/api/effect-class). |
-| `idempotency_key` | `str \| None` | `None` | Required for `IDEMPOTENT_WRITE`. Auto-generated UUID if omitted. |
-| `timeout_seconds` | `int` | `300` | Maximum execution time before the tool is forcefully terminated. |
+| `trajectory` | `Trajectory` | *required* | The trajectory to write the seal to. |
+| `payload` | `dict` | *required* | The tool name and arguments being sealed. |
+| `effect_class` | `EffectClass` | `PURE` | Safety classification for the call. See [EffectClass](/docs/api/effect-class). |
 
-### Behavior
+**Returns:** the SHA256 hash of the canonicalized payload, this is the Node Identity for the decision.
 
-1. Before execution, the tool payload is canonicalized (RFC 8785 JCS) and hashed (SHA256).
-2. A `DECISION_SEAL` is written to the metadata log.
-3. The function body executes inside a DBOS durable step.
-4. On completion, an `Observation` node is automatically appended.
+---
+
+## `exec_tool()`
+
+Runs a tool against a seal produced by `seal_decision()`.
+
+```python
+def exec_tool(
+    trajectory: Trajectory,
+    seal: str,
+    tool: Callable[..., Any],
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+```
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `trajectory` | `Trajectory` | *required* | The trajectory the seal belongs to. |
+| `seal` | `str` | *required* | Node hash returned by `seal_decision()`. |
+| `tool` | `Callable` | *required* | The function to execute. |
+| `*args` / `**kwargs` | | | Arguments passed through to `tool`. |
+
+**Returns:** whatever `tool` returns.
+
+If the process is interrupted mid-call and `effect_class` was `NON_IDEMPOTENT_WRITE`, the seal is left dangling. `resume()` won't retry it on its own, the trajectory comes back `BLOCKED_NEEDS_GATE` until it's cleared manually.
+
+---
+
+## `commit_step()`
+
+Appends the tool's result to the trajectory log as an `Observation` node, closing out the seal from `seal_decision()`.
+
+```python
+def commit_step(
+    trajectory: Trajectory,
+    seal: str,
+    result: Any,
+    metadata: Optional[dict] = None,
+) -> str:
+```
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `trajectory` | `Trajectory` | *required* | The trajectory to append to. |
+| `seal` | `str` | *required* | Node hash of the seal this result closes out. |
+| `result` | `Any` | *required* | The value to record as the observation. |
+| `metadata` | `dict \| None` | `None` | Optional extra fields stored alongside the observation. |
+
+**Returns:** the SHA256 hash of the appended `Observation` node.
 
 ### Example
 
 ```python
-from trajectory_ir.runtime import Trajectory
+from trajectory_ir.runtime import seal_decision, exec_tool, commit_step
 from trajectory_ir.effects import EffectClass
 
-@Trajectory.tool(
-    effect_class=EffectClass.IDEMPOTENT_WRITE,
-    timeout_seconds=60,
+def send_email(to: str, body: str) -> str:
+    return f"Email sent to {to}"
+
+seal = seal_decision(
+    traj,
+    payload={"tool": "send_email", "args": {"to": "a@example.com", "body": "hi"}},
+    effect_class=EffectClass.NON_IDEMPOTENT_WRITE,
 )
-def update_config(key: str, value: str) -> dict:
-    """Updates a configuration value with idempotent PUT semantics."""
-    return api.put(f"/config/{key}", json={"value": value})
+result = exec_tool(traj, seal, send_email, "a@example.com", "hi")
+commit_step(traj, seal, result)
 ```
