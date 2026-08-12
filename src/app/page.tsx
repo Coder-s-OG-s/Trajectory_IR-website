@@ -168,7 +168,7 @@ export default function Home() {
                   className="text-base sm:text-lg text-sky-100/90 leading-relaxed max-w-md font-normal"
                   style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
                 >
-                  A portable intermediate representation for agent execution trajectories, built on top of existing durable execution engines rather than replacing them. Currently at the design-spec stage.
+                  A portable intermediate representation for agent execution trajectories, built on top of existing durable execution engines rather than replacing them. Phase 1B is underway, with Go as the primary SDK.
                 </p>
 
                 <div className="flex flex-col items-start lg:items-end gap-3.5 pt-1 w-full max-w-xs">
