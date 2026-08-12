@@ -42,7 +42,31 @@ Based on the [Infrastructure Blueprint](/docs/infrastructure) and Master Spec, w
 - **Cache Poisoning (`k8s-fluid` profile)**: Exploits where a stale or poisoned Fluid Dataset FUSE mount can trick the runtime into bypassing the direct S3/MinIO CAS hash-verification fallback.
 
 ### C. Data & Export Plane (`.tir` Packages)
-- **Sensitive Data Leakage**: Flaws where nodes marked with the `SENSITIVE` effect class fail to be stripped or hashed properly during a `redacted` `.tir` package export.
+- **Sensitive Data Leakage**: Flaws where secret-like fields or thoughts leak during a `redacted` `.tir` package export.
+- **Package Resource Exhaustion**: Zip bombs and oversized members must be rejected by load limits (`TirLimitError`).
+- **Unverified Import**: `import_tir` always verifies; `load_tir(verify=False)` is disabled. Inspection without verification requires the explicit `load_tir_unverified()` call and must never write to a durable NodeLog.
+- **Integrity vs. Provenance**: Node hash verification proves content integrity, not publisher authenticity. Package signatures remain reserved and unimplemented until a cryptography-focused design lands.
+
+### D. Execution Concurrency
+- **Block-and-Gate Races**: Claiming a `TOOL_CALL` slot must be atomic so concurrent workers cannot double-run a `NON_IDEMPOTENT_WRITE` tool (R02).
+
+### E. Implemented vs. Planned
+
+We would rather be honest about what's actually built than let this page read as a roadmap.
+
+| Control | Status |
+| ------- | ------ |
+| Fail-closed MCP effect mapping | Implemented |
+| Atomic `TOOL_CALL` claim (gate) | Implemented |
+| `.tir` size / path safety limits | Implemented |
+| Redacted export (secret-like keys/values + thoughts) | Implemented (basic keyword/pattern heuristic, not a secret scanner; still review before external sharing) |
+| Package digital signatures | Not implemented (reserved) |
+| Full multi-tenant SaaS isolation | Not a product surface yet; `tenant_id` filter on list/export exists |
+| Fluid / k8s cache poisoning controls | Design only (future profile) |
+
+### F. Continuous Dependency Scanning
+- **Go**: `govulncheck ./...` runs in the CI `Go` job.
+- **Python**: `pip-audit --skip-editable` runs in the CI job **Security (pip-audit)**. Locally: `RUN_PIP_AUDIT=1 pytest test/unit/test_pip_audit.py -q` in a clean venv after `pip install -e ".[dev]"`.
 
 ## 4. Security Accountability for Contributors
 
