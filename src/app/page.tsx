@@ -246,10 +246,7 @@ export default function Home() {
             <div className="md:col-span-2 flex flex-col space-y-3.5">
               <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">Company</h4>
               <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">About</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Partners</Link></li>
                 <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Terms</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Brand Kit</Link></li>
                 <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Privacy</Link></li>
               </ul>
             </div>

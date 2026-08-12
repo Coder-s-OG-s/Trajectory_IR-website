@@ -28,17 +28,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: 'Resources',
-    href: '/docs',
-    hasDropdown: true,
-    dropdownItems: [
-      { label: 'Blogs', href: '/docs/changelog', description: 'Engineering insights & updates' },
-      { label: 'Case study', href: '/docs', description: 'Production AI reliability cases' },
-      { label: 'About us', href: '/docs', description: 'Our mission & open source journey' },
-      { label: 'Careers', href: 'https://github.com/Coder-s-OG-s/Trajectory-IR', description: 'Build the future of AI IR' },
-    ],
-  },
-  {
     label: 'Architecture',
     href: '/docs/infrastructure',
     hasDropdown: true,
