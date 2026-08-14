@@ -263,9 +263,17 @@ export default function Home() {
           {/* Bottom Copyright Row */}
           <div className="max-w-[1280px] mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sky-100/50 gap-2">
             <span>Trajectory IR — Apache-2.0 licensed</span>
-            <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
-              View source on GitHub →
-            </a>
+            <div className="flex items-center gap-6">
+              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR/issues" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
+                Report an issue
+              </a>
+              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
+                Contributing guide
+              </a>
+              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
+                View source on GitHub →
+              </a>
+            </div>
           </div>
 
           {/* Monumental Liquid Glass Display Typography */}
