@@ -273,6 +273,9 @@ export default function Home() {
               <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
                 View source on GitHub →
               </a>
+              <a href="https://www.bestpractices.dev/projects/14075" target="_blank" rel="noreferrer" className="hover:opacity-80 transition-opacity inline-flex items-center">
+                <img src="https://www.bestpractices.dev/projects/14075/badge" alt="OpenSSF Best Practices" className="h-5" />
+              </a>
             </div>
           </div>
 
