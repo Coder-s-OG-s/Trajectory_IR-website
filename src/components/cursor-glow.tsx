@@ -33,7 +33,7 @@ export function CursorGlow() {
           borderRadius: '50%',
           filter: 'blur(100px)',
           opacity: 0.6,
-          background: 'radial-gradient(circle, rgba(242, 102, 37, 0.8) 0%, rgba(217, 92, 32, 0) 70%)',
+          background: 'radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(14, 165, 233, 0.05) 45%, rgba(2, 132, 199, 0) 70%)',
           willChange: 'transform',
         }}
       />

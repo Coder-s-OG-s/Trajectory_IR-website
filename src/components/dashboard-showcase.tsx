@@ -147,14 +147,14 @@ export function DashboardShowcase() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 bg-white border-2 border-[#d95c20] shadow-[0_0_15px_rgba(217,92,32,0.4)] rounded-xl overflow-hidden flex flex-col md:flex-row text-left">
+    <div className="w-full max-w-4xl mx-auto mt-6 bg-slate-900/90 border border-sky-400/30 shadow-[0_0_25px_rgba(56,189,248,0.15)] rounded-2xl overflow-hidden flex flex-col md:flex-row text-left backdrop-blur-xl">
       
       {/* Sidebar Tabs */}
-      <div className="w-full md:w-56 bg-zinc-50 border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col">
-        <div className="px-4 py-3 border-b border-zinc-200">
-          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Features</span>
+      <div className="w-full md:w-56 bg-slate-950/60 border-b md:border-b-0 md:border-r border-white/10 flex flex-col">
+        <div className="px-4 py-3 border-b border-white/10">
+          <span className="text-[11px] font-bold text-sky-200/60 uppercase tracking-wider">Features</span>
         </div>
-        <div className="flex flex-col p-1.5 gap-0.5">
+        <div className="flex flex-col p-2 gap-1">
           {Object.values(snippets).map((snippet) => (
             <button
               key={snippet.id}
@@ -162,10 +162,10 @@ export function DashboardShowcase() {
                 setActiveTab(snippet.id);
                 setShowOutput(false);
               }}
-              className={`px-3 py-2 rounded-md text-[13px] font-medium transition-all text-left ${
+              className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all text-left ${
                 activeTab === snippet.id
-                  ? 'bg-white text-[#f26625] shadow-sm border border-zinc-200'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent'
+                  ? 'bg-sky-500/15 text-sky-300 shadow-sm border border-sky-400/30'
+                  : 'text-sky-100/70 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
               {snippet.title}

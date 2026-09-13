@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { Mermaid } from '@/components/mermaid';
+import { CopyDocsButton } from '@/components/copy-docs-button';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -27,10 +28,10 @@ export default async function Page(props: {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
-      {/* Breadcrumb Navigation */}
-      {breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1.5 text-xs font-medium mb-4 flex-wrap" style={{ color: 'var(--color-fd-muted-foreground, #888)' }}>
-          <a href="/docs" className="no-underline transition-colors" style={{ color: 'inherit' }}>
+      {/* Top Header Action Bar: Breadcrumbs & Copy Docs for AI */}
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap pb-3 border-b border-white/10">
+        <nav className="flex items-center gap-1.5 text-xs font-medium flex-wrap" style={{ color: 'var(--color-fd-muted-foreground, #888)' }}>
+          <a href="/docs" className="no-underline transition-colors hover:text-white" style={{ color: 'inherit' }}>
             Docs
           </a>
           {breadcrumbs.map((crumb, i) => (
@@ -39,14 +40,16 @@ export default async function Page(props: {
               {i === breadcrumbs.length - 1 ? (
                 <span style={{ color: '#ff3e00', fontWeight: 600 }}>{crumb.label}</span>
               ) : (
-                <a href={crumb.href} className="no-underline transition-colors" style={{ color: 'inherit' }}>
+                <a href={crumb.href} className="no-underline transition-colors hover:text-white" style={{ color: 'inherit' }}>
                   {crumb.label}
                 </a>
               )}
             </span>
           ))}
         </nav>
-      )}
+
+        <CopyDocsButton />
+      </div>
 
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>

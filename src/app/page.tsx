@@ -6,10 +6,14 @@ import { DashboardShowcase } from '@/components/dashboard-showcase';
 import { SiteHeader } from '@/components/site-header';
 import { CursorGlow } from '@/components/cursor-glow';
 import { DustParticles } from '@/components/dust-particles';
+import { ProblemStatement } from '@/components/problem-statement';
+import { FeaturePillars } from '@/components/feature-pillars';
+
 
 export default function Home() {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const openDemoModal = () => {
     setIsAnimatingOut(false);
@@ -34,16 +38,47 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDemoModal]);
 
+  // Smooth scroll-triggered background color shift mapped directly to scroll progress
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          // Smoothly shifts background to dark shade as user scrolls into main content
+          const start = 40;
+          const end = 650;
+          const progress = Math.min(Math.max((scrollY - start) / (end - start), 0), 1);
+          const darkness = (progress * 0.94).toFixed(3);
+          const infinityOpacity = (0.5 * (1 - progress)).toFixed(3);
+          if (containerRef.current) {
+            containerRef.current.style.setProperty('--scroll-darkness', darkness);
+            containerRef.current.style.setProperty('--infinity-opacity', infinityOpacity);
+          }
+          document.documentElement.style.setProperty('--scroll-darkness', darkness);
+          document.documentElement.style.setProperty('--infinity-opacity', infinityOpacity);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="hero-gradient-bg text-white font-sans antialiased min-h-screen w-screen overflow-x-hidden relative select-none flex flex-col justify-between">
-      
+    <div ref={containerRef} className="hero-gradient-bg text-white font-sans antialiased min-h-screen w-screen overflow-x-clip relative select-none flex flex-col justify-between">
+
       {/* Background Ambient Layers (Fixed) */}
       <CursorGlow />
       <DustParticles />
 
-      {/* Aesthetic Compact Ethereal Infinity Symbol Background Element */}
-      <div 
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 w-[460px] sm:w-[560px] lg:w-[660px] h-[320px] opacity-50 transition-opacity duration-1000"
+      {/* Aesthetic Compact Ethereal Infinity Symbol Background Element (Positioned at z-[2] above dark transition, smoothly fades out on scroll) */}
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[2] w-[460px] sm:w-[560px] lg:w-[660px] h-[320px] transition-opacity duration-150 ease-out"
+        style={{ opacity: 'var(--infinity-opacity, 0.5)' }}
         aria-hidden="true"
       >
         <svg viewBox="0 0 800 400" className="w-full h-full">
@@ -53,15 +88,15 @@ export default function Home() {
               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
               <stop offset="30%" stopColor="#7dd3fc" stopOpacity="0.85" />
               <stop offset="50%" stopColor="#ffffff" stopOpacity="0.95" />
-              <stop offset="75%" stopColor="#ffb070" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#c084fc" stopOpacity="0.85" />
+              <stop offset="75%" stopColor="#38bdf8" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#818cf8" stopOpacity="0.85" />
             </linearGradient>
 
-            {/* Soft Ambient Fire Caustic Accent */}
+            {/* Soft Ambient Cyan/Blue Caustic Accent */}
             <linearGradient id="aestheticAmberCaustic" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#ff7700" stopOpacity="0.65" />
+              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.65" />
               <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.75" />
-              <stop offset="100%" stopColor="#ffaa44" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.7" />
             </linearGradient>
 
             {/* Ultra-Soft Ethereal Blur Filters */}
@@ -124,7 +159,7 @@ export default function Home() {
 
           {/* Subtle Delicate Star Embers */}
           <circle cx="210" cy="115" r="2" fill="#ffffff" className="opacity-80" />
-          <circle cx="590" cy="285" r="2.5" fill="#ffb070" filter="url(#etherealSoftGlow)" />
+          <circle cx="590" cy="285" r="2.5" fill="#7dd3fc" filter="url(#etherealSoftGlow)" />
           <circle cx="390" cy="190" r="1.5" fill="#ffffff" />
           <circle cx="410" cy="210" r="2" fill="#7dd3fc" />
         </svg>
@@ -139,7 +174,7 @@ export default function Home() {
         <div className="min-h-[calc(100vh-140px)] flex flex-col justify-between">
           <main className="w-full max-w-[1280px] mx-auto px-8 sm:px-12 flex-1 flex items-center my-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full my-auto">
-              
+
               {/* Left Column: Headline matching Image 2 reference */}
               <div className="lg:col-span-7 flex flex-col text-left space-y-0">
                 <a
@@ -200,9 +235,11 @@ export default function Home() {
               className="liquid-glass-dock px-7 py-3 flex items-center gap-4 text-white text-sm font-medium no-underline shadow-2xl group pointer-events-auto cursor-pointer"
               style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
             >
-              <span className="text-xl font-bold text-sky-200 group-hover:rotate-45 transition-transform duration-300">
-                ✻
-              </span>
+              <img
+                src="/brand-logo.png"
+                alt="Trajectory IR Logo"
+                className="w-5 h-5 object-contain rounded group-hover:scale-110 transition-transform duration-300 shadow-sm"
+              />
               <span className="opacity-95 tracking-wide font-normal">
                 Get started with demo
               </span>
@@ -215,14 +252,26 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Problem Statement: Scroll-Triggered Progressive Typewriter Writing Animation */}
+        <ProblemStatement />
+
+        {/* Feature Pillars: Core Architecture & Guarantees (The Problem We Are Solving) */}
+        <FeaturePillars />
+
+
+
         {/* FROSTED LIQUID GLASS CURTAIN SHEET FOOTER (Matching user reference image 1:1) */}
         <footer className="liquid-glass-footer-curtain w-full mt-12 pt-16 pb-12 px-8 sm:px-16 text-white border-t border-white/20">
           <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 pb-16">
-            
+
             {/* Column 1: Brand Logo & Tagline */}
             <div className="md:col-span-5 flex flex-col space-y-4">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-bold text-sky-200">✻</span>
+              <div className="flex items-center gap-3">
+                <img
+                  src="/brand-logo.png"
+                  alt="Trajectory IR Logo"
+                  className="w-7 h-7 object-contain rounded-md shadow-md"
+                />
                 <span className="text-3xl font-bold tracking-tight text-white" style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}>
                   trajectory<span className="text-sky-300 font-normal">_ir</span>
                 </span>
@@ -280,11 +329,11 @@ export default function Home() {
           </div>
 
           {/* Monumental Liquid Glass Display Typography */}
-          <div 
+          <div
             className="w-full overflow-hidden flex items-center justify-center pointer-events-none relative pt-4 pb-0 mt-4 h-[100px] sm:h-[150px] md:h-[200px] lg:h-[240px]"
             aria-hidden="true"
           >
-            <h2 
+            <h2
               className="text-[7.5vw] sm:text-[9.2vw] md:text-[10.6vw] lg:text-[11.8vw] font-black uppercase tracking-tighter leading-none select-none text-center whitespace-nowrap opacity-50 w-full"
               style={{
                 fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
@@ -305,21 +354,23 @@ export default function Home() {
 
       {/* Liquid Glass Interactive Demo Modal */}
       {showDemoModal && (
-        <div 
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md ${
-            isAnimatingOut ? 'animate-modal-backdrop-exit' : 'animate-modal-backdrop-enter'
-          }`}
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-exit' : 'animate-modal-backdrop-enter'
+            }`}
           onClick={closeDemoModal}
         >
-          <div 
-            className={`relative w-full max-w-5xl max-h-[85vh] overflow-y-auto custom-scrollbar liquid-glass-card p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl ${
-              isAnimatingOut ? 'animate-modal-card-exit' : 'animate-modal-card-enter'
-            }`}
+          <div
+            className={`relative w-full max-w-5xl max-h-[85vh] overflow-y-auto custom-scrollbar liquid-glass-card p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl ${isAnimatingOut ? 'animate-modal-card-exit' : 'animate-modal-card-enter'
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <span className="text-xl text-sky-200">✻</span>
+                <img
+                  src="/brand-logo.png"
+                  alt="Trajectory IR Logo"
+                  className="w-6 h-6 object-contain rounded shadow-sm"
+                />
                 <span className="text-lg font-semibold text-white">Trajectory IR — Interactive Execution Demo</span>
               </div>
               <button
