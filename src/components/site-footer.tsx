@@ -87,7 +87,11 @@ export function SiteFooter() {
           {/* Column 1: Logo and Tagline */}
           <div className="flex-shrink-0">
             <div className="flex items-center gap-3">
-              <span className="text-2xl text-white font-bold">✻</span>
+              <img
+                src="/brand-logo.png"
+                alt="Trajectory IR Logo"
+                className="w-6 h-6 object-contain rounded-md shadow-sm"
+              />
               <span className="text-[16px] font-semibold text-white tracking-tight whitespace-nowrap">
                 trajectory<span className="text-sky-200/60 font-normal">_ir</span>
               </span>

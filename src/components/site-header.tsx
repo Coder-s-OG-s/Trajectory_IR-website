@@ -39,108 +39,125 @@ const navItems: NavItem[] = [
   },
 ];
 
-function LiquidDropdownMenu({ items, isOpen, onClose }: { items: DropdownItem[]; isOpen: boolean; onClose: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClose();
-      }
-    }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose]);
-
+function LiquidDropdownMenu({ 
+  items, 
+  isOpen, 
+  onClose 
+}: { 
+  items: DropdownItem[]; 
+  isOpen: boolean; 
+  onClose: () => void;
+}) {
   if (!isOpen) return null;
 
   return (
-    <div
-      ref={ref}
-      className="liquid-glass-dropdown"
-      style={{
-        position: 'absolute',
-        top: 'calc(100% + 12px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        minWidth: '240px',
-        padding: '8px',
-        zIndex: 100,
-        animation: 'header-dropdown-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-      }}
-    >
-      {items.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          onClick={onClose}
-          className="liquid-glass-dropdown-item"
-          style={{
-            display: 'block',
-            padding: '10px 14px',
-            borderRadius: '10px',
-            fontSize: '14px',
-            textDecoration: 'none',
-          }}
-        >
-          <span style={{ fontWeight: 600, display: 'block' }}>{item.label}</span>
-          {item.description && (
-            <span style={{ display: 'block', fontSize: '12px', opacity: 0.65, marginTop: '2px' }}>
-              {item.description}
+    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 min-w-[260px] pointer-events-auto">
+      <div 
+        className="liquid-glass-dropdown p-2"
+        style={{
+          animation: 'header-dropdown-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.4)',
+        }}
+      >
+        {items.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            onClick={onClose}
+            className="liquid-glass-dropdown-item block px-3.5 py-2.5 rounded-xl text-sm no-underline group"
+          >
+            <span className="font-semibold block text-white/95 group-hover:text-white transition-colors">
+              {item.label}
             </span>
-          )}
-        </Link>
-      ))}
+            {item.description && (
+              <span className="block text-xs text-sky-100/60 group-hover:text-sky-100/90 mt-0.5 transition-colors">
+                {item.description}
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
 function NavLink({ item }: { item: NavItem }) {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (!item.hasDropdown) return;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (!item.hasDropdown) return;
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150); // 150ms buffer prevents accidental closure when moving mouse
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [isOpen]);
 
   return (
     <div
-      style={{ position: 'relative' }}
-      onMouseEnter={() => item.hasDropdown && setIsOpen(true)}
-      onMouseLeave={() => item.hasDropdown && setIsOpen(false)}
+      ref={containerRef}
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link
         href={item.href}
         onClick={(e) => {
           if (item.hasDropdown) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen((prev) => !prev);
           }
         }}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.88)',
-          textDecoration: 'none',
-          padding: '8px 14px',
-          borderRadius: '9999px',
-          transition: 'all 0.15s ease',
-          whiteSpace: 'nowrap',
-        }}
-        className="hover:text-white hover:bg-white/10"
+        className={`inline-flex items-center gap-1.5 text-sm font-medium no-underline px-3.5 py-2 rounded-full transition-all whitespace-nowrap ${
+          isOpen ? 'text-white bg-white/15 shadow-sm' : 'text-white/90 hover:text-white hover:bg-white/10'
+        }`}
+        aria-expanded={isOpen}
+        aria-haspopup={item.hasDropdown ? 'true' : undefined}
       >
-        {item.label}
+        <span>{item.label}</span>
         {item.hasDropdown && (
           <svg
             width="10"
             height="10"
             viewBox="0 0 10 10"
             fill="none"
-            style={{
-              transition: 'transform 0.2s ease',
-              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              opacity: 0.7,
-            }}
+            className={`transition-transform duration-200 opacity-75 ${isOpen ? 'rotate-180 text-sky-300' : 'rotate-0'}`}
           >
             <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -194,20 +211,11 @@ export function SiteHeader() {
             textDecoration: 'none',
           }}
         >
-          <div
-            style={{
-              width: '26px',
-              height: '26px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: '22px',
-              fontWeight: 'bold',
-            }}
-          >
-            ✻
-          </div>
+          <img
+            src="/brand-logo.png"
+            alt="Trajectory IR Logo"
+            className="w-6 h-6 object-contain rounded-md shadow-sm"
+          />
           <span
             style={{
               fontSize: '20px',

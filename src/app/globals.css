@@ -8,6 +8,8 @@
 @theme {
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), monospace;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-heading: var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif;
   --color-primary: #ff3e00;
 }
 
@@ -82,6 +84,44 @@
   @keyframes fluid-flow {
     0% { background-position: 0% 0%; }
     100% { background-position: 0% 200%; }
+  }
+
+  @keyframes folderRise {
+    0% {
+      opacity: 0;
+      transform: translateY(36px) scale(0.98);
+    }
+    60% {
+      opacity: 0.95;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-folder-rise {
+    animation: folderRise 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+  }
+
+  @keyframes folderFullSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(105%);
+    }
+    12% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0%);
+    }
+  }
+
+  .animate-folder-full-slide-up {
+    animation: folderFullSlideUp 0.78s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    will-change: transform, opacity;
   }
 
   .fd-step {
@@ -292,11 +332,11 @@
 @keyframes header-dropdown-enter {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(-4px);
+    transform: translateY(-6px) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -310,13 +350,13 @@
 
 .header-logo:hover {
   transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.35);
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
 }
 
 .header-apply-btn:hover {
-  background-color: #e55a1b !important;
-  border-color: #e55a1b !important;
-  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.3);
+  background-color: #0284c7 !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
   transform: translateY(-1px);
 }
 
@@ -397,6 +437,17 @@
   background-attachment: fixed;
   position: relative;
   min-height: 100vh;
+}
+
+.hero-gradient-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #05152d 0%, #071c3d 40%, #0a254f 100%);
+  opacity: var(--scroll-darkness, 0);
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
 }
 
 /* 100% Seamless Header - No cutting rectangle background */
@@ -632,6 +683,38 @@
   animation: pulse-glow 8s ease-in-out infinite;
 }
 
+@keyframes marquee-drift-left {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-drift-left 36s linear infinite;
+  will-change: transform;
+}
+
+@keyframes marquee-drift-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-drift-right 36s linear infinite;
+  will-change: transform;
+}
+
 @keyframes dust-float {
   0% {
     transform: translateY(0px) translateX(0px) scale(0.9);
@@ -649,6 +732,19 @@
 
 .animate-dust-float {
   animation: dust-float infinite ease-in-out alternate;
+}
+
+@keyframes data-pulse-flow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-data-pulse {
+  animation: data-pulse-flow 1.6s linear infinite;
 }
 
 /* Frosted Liquid Glass Curtain Sheet Footer (Matching reference photo) */
@@ -779,5 +875,68 @@
   scrollbar-color: rgba(255, 255, 255, 0.38) rgba(255, 255, 255, 0.08);
 }
 
+/* High-Energy Liquid Plasma Effect for [The Problem */
+@keyframes plasma-shift {
+  0% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.75)) drop-shadow(0 0 22px rgba(225, 29, 72, 0.45));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 16px rgba(251, 113, 133, 0.95)) drop-shadow(0 0 35px rgba(192, 38, 211, 0.65));
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.75)) drop-shadow(0 0 22px rgba(225, 29, 72, 0.45));
+  }
+}
 
+.plasma-text-flow {
+  background: linear-gradient(
+    115deg,
+    #e11d48 0%,
+    #f43f5e 20%,
+    #ffffff 35%,
+    #fda4af 50%,
+    #c026d3 68%,
+    #fb7185 82%,
+    #f43f5e 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: plasma-shift 3.5s ease-in-out infinite;
+}
 
+/* 3D Isometric Schematic Optic Fiber Pulse Flow Animation */
+@keyframes data-pulse-flow {
+  0% {
+    stroke-dashoffset: 64;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-data-pulse {
+  animation: data-pulse-flow 2s linear infinite;
+}
+
+.animate-data-pulse-fast {
+  animation: data-pulse-flow 1.2s linear infinite;
+}
+
+@keyframes hologram-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-hologram-pulse {
+  animation: hologram-pulse 2.5s ease-in-out infinite;
+}
