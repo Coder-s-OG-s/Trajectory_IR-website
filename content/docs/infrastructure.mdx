@@ -71,7 +71,7 @@ The `Execution` column below distinguishes the Python/DBOS path from the Go/Temp
 | `server-s3` | Single-Region API | Python SDK + DBOS / Restate | PostgreSQL | AWS S3 | None |
 | `k8s-fluid` | Enterprise Fleets | Go SDK + Temporal | PostgreSQL | AWS S3 | Fluid FUSE |
 
-DBOS's embedded, single-process model is a good fit for the `local` and `server-s3` profiles the Python SDK targets. `k8s-fluid` fleets need independent worker pools, workflow history and replay, and signals for the block-and-gate protocol, which is why the Go SDK is built on Temporal rather than DBOS. See [Why Go Uses Temporal](/docs/api-go/durable-temporal) for the full reasoning.
+DBOS's embedded, single-process model is a good fit for the `local` and `server-s3` profiles the Python SDK targets. `k8s-fluid` fleets need independent worker pools, workflow history and replay, and signals for the block-and-gate protocol, which is why the Go SDK is built on Temporal rather than DBOS.
 
 ---
 
