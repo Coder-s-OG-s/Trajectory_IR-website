@@ -1,0 +1,191 @@
+---
+title: CLI (trajirctl)
+description: Operate Trajectory IR workdirs from the terminal, and wire trajir-mcp for agent hosts.
+---
+
+[`trajirctl`](https://github.com/Coder-s-OG-s/trajirctl) is the human-operated CLI for local Trajectory IR workdirs, plus MCP host packaging for the agent-facing `trajir-mcp` server. Both surfaces call the same Go SDK (`github.com/Coder-s-OG-s/Trajectory-IR/go`).
+
+| Surface | What you use | Audience |
+|---------|--------------|----------|
+| **MCP** (agents) | `trajir-mcp` from Trajectory-IR, plus configs in `integrations/mcp/` | Claude Code, Cursor, and other MCP hosts |
+| **CLI** (humans / scripts) | `trajirctl` | Terminal operators and CI |
+
+The MCP server enforces `TRAJIR_MCP_ROOT` workspace confinement. `trajirctl` does not: a person typing `--workdir` is the trust boundary, so it's meant for local, human-driven use rather than untrusted input.
+
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+
+## Install
+
+```bash
+go install github.com/Coder-s-OG-s/trajirctl@v0.1.0
+# or track main:
+go install github.com/Coder-s-OG-s/trajirctl@latest
+```
+
+Or build from a clone:
+
+```bash
+git clone https://github.com/Coder-s-OG-s/trajirctl.git
+cd trajirctl
+go build -o trajirctl .
+```
+
+<Callout type="info">
+Requires Go 1.25+. Confirm the install with `trajirctl --help`.
+</Callout>
+
+## Quick start
+
+Point at a workdir that already has trajectory data, created by an agent, an SDK demo, or MCP tools:
+
+<Steps>
+
+### 1. Set the workdir
+
+```bash
+export TRAJIR_WORKDIR=/absolute/path/to/workdir
+export TRAJIR_TENANT=acme
+export TRAJIR_TRAJECTORY=trip-1
+```
+
+### 2. Inspect and export
+
+```bash
+trajirctl status
+trajirctl nodes list --json
+trajirctl export --dest ./out.tir --mode thin
+trajirctl import --path ./out.tir
+trajirctl verify --path ./out.tir
+```
+
+</Steps>
+
+If you don't have a workdir yet, create one with the [Go quickstart](/docs/quickstart) or run `go run ./examples/adoption_host` from `Trajectory-IR/go`.
+
+## Command reference
+
+```text
+trajirctl status       --workdir DIR --tenant ID --trajectory ID [--json]
+trajirctl export       --workdir DIR --tenant ID --trajectory ID --dest PATH [--mode thin|fat] [--json]
+trajirctl import       --path PATH [--src PATH] [--json]
+trajirctl verify       --path PATH [--src PATH] [--require-signature] [--json]
+trajirctl nodes list   --workdir DIR --tenant ID --trajectory ID [--json]
+trajirctl nodes show   --workdir DIR --tenant ID --trajectory ID --id NODE_ID [--json]
+```
+
+### Flag and environment resolution
+
+| Flag | Env fallback | Default |
+|------|--------------|---------|
+| `--workdir` | `TRAJIR_WORKDIR` | `.` |
+| `--tenant` | `TRAJIR_TENANT` | (required) |
+| `--trajectory` | `TRAJIR_TRAJECTORY` | (required) |
+
+A flag wins over its env var when both are set. For package paths, prefer `--path` (the MCP name); `--src` is an accepted alias on `import` and `verify`.
+
+### `status`
+
+Summarizes a trajectory in a workdir: paths, node count, seal count, counts by kind.
+
+### `export`
+
+Writes a `.tir` package. `thin` (default) skips fattening large artifacts; `fat` embeds them where the SDK supports it.
+
+### `import`
+
+Loads and reports on a `.tir` (mode, ids, node/seal counts, signed or not). Same semantics as the MCP `trajectory_import_tir` tool: it never writes into the NodeLog.
+
+### `verify`
+
+Checks package signature policy.
+
+| Situation | `status` | Exit |
+|-----------|----------|------|
+| Unsigned, no `--require-signature` | `unsigned` | `0` |
+| Signature valid | `verified` | `0` |
+| Tamper / missing when required | `failed` | `1` |
+
+```bash
+trajirctl verify --path ./out.tir --require-signature   # fail closed for CI
+```
+
+### `nodes list` / `nodes show`
+
+Terminal-native per-node browsing, not exposed over MCP. A missing `--id` on `nodes show` prints `node not found` and exits `1`.
+
+### Output and exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | Runtime error, including a failed `verify` or a `nodes show` that finds nothing |
+| `2` | Usage / unknown command |
+
+---
+
+## Wiring MCP for agents
+
+Agents should talk to Trajectory IR over MCP, not by shelling out to `trajirctl`.
+
+<Steps>
+
+### 1. Build `trajir-mcp`
+
+```bash
+git clone https://github.com/Coder-s-OG-s/Trajectory-IR.git
+cd Trajectory-IR/go
+go build -o trajir-mcp ./cmd/trajir-mcp
+```
+
+### 2. Configure the host with an absolute project root
+
+```json
+{
+  "mcpServers": {
+    "trajectory-ir": {
+      "command": "/absolute/path/to/trajir-mcp",
+      "args": [],
+      "env": {
+        "TRAJIR_MCP_ROOT": "/absolute/path/to/project"
+      }
+    }
+  }
+}
+```
+
+`TRAJIR_MCP_ROOT` is the approved workspace root: every MCP `work_dir`, `dest`, and `path` must resolve under it. It defaults to the process cwd when unset, so set it explicitly.
+
+</Steps>
+
+### MCP tools
+
+| Tool | Purpose |
+|------|---------|
+| `trajectory_status` | Node counts by kind, seal count, paths |
+| `trajectory_export_tir` | Export thin (default) or fat `.tir` |
+| `trajectory_import_tir` | Load and hash-verify a `.tir`, no NodeLog write |
+| `trajectory_verify_signature` | Optional `trajir-pkg-sig-v1` verify; unsigned is OK unless `require_signature` is set |
+
+Full contract: [Trajectory-IR `docs/INTEGRATIONS.md`](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/docs/INTEGRATIONS.md).
+
+### CLI vs MCP, at a glance
+
+| Task | Use |
+|------|-----|
+| Agent reads / exports / verifies inside a project | MCP (`trajir-mcp` + `TRAJIR_MCP_ROOT`) |
+| Inspecting a workdir at the terminal | `trajirctl` |
+| CI checking a `.tir` package | `trajirctl verify --require-signature` |
+| Browsing individual nodes | `trajirctl nodes list` / `nodes show` (CLI only) |
+
+---
+
+## Related links
+
+| Resource | Link |
+|----------|------|
+| trajirctl source and README | https://github.com/Coder-s-OG-s/trajirctl |
+| MCP integration contract | https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/docs/INTEGRATIONS.md |
+| Go quickstart | [/docs/quickstart](/docs/quickstart) |
+| Releases | https://github.com/Coder-s-OG-s/trajirctl/releases |
