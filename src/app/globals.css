@@ -631,3 +631,221 @@
   50% { transform: translateY(-15px); }
   100% { transform: translateY(0px); }
 }
+
+
+/* Merged from main: liquid-glass + docs-page-container (keep docs features working) */
+/* 100% Seamless Header - No cutting rectangle background */
+.liquid-glass-header {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Liquid Glass Texture & Refraction Shader System */
+.liquid-glass-texture, .liquid-glass-dock, .liquid-glass-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.16) 100%);
+  backdrop-filter: blur(40px) saturate(240%) contrast(110%);
+  -webkit-backdrop-filter: blur(40px) saturate(240%) contrast(110%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 
+    /* High-Index Specular Rim Highlight */
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 1px 0 rgba(255, 255, 255, 0.2),
+    /* Surface Tension Lens Inner Diffusion */
+    inset 0 0 20px 0 rgba(255, 255, 255, 0.22),
+    /* Soft Caustics Ambient Shadows & Fluid Glow */
+    0 28px 64px -12px rgba(0, 16, 44, 0.45),
+    0 0 36px 0 rgba(140, 205, 245, 0.2);
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform, backdrop-filter, box-shadow;
+}
+
+.liquid-glass-texture::before, .liquid-glass-dock::before, .liquid-glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 46%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.liquid-glass-dock {
+  border-radius: 9999px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-dock:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.24) 100%);
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 
+    inset 0 2px 1.5px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 1px 0 rgba(255, 255, 255, 0.3),
+    0 34px 72px -8px rgba(0, 16, 44, 0.55),
+    0 0 48px 0 rgba(160, 220, 255, 0.35);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.liquid-glass-dropdown {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.14) 100%);
+  backdrop-filter: blur(36px) saturate(220%) contrast(110%);
+  -webkit-backdrop-filter: blur(36px) saturate(220%) contrast(110%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1.5px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 16px 0 rgba(255, 255, 255, 0.18),
+    0 24px 54px -8px rgba(0, 12, 36, 0.45);
+  border-radius: 20px;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.liquid-glass-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.liquid-glass-dropdown-item {
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: 10px !important;
+  border: none !important;
+  transition: all 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.liquid-glass-dropdown-item:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Docs Page Specific Liquid Glass Adjustments (Black/Dark Charcoal Tint matching page background #09090b) */
+.docs-page-container .liquid-glass-dropdown {
+  background: linear-gradient(135deg, rgba(20, 20, 26, 0.94) 0%, rgba(9, 9, 12, 0.97) 100%) !important;
+  backdrop-filter: blur(48px) saturate(200%) contrast(110%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(200%) contrast(110%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1.5px 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 16px 0 rgba(255, 255, 255, 0.03),
+    0 28px 60px -8px rgba(0, 0, 0, 0.95) !important;
+}
+
+.docs-page-container .liquid-glass-dropdown::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%) !important;
+}
+
+.docs-page-container .liquid-glass-dropdown-item:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+.docs-page-container .liquid-glass-texture,
+.docs-page-container .liquid-glass-card {
+  background: linear-gradient(135deg, rgba(20, 20, 26, 0.90) 0%, rgba(9, 9, 12, 0.94) 100%) !important;
+  backdrop-filter: blur(40px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.docs-page-container .liquid-glass-pill {
+  background: linear-gradient(135deg, rgba(20, 20, 26, 0.88) 0%, rgba(9, 9, 12, 0.92) 100%) !important;
+  backdrop-filter: blur(36px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+
+.liquid-glass-pill {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.15) 100%);
+  backdrop-filter: blur(32px) saturate(220%) contrast(108%);
+  -webkit-backdrop-filter: blur(32px) saturate(220%) contrast(108%);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.18),
+    0 16px 36px 0 rgba(0, 12, 32, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+  will-change: transform, background, box-shadow;
+}
+
+.liquid-glass-pill:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.22) 100%);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.95),
+    0 20px 48px 0 rgba(0, 12, 32, 0.4);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.liquid-glass-pill-solid {
+  background: #ffffff;
+  color: #031429;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    inset 0 2px 3px 0 rgba(255, 255, 255, 1),
+    0 16px 36px 0 rgba(0, 12, 32, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-pill-solid:hover {
+  background: #f4f9fd;
+  box-shadow: 
+    inset 0 2.5px 4px 0 rgba(255, 255, 255, 1),
+    0 20px 48px 0 rgba(0, 12, 32, 0.45);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.liquid-glass-dock::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+  pointer-events: none;
+}
+
+.liquid-glass-dock:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0.28) 100%);
+  border-color: rgba(255, 255, 255, 0.75);
+  box-shadow: 
+    inset 0 3.5px 5px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.35),
+    0 34px 72px -8px rgba(0, 16, 44, 0.6);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.liquid-glass-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 
+    inset 0 2px 3px 0 rgba(255, 255, 255, 0.65),
+    0 32px 64px -16px rgba(0, 10, 30, 0.35);
+  border-radius: 28px;
+}
+
+

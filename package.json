@@ -11,8 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.42.2",
+    "@types/three": "^0.185.4",
     "fumadocs-core": "^16.13.0",
     "fumadocs-mdx": "^15.2.0",
     "fumadocs-ui": "^16.13.0",
@@ -21,16 +20,16 @@
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "tailwind-merge": "^3.6.0"
+    "react-smokey-fluid-cursor": "^1.0.4",
+    "tailwind-merge": "^3.6.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "1.13.16",
     "@cloudflare/workers-types": "^4.20240208.0",
     "@tailwindcss/postcss": "^4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^20",
+    "@types/node": "26.1.2",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",

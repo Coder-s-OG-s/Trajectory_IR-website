@@ -1,5 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans, Newsreader } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
 
@@ -18,8 +18,13 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-heading',
 });
 
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+});
+
 export const metadata = {
-  metadataBase: new URL('https://trajectory-ir.dev'),
   title: 'Trajectory IR Documentation',
   description: 'Portable, hash-verifiable intermediate representation for agent execution trajectories.',
   icons: {
@@ -45,9 +50,9 @@ import { UnderConstructionModal } from '@/components/under-construction-modal';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider theme={{ defaultTheme: 'light', enableSystem: false }}>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>{children}</RootProvider>
         <UnderConstructionModal />
       </body>
     </html>
