@@ -1,20 +1,117 @@
 ---
 title: Quickstart
-description: Get up and running with the Trajectory IR local deployment profile in under 5 minutes.
+description: Get up and running with Trajectory IR in under 5 minutes, in Go or Python.
 ---
 
-Welcome to Trajectory IR! This guide will get you up and running with the `local` deployment profile in under 5 minutes. 
+Welcome to Trajectory IR! Go is the primary SDK and the recommended starting point if you're new to the project; Python remains fully supported as the reference implementation. Pick whichever matches your stack below.
 
-Trajectory IR acts as a semantic layer for AI agents, wrapping your agent's execution history in a portable, crash-safe format using pluggable durable execution backends like [DBOS](https://docs.dbos.dev/) or Restate.
+Trajectory IR acts as a semantic layer for AI agents, wrapping your agent's execution history in a portable, crash-safe format over pluggable durable execution backends: Temporal for Go, or DBOS/Restate for Python.
+
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['Go', 'Python']}>
+
+<Tab value="Go">
+
+## Prerequisites
+
+- Go 1.25+
+- Git
+
+<Steps>
+
+### 1. Clone and run the test suite
+
+```bash
+git clone https://github.com/Coder-s-OG-s/Trajectory-IR.git
+cd Trajectory-IR/go
+go test ./...
+```
+
+### 2. Your first durable step
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/Coder-s-OG-s/Trajectory-IR/go/trajir/client"
+	"github.com/Coder-s-OG-s/Trajectory-IR/go/trajir/effects"
+	"github.com/Coder-s-OG-s/Trajectory-IR/go/trajir/resume"
+)
+
+func main() {
+	dir, err := os.MkdirTemp("", "trajir-qs-*")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(dir)
+
+	tr, err := client.OpenTrajectory("demo", "qs-1", client.Options{WorkDir: dir})
+	if err != nil {
+		panic(err)
+	}
+	defer tr.Close()
+
+	if _, err := tr.Project(1, map[string]any{"goal": "hello"}); err != nil {
+		panic(err)
+	}
+	plan := map[string]any{
+		"tool_calls": []any{
+			map[string]any{"name": "echo", "args": map[string]any{"msg": "hi"}},
+		},
+	}
+	if _, err := tr.SealDecision(1, plan); err != nil {
+		panic(err)
+	}
+
+	tool := resume.Tool{
+		Name:   "echo",
+		Effect: effects.PURE,
+		Fn: func(args map[string]any) (any, error) {
+			return args["msg"], nil
+		},
+	}
+	res, err := tr.ExecTool(1, 2, tool, map[string]any{"msg": "hi"})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res.Result) // hi
+	if err := tr.CommitStep(1, 4); err != nil {
+		panic(err)
+	}
+}
+```
+
+### 3. Try the runnable demos instead
+
+No paid model API needed, these run against a stub:
+
+```bash
+go run ./examples/adoption_host
+go run ./examples/kill_mid_deploy -workdir ./demo-data
+```
+
+</Steps>
+
+## What's Next?
+- Full walkthrough, live Temporal/Postgres/MinIO setup, and more demos: [go/QUICKSTART.md](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/go/QUICKSTART.md)
+- Inspect a workdir from the terminal, or wire an agent host up to Trajectory IR over MCP, with [`trajirctl`](https://github.com/Coder-s-OG-s/trajirctl)
+- Read the [Infrastructure Design](/docs/infrastructure) to learn how to scale this to `server-s3` or `k8s-fluid`
+
+</Tab>
+
+<Tab value="Python">
 
 ## Prerequisites
 
 - Python 3.11+
 - `pip` or [Hatch](https://hatch.pypa.io/) (recommended)
-
----
-
-import { Steps } from 'fumadocs-ui/components/steps';
 
 <Steps>
 
@@ -96,3 +193,7 @@ Because of the **Block-and-Gate** policy, if your agent crashes inside `deploy_s
 ## What's Next?
 - Read the [Infrastructure Design](/docs/infrastructure) to learn how to scale this to `server-s3` or `k8s-fluid`.
 - Read the [Contributing Guide](https://github.com/Coder-s-OG-s/Trajectory_IR-website/blob/main/CONTRIBUTING.md) if you want to help build the project!
+
+</Tab>
+
+</Tabs>
