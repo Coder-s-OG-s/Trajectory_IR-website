@@ -18,8 +18,23 @@ Modern AI agents execute multi-step workflows across LLMs, APIs, and databases. 
 
 ## The Solution
 
-Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects over pluggable durable execution engines.
+Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects over pluggable durable execution engines. Go is the primary SDK; Python is fully supported as the reference implementation.
 
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['Go', 'Python']}>
+
+<Tab value="Go">
+```go
+tr, _ := client.OpenTrajectory("prod", "run-1", client.Options{WorkDir: dir})
+tr.Project(1, map[string]any{"goal": "deploy cluster-01"})
+
+tool := resume.Tool{Name: "deploy_server", Effect: effects.NON_IDEMPOTENT_WRITE, Fn: deploy}
+res, _ := tr.ExecTool(1, 2, tool, map[string]any{"name": "cluster-01"})
+```
+</Tab>
+
+<Tab value="Python">
 ```python
 from trajectory_ir.runtime import Trajectory
 from trajectory_ir.effects import EffectClass
@@ -36,6 +51,9 @@ def run_agent():
     result = deploy_server("cluster-01")
     traj.append_observation(result)
 ```
+</Tab>
+
+</Tabs>
 
 ---
 
