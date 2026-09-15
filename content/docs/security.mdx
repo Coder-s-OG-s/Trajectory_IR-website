@@ -9,11 +9,12 @@ This policy is tightly integrated with our [Infrastructure Design](/docs/infrast
 
 ## 1. Supported Versions
 
-Trajectory IR is currently in its **Phase 1A / v0.1.x** development cycle. 
+Trajectory IR ships **0.2.x** (Phase 1B Go primary + Phase 1C harden). Older 0.1.x tags remain available but are not the active development line.
 
 | Version | Supported          | Notes |
 | ------- | ------------------ | ----- |
-| v0.1.x  | :white_check_mark: | Active development (DBOS embedded backend) |
+| v0.2.x  | :white_check_mark: | Current (Go primary, Python reference) |
+| v0.1.x  | :warning:          | Security fixes only if maintainers agree; prefer upgrading |
 | < v0.1  | :x:                | Historical (CAMI/CLOOP prototypes) |
 
 ## 2. Reporting a Vulnerability
@@ -33,9 +34,10 @@ We will acknowledge receipt of your vulnerability report within 48 hours. Please
 Based on the [Infrastructure Blueprint](/docs/infrastructure) and Master Spec, we are actively monitoring for vulnerabilities in the following planes:
 
 ### A. Execution & Tool Safety Plane
-- **Safety Boundary Bypasses**: Exploits that trick the system into classifying a `NON_IDEMPOTENT_WRITE` tool as `PURE` or `READ_ONLY`, bypassing the Fail-Closed default.
+- **Safety Boundary Bypasses**: Exploits that trick the system into classifying a `NON_IDEMPOTENT_WRITE` tool as `PURE` or `READ_ONLY`, bypassing the Fail-Closed default. Sandbox mode also rejects `AGENT_SPAWN` and `SENSITIVE` effects, not just `NON_IDEMPOTENT_WRITE`.
 - **Block-and-Gate Evasion**: Flaws that allow an interrupted non-idempotent tool to automatically retry without explicit human/policy resolution.
 - **Backend Injection**: Any flaw in `drivers/durable-backend/dbos/` that allows arbitrary code execution outside of the locked DBOS/Restate step wrapper context.
+- **Path Confinement Races**: The Go MCP server's workspace root confinement resolves and validates paths atomically to close TOCTOU windows (CWE-367).
 
 ### B. State & Durability Plane
 - **Seal Tampering**: Vulnerabilities allowing a node payload to be mutated without breaking the RFC 8785 (JCS) + SHA256 identity hashing.
@@ -44,8 +46,8 @@ Based on the [Infrastructure Blueprint](/docs/infrastructure) and Master Spec, w
 ### C. Data & Export Plane (`.tir` Packages)
 - **Sensitive Data Leakage**: Flaws where secret-like fields or thoughts leak during a `redacted` `.tir` package export.
 - **Package Resource Exhaustion**: Zip bombs and oversized members must be rejected by load limits (`TirLimitError`).
-- **Unverified Import**: `import_tir` always verifies; `load_tir(verify=False)` is disabled. Inspection without verification requires the explicit `load_tir_unverified()` call and must never write to a durable NodeLog.
-- **Integrity vs. Provenance**: Node hash verification proves content integrity, not publisher authenticity. Package signatures remain reserved and unimplemented until a cryptography-focused design lands.
+- **Unverified Import**: `import_tir` always verifies; `load_tir(verify=False)` is disabled. Inspection without verification requires the explicit `load_tir_unverified()` call (Python) or `LoadUnverified()` (Go), gated behind `TRAJIR_ALLOW_UNVERIFIED=1`. When allowed, a runtime warning is emitted and the call is logged at WARNING level. Unverified loads must never write to a durable NodeLog.
+- **Integrity vs. Provenance**: Node hash verification proves content integrity, not publisher authenticity. Optional package signatures (`trajir-pkg-sig-v1`, Ed25519) prove publisher authenticity when a `SIGNATURE` member is present; unsigned packages remain valid by default. `verify_package` now rejects an empty or misconfigured trust store outright instead of silently skipping the signature check.
 
 ### D. Execution Concurrency
 - **Block-and-Gate Races**: Claiming a `TOOL_CALL` slot must be atomic so concurrent workers cannot double-run a `NON_IDEMPOTENT_WRITE` tool (R02).
@@ -59,8 +61,8 @@ We would rather be honest about what's actually built than let this page read as
 | Fail-closed MCP effect mapping | Implemented |
 | Atomic `TOOL_CALL` claim (gate) | Implemented |
 | `.tir` size / path safety limits | Implemented |
-| Redacted export (secret-like keys/values + thoughts) | Implemented (basic keyword/pattern heuristic, not a secret scanner; still review before external sharing) |
-| Package digital signatures | Not implemented (reserved) |
+| Redacted export (secret-like keys/values + thoughts) | Implemented (basic keyword/pattern heuristic, not a secret scanner; still review before external sharing), including the Go side of `.tir` export |
+| Package digital signatures (`trajir-pkg-sig-v1`) | Implemented (optional; verify on load when present) |
 | Full multi-tenant SaaS isolation | Not a product surface yet; `tenant_id` filter on list/export exists |
 | Fluid / k8s cache poisoning controls | Design only (future profile) |
 
