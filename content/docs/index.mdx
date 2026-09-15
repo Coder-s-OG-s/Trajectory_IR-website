@@ -1,49 +1,75 @@
 ---
 title: Welcome to Trajectory IR
-description: A next-generation durable execution system that makes it possible to effortlessly compose, seal, and observe every AI agent tool execution in real-time.
+description: Portable, hash-verifiable intermediate representation for agent execution trajectories.
 ---
 
-A next-generation durable execution system that makes it possible to effortlessly compose, seal, and observe every AI agent tool execution in real-time for the first time ever.
+**Portable, hash-verifiable intermediate representation for agent execution trajectories.**
 
----
+Trajectory IR is the flight recorder and safety switch for agent runs: seal the model’s plan before side effects, classify tool effects, resume without re-inventing the plan, and export a runtime-independent `.tir` package anyone can verify by content hash. It sits **on top of** durable execution engines (Temporal, DBOS, Restate) — it does not replace them, and it is not another agent framework.
 
-## The Problem
+```mermaid
+flowchart TB
+  Host[Agent host / framework] --> TIR[Trajectory IR]
+  TIR --> BE[Durable backend<br/>Temporal / DBOS / Restate]
+```
 
-Modern AI agents execute multi-step workflows across LLMs, APIs, and databases. When an agent fails mid-execution:
-
-- Unsealed side-effects re-execute, causing duplicate API calls, double charges, or corrupt state.
-- Execution context is wiped, requiring expensive re-prompting.
-
----
-
-## The Solution
-
-Trajectory IR seals every decision using **RFC 8785 (JCS)** and **SHA256** before execution, guaranteeing 100% crash recovery and zero duplicate side-effects over pluggable durable execution engines.
-
-```python
-from trajectory_ir.runtime import Trajectory
-from trajectory_ir.effects import EffectClass
-
-Trajectory.launch()
-
-@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
-def deploy_server(name: str):
-    return f"Deployed {name}"
-
-@Trajectory.workflow()
-def run_agent():
-    traj = Trajectory.start(tenant_id="prod")
-    result = deploy_server("cluster-01")
-    traj.append_observation(result)
+```text
+  Agent host / framework     (LangGraph, custom loops, MCP hosts, …)
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │       Trajectory IR         │  seals · effect classes · .tir · sandbox
+  └─────────────────────────────┘
+            │
+            ▼
+  Durable backend              (Temporal · DBOS · Restate)
 ```
 
 ---
 
-## Explore the Docs
+## Failure today → what Trajectory IR adds
+
+| Failure today | What Trajectory IR adds |
+|---|---|
+| Crash mid-tool → retry double-fires a write | Block-and-gate + durable backend memoization |
+| Resume re-asks the model → silent plan drift | Sealed `DECISION` is the plan; resume replays it |
+| History locked in one framework | Portable thin/fat `.tir` with hash-checked node IDs |
+| Demo can charge / email / deploy for real | Sandbox mode blocks dangerous effect classes |
+
+---
+
+## Who is this for?
+
+| Audience | Start here |
+|---|---|
+| Students / newcomers | [Go Quickstart](/docs/quickstart) → [Sandbox demo](/docs/demos/sandbox) |
+| Agent / platform engineers | [How it fits](/docs/how-it-fits) → [Concepts](/docs/concepts) |
+| Security / compliance | Seals + [`.tir`](/docs/api/tir-package) + [Security](/docs/security) |
+| Contributors | [Contributing](/docs/contributing) · Go first for new features |
+| AI coding agents | Engine [master spec](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/docs/MASTER_SPECIFICATION.md) — implement the spec, don’t invent APIs |
+
+---
+
+## Next steps
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
 <Cards>
-  <Card title="Quickstart" href="/docs/quickstart" description="Get up and running in under 5 minutes with SQLite local profile." />
-  <Card title="Infrastructure Architecture" href="/docs/infrastructure" description="Production architecture, storage schemas, and deployment profiles." />
-  <Card title="Trajectory Lifecycle" href="/docs/lifecycle" description="Deep dive into the 5-phase sealed execution loop." />
-  <Card title="API Reference" href="/docs/api" description="Complete Python SDK reference for Trajectory class and EffectClass." />
+  <Card title="Quickstart (Go)" href="/docs/quickstart" description="Primary path: clone, go test, minimal client." />
+  <Card title="How it fits" href="/docs/how-it-fits" description="Honest is / is-not vs Temporal, LangGraph, memory products." />
+  <Card title="Demos" href="/docs/demos" description="Adoption host, sandbox, kill-mid-deploy." />
+  <Card title="Contribute" href="/docs/contributing" description="DCO, Go-first features, website vs engine PRs." />
 </Cards>
+
+---
+
+## Status (honest)
+
+- Spec: `spec-v0.2-draft`
+- Phase: **1C harden and adopt** (Go primary; Python reference / parity)
+- License: Apache-2.0
+- [OpenSSF Best Practices](https://www.bestpractices.dev/projects/14075)
+- CNCF Sandbox: **preparing** — not claimed as membership
+- Adopters: none listed yet — [empty is honest](/docs/adopters)
+
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14075/badge)](https://www.bestpractices.dev/projects/14075)

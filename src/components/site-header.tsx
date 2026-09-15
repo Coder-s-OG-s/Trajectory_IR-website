@@ -19,26 +19,28 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Platform',
-    href: '#',
-    hasDropdown: true,
-    dropdownItems: [
-      { label: 'Overview', href: '/docs', description: 'Learn about Trajectory IR' },
-      { label: 'Architecture', href: '/docs/infrastructure', description: 'System design & internals' },
-    ],
-  },
-  {
-    label: 'Documentation',
+    label: 'Docs',
     href: '/docs',
     hasDropdown: true,
     dropdownItems: [
-      { label: 'API Reference', href: '/docs/api', description: 'Full SDK documentation' },
-      { label: 'Quick Start', href: '/docs/quickstart', description: 'Get up and running' },
+      { label: 'Welcome', href: '/docs', description: 'What Trajectory IR is' },
+      { label: 'How it fits', href: '/docs/how-it-fits', description: 'What it is and is not' },
+      { label: 'Architecture', href: '/docs/architecture', description: 'Host → IR → durable backend' },
     ],
   },
   {
-    label: 'Enterprise',
-    href: '#',
+    label: 'Quickstart',
+    href: '/docs/quickstart',
+    hasDropdown: true,
+    dropdownItems: [
+      { label: 'Go (primary)', href: '/docs/quickstart', description: 'Clone, test, minimal client' },
+      { label: 'Python (reference)', href: '/docs/quickstart-python', description: 'Parity port from git' },
+      { label: 'SDK Reference', href: '/docs/api', description: 'Go + Python client surfaces' },
+    ],
+  },
+  {
+    label: 'Demos',
+    href: '/docs/demos',
   },
 ];
 
@@ -234,7 +236,7 @@ export function SiteHeader() {
             href="/docs/quickstart"
             className="glass-pill px-5 py-2.5 rounded-full text-sm font-medium text-white hover:bg-white/20 transition-all flex items-center justify-center"
           >
-            Get Access
+            Get started
           </Link>
         </div>
       </div>

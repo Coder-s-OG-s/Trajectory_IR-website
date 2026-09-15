@@ -1,48 +1,38 @@
 ---
-title: EffectClass Enum
-description: Strict safety classification enum for every tool operation in Trajectory-IR.
+title: EffectClass
+description: All six effect classes, fail-closed defaults, block-and-gate, and sandbox behavior.
 ---
 
-## Overview
-
-The `EffectClass` enum defines the safety boundary for each tool registered in the Trajectory-IR runtime. It is the core mechanism that determines how the system handles crashes, retries, and human intervention.
-
-```python
-from trajectory_ir.effects import EffectClass
-```
+Effect classes decide how crashes, retries, and sandbox mode treat a tool. Unknown classifications **fail closed**.
 
 ## Values
 
-| Value | Risk Level | Retry on Crash? | Description |
-|-------|-----------|-----------------|-------------|
-| `PURE` | 🟢 None | ✅ Yes | A pure computation with zero side effects (e.g., math, formatting). |
-| `READ_ONLY` | 🟢 Low | ✅ Yes | Reads external state but does not modify it (e.g., database SELECT, API GET). |
-| `IDEMPOTENT_WRITE` | 🟡 Medium | ✅ Yes (with key) | Writes that are safe to retry with the same idempotency key (e.g., PUT with ETag). |
-| `NON_IDEMPOTENT_WRITE` | 🔴 Critical | ❌ **BLOCKED** | Dangerous writes that cannot be safely retried (e.g., sending an email, scaling a cluster). Triggers Block-and-Gate. |
+| Class | Retry on crash? | Notes |
+|---|---|---|
+| `PURE` | Yes (recompute) | No side effects |
+| `READ_ONLY` | Yes | Reads only |
+| `IDEMPOTENT_WRITE` | Yes (with idempotency key) | Safe retries |
+| `NON_IDEMPOTENT_WRITE` | **No — block-and-gate** | Emails, charges, deploys |
+| `AGENT_SPAWN` | Policy / sandbox sensitive | Spawning agents |
+| `SENSITIVE` | Policy / sandbox sensitive | Secrets / PII-class ops |
 
-## Usage
+## Block-and-gate
 
-```python
-from trajectory_ir.runtime import Trajectory
-from trajectory_ir.effects import EffectClass
+If a `NON_IDEMPOTENT_WRITE` is interrupted, resume must not blindly re-fire the tool. The runtime enters a gated state until policy or a human resolves it.
 
-# Safe: can be retried on crash
-@Trajectory.tool(effect_class=EffectClass.READ_ONLY)
-def get_user(user_id: str) -> dict:
-    return db.query(f"SELECT * FROM users WHERE id = {user_id}")
+## Sandbox
 
-# Dangerous: triggers Block-and-Gate on crash
-@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
-def deploy_to_production(service: str) -> str:
-    return cloud.deploy(service)
-```
+Sandbox mode rejects dangerous classes **before** side effects, including:
 
-## Block-and-Gate Protocol
+- `NON_IDEMPOTENT_WRITE`
+- `AGENT_SPAWN`
+- `SENSITIVE`
 
-When a `NON_IDEMPOTENT_WRITE` tool is interrupted mid-execution:
+Use it for demos and CI. See [Sandbox demo](/docs/demos/sandbox).
 
-1. The runtime detects the dangling `DECISION_SEAL` on restart.
-2. Instead of re-executing, it enters `BLOCKED_NEEDS_GATE` state.
-3. A human operator (or policy engine) must explicitly approve or reject the retry.
+## Language bindings
 
-This prevents catastrophic duplicate side-effects like double-deploying, double-charging, or sending duplicate notifications.
+- Go: `trajir/effects`
+- Python: `trajectory_ir.effects.EffectClass`
+
+Do **not** invent APIs like `SecurityLevel.HIGH_RISK` — they are not part of Trajectory IR.

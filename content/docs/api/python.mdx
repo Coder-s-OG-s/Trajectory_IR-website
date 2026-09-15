@@ -1,0 +1,40 @@
+---
+title: Python client
+description: Reference / parity client — open_trajectory, project, seal_decision, exec_tool, commit_step.
+---
+
+Prefer **Go** for new features. Python mirrors the same seal / effect / package semantics.
+
+## Core flow
+
+| Function | Role |
+|---|---|
+| `open_trajectory(...)` | Open or create a trajectory |
+| `project(...)` | Project step context |
+| `seal_decision(...)` | Freeze the plan |
+| `exec_tool(...)` | Run a `Tool` with an `EffectClass` |
+| `commit_step(...)` | Commit the step |
+| `export_tir` / `import_tir` | Portable packages (+ optional sign/verify) |
+
+Typical imports:
+
+```python
+from client.python.trajectory_client import (
+    open_trajectory,
+    project,
+    seal_decision,
+    exec_tool,
+    commit_step,
+)
+from trajectory_ir.effects import EffectClass
+from trajectory_ir.runtime.tool import Tool
+```
+
+Full install + snippet: [Quickstart (Python)](/docs/quickstart-python).
+
+## Packages
+
+- `trajectory_ir.package` / tir helpers for thin/fat export
+- Signatures: `trajir-pkg-sig-v1` (`sign_package` / `verify_package`)
+
+Engine tree: [Trajectory-IR](https://github.com/Coder-s-OG-s/Trajectory-IR)

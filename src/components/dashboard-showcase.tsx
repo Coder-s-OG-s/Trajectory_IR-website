@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-type TabId = 'idempotent' | 'crash-recovery' | 'human-gate';
+type TabId = 'seal' | 'exec' | 'sandbox';
 
 interface CodeSnippet {
   id: TabId;
@@ -11,124 +11,87 @@ interface CodeSnippet {
   code: React.ReactNode;
   lines: number;
   output: string;
+  filename: string;
 }
 
 const snippets: Record<TabId, CodeSnippet> = {
-  'idempotent': {
-    id: 'idempotent',
-    title: 'Idempotent Caching',
-    description: 'Wrap agent decisions to guarantee side-effects are never duplicated, even if the agent is called multiple times.',
-    lines: 14,
+  'seal': {
+    id: 'seal',
+    title: 'Seal a decision',
+    description: 'Freeze the model plan as a DECISION before any world-changing tool runs. Resume replays the seal; it does not re-prompt.',
+    lines: 16,
+    filename: 'main.go',
     code: (
       <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#001080]">userId</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
-        <span className="text-green-700">{'  // This operation is pure/idempotent.\n'}</span>
-        <span className="text-green-700">{'  // Trajectory IR caches the deterministic output.\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'fetch_user'</span>, <span className="text-[#001080]">userId</span> {'},\n'}
-        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">db</span>.<span className="text-[#001080]">users</span>.<span className="text-[#795e26]">find</span>(<span className="text-[#001080]">userId</span>){'\n'}
-        {'  );\n'}
-        {'}\n\n'}
-        <span className="text-green-700">{'// Subsequent calls return the cached JCS hash instantly.\n'}</span>
-        <span className="text-blue-600">const</span> <span className="text-[#001080]">user</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#795e26]">fetchUserData</span>(<span className="text-[#a31515]">'123'</span>);
+        <span className="text-blue-600">tr</span>, <span className="text-blue-600">err</span> := <span className="text-[#267f99]">client</span>.<span className="text-[#795e26]">OpenTrajectory</span>(<span className="text-[#a31515]">&quot;demo&quot;</span>, <span className="text-[#a31515]">&quot;qs-1&quot;</span>, <span className="text-[#267f99]">client</span>.<span className="text-[#267f99]">Options</span>{'{'}WorkDir: dir{'}'}){'\n'}
+        <span className="text-blue-600">if</span> err != <span className="text-blue-600">nil</span> {'{'} panic(err) {'}'}\n\n
+        <span className="text-[#267f99]">tr</span>.<span className="text-[#795e26]">Project</span>(1, map[string]any{'{'}<span className="text-[#a31515]">&quot;goal&quot;</span>: <span className="text-[#a31515]">&quot;hello&quot;</span>{'}'}){'\n'}
+        plan := map[string]any{'{'}{'\n'}
+        {'  '}<span className="text-[#a31515]">&quot;tool_calls&quot;</span>: []any{'{'}{'\n'}
+        {'    '}map[string]any{'{'}<span className="text-[#a31515]">&quot;name&quot;</span>: <span className="text-[#a31515]">&quot;echo&quot;</span>, <span className="text-[#a31515]">&quot;args&quot;</span>: map[string]any{'{'}<span className="text-[#a31515]">&quot;msg&quot;</span>: <span className="text-[#a31515]">&quot;hi&quot;</span>{'}'}{'}'},{'\n'}
+        {'  '}{'}'},{'\n'}
+        {'}'}\n
+        <span className="text-[#267f99]">tr</span>.<span className="text-[#795e26]">SealDecision</span>(1, plan)
       </>
     ),
-    output: `[Trajectory IR] Operation: fetch_user
-[Trajectory IR] Executing closure...
-[Trajectory IR] Data fetched from DB.
-[Trajectory IR] Sealed with SHA256: 8f7e9c29a...
----
-[Trajectory IR] Operation: fetch_user
-[Trajectory IR] Cache HIT (SHA256: 8f7e9c29a...)
-[Trajectory IR] Skipping closure execution.`
+    output: `[trajir] OpenTrajectory demo/qs-1
+[trajir] PROJECT_CONTEXT step=1
+[trajir] DECISION sealed (plan frozen)
+[trajir] Ready for ExecTool`
   },
-  'crash-recovery': {
-    id: 'crash-recovery',
-    title: 'Crash Recovery',
-    description: 'Powered by DBOS, if your agent crashes mid-execution, it resumes exactly where it left off without re-running previous side-effects.',
-    lines: 18,
-    code: (
-      <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">Workflow</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-[#267f99]">@Workflow</span>(){'\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">multiStepAgentProcess</span>(<span className="text-[#001080]">data</span>: <span className="text-[#267f99]">any</span>) {'{\n'}
-        <span className="text-green-700">{'  // Step 1: Execute and seal\n'}</span>
-        {'  '}<span className="text-blue-600">const</span> <span className="text-[#001080]">step1</span> <span className="text-blue-600">=</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">1</span> {'}, \n'}
-        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">callExternalAPI</span>(<span className="text-[#001080]">data</span>){'\n'}
-        {'  );\n\n'}
-        <span className="text-green-700">{'  // 💥 Simulate a server crash here!\n'}</span>
-        <span className="text-green-700">{'  // When restarted, Step 1 is NOT re-executed.\n\n'}</span>
-        <span className="text-green-700">{'  // Step 2: Resumes safely\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">step</span>: <span className="text-[#098658]">2</span> {'}, \n'}
-        {'    () '}<span className="text-blue-600">=&gt;</span> <span className="text-[#795e26]">processData</span>(<span className="text-[#001080]">step1</span>){'\n'}
-        {'  );\n'}
-        {'}'}
-      </>
-    ),
-    output: `[Trajectory IR] Starting Workflow: multiStepAgentProcess
-[Trajectory IR] Executing Step 1...
-[Trajectory IR] Step 1 sealed.
-[SYSTEM] Process killed (SIGTERM).
----
-[Trajectory IR] Resuming Workflow: multiStepAgentProcess
-[Trajectory IR] Step 1 already sealed. Skipping execution.
-[Trajectory IR] Executing Step 2...
-[Trajectory IR] Workflow complete.`
-  },
-  'human-gate': {
-    id: 'human-gate',
-    title: 'Human-in-the-Loop Gate',
-    description: 'Automatically pause non-idempotent or high-risk operations until a human operator approves them.',
+  'exec': {
+    id: 'exec',
+    title: 'Exec a PURE tool',
+    description: 'Run a classified tool after the seal. PURE tools may recompute safely on resume.',
     lines: 15,
+    filename: 'main.go',
     code: (
       <>
-        <span className="text-blue-600">import</span> {'{ '}
-        <span className="text-[#267f99]">Trajectory</span>, <span className="text-[#267f99]">SecurityLevel</span>
-        {' } '} <span className="text-blue-600">from</span> <span className="text-[#a31515]">'trajectory-ir'</span>;
-        {'\n\n'}
-        <span className="text-blue-600">async</span> <span className="text-blue-600">function</span> <span className="text-[#795e26]">deployToProduction</span>(<span className="text-[#001080]">cluster</span>: <span className="text-[#267f99]">string</span>) {'{\n'}
-        <span className="text-green-700">{'  // This operation is highly destructive/non-idempotent.\n'}</span>
-        <span className="text-green-700">{'  // Execution will pause and wait for human approval.\n'}</span>
-        {'  '}<span className="text-blue-600">return</span> <span className="text-blue-600">await</span> <span className="text-[#267f99]">Trajectory</span>.<span className="text-[#795e26]">seal</span>({'\n'}
-        {'    { '}<span className="text-[#001080]">operation</span>: <span className="text-[#a31515]">'deploy'</span>, <span className="text-[#001080]">cluster</span> {'},\n'}
-        {'    '}<span className="text-blue-600">async</span> () <span className="text-blue-600">=&gt;</span> <span className="text-blue-600">await</span> <span className="text-[#001080]">cloud</span>.<span className="text-[#795e26]">deploy</span>(<span className="text-[#001080]">cluster</span>),{'\n'}
-        {'    { \n'}
-        {'      '}<span className="text-[#001080]">securityLevel</span>: <span className="text-[#267f99]">SecurityLevel</span>.<span className="text-[#0070c1]">HIGH_RISK</span>,{'\n'}
-        {'      '}<span className="text-[#001080]">requireApproval</span>: <span className="text-blue-600">true</span> {'\n'}
-        {'    }\n'}
-        {'  );\n'}
-        {'}'}
+        tool := <span className="text-[#267f99]">resume</span>.<span className="text-[#267f99]">Tool</span>{'{'}{'\n'}
+        {'  '}Name:   <span className="text-[#a31515]">&quot;echo&quot;</span>,{'\n'}
+        {'  '}Effect: <span className="text-[#267f99]">effects</span>.<span className="text-[#0070c1]">PURE</span>,{'\n'}
+        {'  '}Fn: <span className="text-blue-600">func</span>(args map[string]any) (any, error) {'{'}{'\n'}
+        {'    '}<span className="text-blue-600">return</span> args[<span className="text-[#a31515]">&quot;msg&quot;</span>], <span className="text-blue-600">nil</span>{'\n'}
+        {'  '}{'}'},{'\n'}
+        {'}'}\n
+        res, err := <span className="text-[#267f99]">tr</span>.<span className="text-[#795e26]">ExecTool</span>(1, 2, tool, map[string]any{'{'}<span className="text-[#a31515]">&quot;msg&quot;</span>: <span className="text-[#a31515]">&quot;hi&quot;</span>{'}'}){'\n'}
+        fmt.<span className="text-[#795e26]">Println</span>(res.Result) <span className="text-green-700">{'// hi'}</span>{'\n'}
+        <span className="text-[#267f99]">tr</span>.<span className="text-[#795e26]">CommitStep</span>(1, 4)
       </>
     ),
-    output: `[Trajectory IR] Operation: deploy (cluster: production)
-[Trajectory IR] WARNING: High Risk Operation Detected.
-[Trajectory IR] Status: BLOCKED_NEEDS_GATE
-[Trajectory IR] Waiting for human approval...
----
-[Trajectory IR] Operator (admin@org.com) approved.
-[Trajectory IR] Executing closure...
-[Trajectory IR] Deployment successful.`
+    output: `[trajir] TOOL_CALL echo effect=PURE
+[trajir] TOOL_RESULT "hi"
+[trajir] COMMIT_STEP step=1`
+  },
+  'sandbox': {
+    id: 'sandbox',
+    title: 'Sandbox mode',
+    description: 'Same agent loop; dangerous effect classes are rejected before side effects — for demos and CI.',
+    lines: 12,
+    filename: 'shell',
+    code: (
+      <>
+        <span className="text-green-700">{'# From Trajectory-IR/go'}</span>{'\n'}
+        go run ./examples/adoption_host -sandbox{'\n\n'}
+        <span className="text-green-700">{'# Sandbox rejects before side effects:'}</span>{'\n'}
+        <span className="text-green-700">{'#  NON_IDEMPOTENT_WRITE · AGENT_SPAWN · SENSITIVE'}</span>
+      </>
+    ),
+    output: `[adoption_host] mode=sandbox
+[trajir] SANDBOX_FORBIDDEN: NON_IDEMPOTENT_WRITE
+[trajir] No deploy / charge / email executed`
   }
 };
 
-const TSIcon = () => (
-  <svg viewBox="0 0 128 128" width="14" height="14">
-    <path fill="#3178C6" d="M0 0h128v128H0z" />
-    <path fill="#FFF" d="M96.262 108.647c-5.748 5.76-15.006 8.784-25.045 8.784-18.068 0-29.356-8.665-31.259-21.78l12.784-7.585c1.42 7.747 8.016 12.399 18.01 12.399 7.746 0 12.807-3.415 12.807-8.136 0-14.735-37.49-5.918-37.49-31.119 0-11.233 8.706-19.344 24.385-19.344 14.59 0 25.405 6.208 28.167 19.308l-12.706 7.02c-1.426-6.398-6.953-9.52-14.97-9.52-7.067 0-11.164 3.018-11.164 7.641 0 13.972 37.487 5.733 37.487 31.267.001 4.542-1.748 8.162-5.005 11.065zM22.015 43.155V30.134h44.386v13.021H44.316v74.288h-14.36V43.155H22.015z" />
+const GoIcon = () => (
+  <svg viewBox="0 0 128 128" width="14" height="14" aria-hidden="true">
+    <circle cx="64" cy="64" r="64" fill="#00ADD8" />
+    <text x="64" y="78" textAnchor="middle" fontSize="48" fontFamily="sans-serif" fontWeight="700" fill="#fff">Go</text>
   </svg>
 );
 
 export function DashboardShowcase() {
-  const [activeTab, setActiveTab] = useState<TabId>('idempotent');
+  const [activeTab, setActiveTab] = useState<TabId>('seal');
   const [isRunning, setIsRunning] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
 
@@ -192,8 +155,8 @@ export function DashboardShowcase() {
             </div>
             {/* Active Tab */}
             <div className="bg-white px-4 py-1.5 border-t-2 border-t-blue-500 border-x border-x-zinc-200 flex items-center gap-2 -mb-[1px] ml-1">
-              <TSIcon />
-              <span className="text-[12px] font-sans text-zinc-700">example.ts</span>
+              <GoIcon />
+              <span className="text-[12px] font-sans text-zinc-700">{activeSnippet.filename}</span>
             </div>
           </div>
           

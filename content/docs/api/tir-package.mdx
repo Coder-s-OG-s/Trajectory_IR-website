@@ -1,0 +1,35 @@
+---
+title: .tir package
+description: Thin vs fat packages, hash verification, and trajir-pkg-sig-v1 signatures.
+---
+
+A `.tir` package is a portable archive of a trajectory. Another runtime or auditor can verify node identity by content hash.
+
+## Thin vs fat
+
+| Mode | Contents | Use |
+|---|---|---|
+| Thin | Metadata + hashes (artifacts by reference) | Lightweight share / CI |
+| Fat | Metadata + artifact bytes | Full audit / offline replay |
+| Redacted | Sensitive fields stripped/hashed | External sharing |
+
+## Export / import
+
+- Go: `trajir/tir` (`Export` / `Load`, optional `ExportOptions.SignKey`)
+- Python: `export_tir` / `import_tir` (optional `sign_key=`); package helpers under `trajectory_ir.package`
+
+## Signatures (`trajir-pkg-sig-v1`)
+
+Package-level Ed25519 signatures are **shipped** (conformance R09–R11):
+
+- Domain-separated payload digest
+- Optional `SIGNATURE` member
+- Unsigned remains the default unless you sign
+- Cross-language verify (Go ↔ Python) is tested
+
+Sigstore integration remains future work.
+
+## Related
+
+- [Architecture](/docs/architecture)
+- [Adoption host demo](/docs/demos/adoption-host) (`-with-package`)

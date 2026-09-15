@@ -1,28 +1,42 @@
 ---
 title: Changelog
-description: All notable changes to Trajectory IR.
+description: Highlights from the Trajectory IR engine CHANGELOG (0.2.x and recent).
 ---
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Site summary of the engine [CHANGELOG](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/CHANGELOG.md). Prefer the engine file for the full history.
 
 ## [Unreleased]
-### Added
-- Boilerplate directory structure initialization for Phase 1A python components (`pkg/`, `client/`, `drivers/`, `conformance/`, `spec/`).
-- GitHub workflow CI/CD documentation and DCO requirements.
-
-## [v0.1.0-draft] - 2026-07-27
-### Added
-- **Master Specification (`README.md`)**: The authoritative definition of Trajectory IR (Spec v0.2-draft).
-- **Infrastructure Blueprint (`infrastructure.md`)**: Detailed DevOps rules targeting `local`, `server-s3`, and `k8s-fluid` profiles. Outlines the sharded CAS layout and fallback mechanisms.
-- **Community Governance**: Added CNCF `CODE_OF_CONDUCT.md`.
-- **Contribution Guidelines**: Added `CONTRIBUTING.md`, enforcing DCO sign-offs (`Signed-off-by`), Everything Claude Code (ECC) subagent suite integration, and governance accountability rules.
-- **Security Policy**: Added `SECURITY.md`, detailing threat models specific to tool execution (Safety Boundary Bypasses, Seal Tampering, Cache Poisoning) and establishing GitHub Private Advisories for confidential reporting.
-- **Quickstart Guide**: Added `QUICKSTART.md` for rapid prototyping using the embedded DBOS backend and SQLite/FileSystem CAS behind an abstract `@Trajectory.workflow()` wrapper.
 
 ### Changed
-- **Session Storage Consolidation (formerly CLOOP)**: Folded CLOOP's session storage design (mutable short-term state, append-only event log, and sharded CAS artifact store) directly into Trajectory IR's unified database and storage schemas rather than maintaining a separate runtime project.
-- **Declarative Memory Provisioning (formerly CAMI)**: Deferred Kubernetes declarative memory-provisioning claims and storage classes to an optional future phase without blocking core package portability or Phase 1A development.
-- **Durable Execution Rebuild Strategy**: Delegated crash-safe step execution, lease/heartbeat coordination, and deterministic replay to hardened, pluggable third-party backends (**DBOS** and Restate) rather than rebuilding custom execution orchestration engines.
+
+- Sandbox rejects `AGENT_SPAWN` and `SENSITIVE` in addition to `NON_IDEMPOTENT_WRITE`; error string standardized to `SANDBOX_FORBIDDEN`.
+
+## [0.2.2] - 2026-09-07
+
+### Added
+
+- In-tree MCP server (`trajir-mcp`) with status / export / import / verify-signature tools
+- Conformance **R09–R11** for `trajir-pkg-sig-v1` (Go + Python sign/verify, cross-language)
+- Phase CI harden: OpenSSF Scorecard, CodeQL, gitleaks, actionlint, SBOM on release
+- CNCF Sandbox process pack (`MAINTAINERS`, `GOVERNANCE`, `ADOPTERS`, scope docs)
+
+### Changed
+
+- Package signatures documented as **shipped**; Sigstore remains future
+- SECURITY supported versions aligned to **0.2.x**
+
+## [0.2.1] - 2026-08-13
+
+Phase 1C harden-and-adopt patch: live Docker matrix (Postgres + MinIO + Temporal), merge policy / branch protection on `main`, release workflow proof.
+
+## [0.2.0] - 2026-08-11
+
+Phase 1B: **Go is the primary SDK**. Python remains the reference / parity port. Go drivers, adoption host demo, deeper CI, client honesty fixes.
+
+## [0.1.x] - 2026-08
+
+Phase 1A library surface: dual-language IR, portable `.tir`, storage drivers, Restate hooks, sandbox (R06), conformance R01–R08, Temporal as Go production durable backend.
+
+## [v0.1.0-draft] - 2026-07-27
+
+Initial spec, governance, and infrastructure drafts.

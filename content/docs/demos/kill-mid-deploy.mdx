@@ -1,0 +1,26 @@
+---
+title: Kill mid-deploy demo
+description: Crash and resume with a sealed plan — block-and-gate for non-idempotent tools.
+---
+
+## Goal
+
+Interrupt a non-idempotent deploy-style tool and see resume use the sealed plan instead of inventing a new one — without blindly double-firing the write.
+
+## Command
+
+```bash
+cd Trajectory-IR/go
+go run ./examples/kill_mid_deploy -workdir ./demo-data
+```
+
+## What to observe
+
+- Decision sealed before the dangerous tool
+- Crash / kill mid-flight
+- Resume path honors block-and-gate semantics for non-idempotent work
+
+## Related
+
+- [Concepts — resume & block-and-gate](/docs/concepts)
+- [Go Quickstart](/docs/quickstart)

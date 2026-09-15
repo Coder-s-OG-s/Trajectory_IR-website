@@ -1,7 +1,5 @@
 import Link from 'next/link';
-import { DashboardShowcase } from '@/components/dashboard-showcase';
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 
 export default function Home() {
   return (
@@ -17,7 +15,7 @@ export default function Home() {
           {/* Left Side: Headline */}
           <div className="w-full lg:w-[30%] flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
             <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1] drop-shadow-lg">
-              Build AI systems grounded in <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#DBEAFE] to-[#93C5FD]">crash-safe execution.</span>
+              Portable IR for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#DBEAFE] to-[#93C5FD]">agent trajectories.</span>
             </h1>
           </div>
 
@@ -26,7 +24,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-[#93C5FD] blur-[100px] opacity-20 rounded-full transform scale-110"></div>
             <img 
               src="/logo_transparent.png" 
-              alt="Trajectory IR Premium Logo" 
+              alt="Trajectory IR logo" 
               className="w-56 h-56 lg:w-80 lg:h-80 object-contain relative z-10 drop-shadow-[0_0_50px_rgba(147,197,253,0.3)]"
             />
           </div>
@@ -34,7 +32,7 @@ export default function Home() {
           {/* Right Side: Supporting text & CTAs */}
           <div className="w-full lg:w-[30%] flex flex-col items-center lg:items-end text-center lg:text-right order-3 lg:order-3 pt-4 lg:pt-0">
             <p className="text-lg text-gray-300 leading-relaxed drop-shadow-md mb-8">
-              Wrap, seal, and recover every agent decision. Never lose state. Never duplicate side-effects. The ultimate durability engine for production AI.
+              Seal decisions. Classify effects. Export a hash-verifiable .tir package — on top of Temporal, DBOS, or Restate.
             </p>
 
             <div className="flex flex-col items-center lg:items-end gap-4 w-full">
@@ -42,14 +40,14 @@ export default function Home() {
                 href="/docs/quickstart"
                 className="bg-[rgba(255,255,255,0.85)] backdrop-blur-xl border border-white/40 text-[#060B19] hover:bg-white w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(191,219,254,0.25)] hover:shadow-[0_4px_32px_rgba(191,219,254,0.4)] hover:-translate-y-[1px]"
               >
-                Start Building
+                Start with Go
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
               </Link>
               <Link
                 href="/docs"
                 className="glass-pill w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-medium transition-all flex items-center justify-center hover:bg-white/10"
               >
-                View Documentation
+                Read the docs
               </Link>
             </div>
           </div>
@@ -64,8 +62,10 @@ export default function Home() {
         {/* Left Side: GitHub */}
         <div className="absolute left-8 lg:left-12">
           <Link 
-            href="https://github.com" 
+            href="https://github.com/Coder-s-OG-s/Trajectory-IR" 
             target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Trajectory IR on GitHub"
             className="glass-pill pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center text-[#0A1128] hover:text-[#060B19] transition-all hover:-translate-y-1 group"
           >
             <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
@@ -76,20 +76,22 @@ export default function Home() {
 
         {/* Center: Demo Pill */}
         <Link 
-          href="/demo" 
+          href="/docs/demos" 
           className="glass-pill pointer-events-auto px-8 py-3.5 rounded-full flex items-center gap-3 text-sm font-semibold text-[#0A1128] transition-all group hover:-translate-y-1"
         >
-          Get started with demo
+          Try a demo
           <svg className="w-4 h-4 group-hover:-translate-y-1 transition-transform text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
           </svg>
         </Link>
 
-        {/* Right Side: Discord */}
+        {/* Right Side: GitHub Discussions (same control chrome; no Discord invite yet) */}
         <div className="absolute right-8 lg:right-12">
           <Link 
-            href="https://discord.com" 
+            href="https://github.com/Coder-s-OG-s/Trajectory-IR/discussions" 
             target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Join GitHub Discussions"
             className="glass-pill pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center text-[#0A1128] hover:text-[#060B19] transition-all hover:-translate-y-1 group"
           >
             <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
