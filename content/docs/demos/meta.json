@@ -1,0 +1,9 @@
+{
+  "title": "Demos",
+  "pages": [
+    "index",
+    "adoption-host",
+    "sandbox",
+    "kill-mid-deploy"
+  ]
+}

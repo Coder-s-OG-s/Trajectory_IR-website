@@ -81,14 +81,23 @@ function getAllDocFiles(dir: string, baseDir: string = dir): DocFile[] {
 const PREFERRED_ORDER = [
   '/docs',
   '/docs/quickstart',
-  '/docs/infrastructure',
-  '/docs/lifecycle',
-  '/docs/security',
+  '/docs/quickstart-python',
+  '/docs/how-it-fits',
+  '/docs/concepts',
+  '/docs/demos',
+  '/docs/demos/adoption-host',
+  '/docs/demos/sandbox',
+  '/docs/demos/kill-mid-deploy',
+  '/docs/architecture',
   '/docs/api',
-  '/docs/api/trajectory',
+  '/docs/api/go',
+  '/docs/api/python',
   '/docs/api/effect-class',
-  '/docs/api/decorators',
-  '/docs/api/tir-export',
+  '/docs/api/tir-package',
+  '/docs/cli',
+  '/docs/contributing',
+  '/docs/adopters',
+  '/docs/security',
   '/docs/changelog',
   '/docs/privacy',
   '/docs/terms',
@@ -120,7 +129,7 @@ export function getAggregatedDocs() {
 > Total Pages: ${allFiles.length} | Generated for AI Agent Analysis & Prompting
 
 This document aggregates the complete official documentation of Trajectory IR.
-Trajectory IR is a next-generation durable execution system for AI agents that seals tool executions using RFC 8785 (JCS) & SHA256, guaranteeing 100% crash recovery and zero duplicate side-effects.
+Trajectory IR is a portable, hash-verifiable intermediate representation for agent execution trajectories. It sits on top of Temporal / DBOS / Restate (it does not replace them). Go is primary; Python is the reference / parity port.
 
 ---
 ## Table of Contents

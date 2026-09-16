@@ -1,71 +1,70 @@
 ---
 title: Changelog
-description: All notable changes to Trajectory IR.
+description: Highlights from the Trajectory IR engine CHANGELOG (0.2.x and recent).
 ---
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Site summary of the engine [CHANGELOG](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/CHANGELOG.md). Prefer the engine file for the full history.
 
 ## [Unreleased]
+
 ### Changed
+
 - Sandbox error string renamed from `SANDBOX_REJECTS_NON_IDEMPOTENT_WRITE` to `SANDBOX_FORBIDDEN`. Callers matching the old substring should update.
 - Sandbox mode now rejects `AGENT_SPAWN` and `SENSITIVE` effects, in addition to `NON_IDEMPOTENT_WRITE`.
 
 ## [v0.2.2] - 2026-09-07
+
 ### Added
-- **MCP**: an in-tree Trajectory IR server (`go/trajir/mcp`, `go/cmd/trajir-mcp`) with tools `trajectory_status`, `trajectory_export_tir`, `trajectory_import_tir`, and `trajectory_verify_signature`.
-- **Package signatures (`trajir-pkg-sig-v1`)**: optional Ed25519 signing and verification on both SDKs. Go's `trajir/tir` package gets `Sign` / `Verify` and an `ExportOptions.SignKey`; Python gets `sign_package` / `verify_package` and `export_tir(..., sign_key=)`. Load verifies a present `SIGNATURE` member on either side; unsigned packages stay valid by default. Go and Python golden vectors match each other.
-- **CI hardening**: OpenSSF Scorecard, CodeQL for Go and Python, gitleaks secret scanning, actionlint, a zizmor advisory scan, Go race testing on core packages, CODEOWNERS, and a CycloneDX SBOM on release tags.
+
+- **MCP**: an in-tree Trajectory IR server (`go/trajir/mcp`, `go/cmd/trajir-mcp`) with tools `trajectory_status`, `trajectory_export_tir`, `trajectory_import_tir`, and `trajectory_verify_signature`. See also [CLI (trajirctl)](/docs/cli).
+- **Package signatures (`trajir-pkg-sig-v1`)**: optional Ed25519 signing and verification on both SDKs (conformance R09–R11). Go `trajir/tir` gets `Sign` / `Verify` and `ExportOptions.SignKey`; Python gets `sign_package` / `verify_package` and `export_tir(..., sign_key=)`. Load verifies a present `SIGNATURE` member; unsigned packages stay valid by default. Go and Python golden vectors match.
+- **CI hardening**: OpenSSF Scorecard, CodeQL for Go and Python, gitleaks, actionlint, zizmor, Go race on core packages, CODEOWNERS, CycloneDX SBOM on release tags.
 - CNCF Sandbox process docs: `MAINTAINERS.md`, `GOVERNANCE.md`, `docs/ROADMAP.md`, `ADOPTERS.md`, `docs/SCOPE_AND_NON_GOALS.md`.
 
 ### Changed
-- Go: pulled the generic path-safety helpers (`CanonicalizeDir`, `ResolveViaExistingAncestor`, `IsSubpath`, `RequireNonSymlinkLeaf`) out of `go/trajir/mcp` into their own `go/trajir/workdir` package. `trajir-mcp`'s workspace confinement behavior is unchanged, it just calls the extracted package now.
-- GitHub Actions are pinned to commit digests with version comments, and `main` now requires the secret scan and workflow lint checks to pass.
+
+- Go: path-safety helpers moved into `go/trajir/workdir`; `trajir-mcp` confinement behavior unchanged.
+- GitHub Actions pinned to commit digests; `main` requires secret scan and workflow lint.
+- Package signatures documented as **shipped**; Sigstore remains future.
+- SECURITY supported versions aligned to **0.2.x**.
 
 ## [v0.2.1] - 2026-08-13
+
 Phase 1C harden-and-adopt patch: merge gates on public `main`, live Docker matrix tooling, and a release workflow proof cut.
 
 ### Added
+
 - `docker-compose.live.yml` and `docs/LIVE_INTEGRATION_DOCKER.md` for a local Postgres + MinIO + Temporal live matrix.
 - Classic branch protection on `main` with required CI checks.
 - `scripts/run_live_matrix.sh` / `.ps1` for local live smoke testing.
 
 ### Changed
+
 - Live compose: dropped a broken `minio/mc` one-shot step in favor of creating the bucket via Python.
 
 ## [v0.2.0] - 2026-08-11
-Phase 1B: Go is now the primary SDK and onboarding path. Python remains the reference and parity port.
+
+Phase 1B: **Go is the primary SDK** and onboarding path. Python remains the reference and parity port.
 
 ### Added
+
 - Go adoption host demo with an optional CAS thin package.
-- Go Postgres NodeLog (`trajir/postgres`) with offline unit tests.
-- Go S3 compatible CAS (`ObjectAPI`) and an AWS SDK v2 `NewS3StoreFromEnv` helper.
-- **CI**: split into a fast gate (static analysis, unit tests) that runs on every push and a slower deep gate (durable conformance, cross-language round-trip) that only starts once the fast gate is green. The fast gate adds `go vet`, `gofmt -l`, and the Go unit suite alongside the existing Python checks, and the Go coverage floor is raised to 70% (later, later again to 80%). A Python/Go `.tir` cross-language round-trip gate exports a trajectory with one SDK and imports it with the other, checking the decoded nodes match.
+- Go Postgres NodeLog (`trajir/postgres`) and S3-compatible CAS.
+- CI fast/deep gates, Python/Go `.tir` cross-language round-trip, Go coverage floor raised.
 
 ### Changed
-- Go client `Resume` now requires existing NodeLog history.
-- Go client logs `TOOL_CALL` / `TOOL_RESULT` for non-gated tools, matching Python.
+
+- Go client `Resume` requires existing NodeLog history.
+- Go client logs `TOOL_CALL` / `TOOL_RESULT` for non-gated tools (parity with Python).
 
 ### Fixed
+
 - `govulncheck` clean for pgx and aws-sdk-go-v2 S3 on the Phase 1B path.
 
-## [v0.1.1] - 2026-08-12
-### Added
-- Boilerplate directory structure initialization for Phase 1A python components (`pkg/`, `client/`, `drivers/`, `conformance/`, `spec/`).
-- GitHub workflow CI/CD documentation and DCO requirements.
+## [0.1.x] - 2026-08
+
+Phase 1A library surface: dual-language IR, portable `.tir`, storage drivers, Restate hooks, sandbox (R06), conformance R01–R08, Temporal as Go production durable backend.
 
 ## [v0.1.0-draft] - 2026-07-27
-### Added
-- **Master Specification (`README.md`)**: The authoritative definition of Trajectory IR (Spec v0.2-draft).
-- **Infrastructure Blueprint (`infrastructure.md`)**: Detailed DevOps rules targeting `local`, `server-s3`, and `k8s-fluid` profiles. Outlines the sharded CAS layout and fallback mechanisms.
-- **Community Governance**: Added CNCF `CODE_OF_CONDUCT.md`.
-- **Contribution Guidelines**: Added `CONTRIBUTING.md`, enforcing DCO sign-offs (`Signed-off-by`), Everything Claude Code (ECC) subagent suite integration, and governance accountability rules.
-- **Security Policy**: Added `SECURITY.md`, detailing threat models specific to tool execution (Safety Boundary Bypasses, Seal Tampering, Cache Poisoning) and establishing GitHub Private Advisories for confidential reporting.
-- **Quickstart Guide**: Added `QUICKSTART.md` for rapid prototyping using the embedded DBOS backend and SQLite/FileSystem CAS behind an abstract `@Trajectory.workflow()` wrapper.
 
-### Changed
-- **Session Storage Consolidation (formerly CLOOP)**: Folded CLOOP's session storage design (mutable short-term state, append-only event log, and sharded CAS artifact store) directly into Trajectory IR's unified database and storage schemas rather than maintaining a separate runtime project.
-- **Declarative Memory Provisioning (formerly CAMI)**: Deferred Kubernetes declarative memory-provisioning claims and storage classes to an optional future phase without blocking core package portability or Phase 1A development.
-- **Durable Execution Rebuild Strategy**: Delegated crash-safe step execution, lease/heartbeat coordination, and deterministic replay to hardened, pluggable third-party backends (**DBOS** and Restate) rather than rebuilding custom execution orchestration engines.
+Initial spec, governance, and infrastructure drafts.

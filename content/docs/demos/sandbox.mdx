@@ -1,0 +1,25 @@
+---
+title: Sandbox demo
+description: Same adoption-host agent with dangerous effect classes blocked.
+---
+
+## Goal
+
+Run the same agent path in sandbox mode so demos and CI cannot charge, email, or deploy for real.
+
+## Command
+
+```bash
+cd Trajectory-IR/go
+go run ./examples/adoption_host -sandbox
+```
+
+## What to observe
+
+- Dangerous classes (`NON_IDEMPOTENT_WRITE`, `AGENT_SPAWN`, `SENSITIVE`) are rejected before side effects
+- Safer path for teaching and automated runs
+
+## Related
+
+- [EffectClass](/docs/api/effect-class)
+- [Concepts](/docs/concepts)

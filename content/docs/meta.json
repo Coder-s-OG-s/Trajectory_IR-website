@@ -1,17 +1,22 @@
 {
   "title": "Documentation",
   "pages": [
-    "---Getting Started---",
+    "---Start here---",
     "index",
     "quickstart",
-    "---Architecture---",
-    "infrastructure",
-    "lifecycle",
-    "---SDK Reference---",
+    "quickstart-python",
+    "how-it-fits",
+    "---Learn---",
+    "concepts",
+    "demos",
+    "architecture",
+    "---SDK---",
     "api",
     "---CLI & MCP---",
     "cli",
     "---Community---",
+    "contributing",
+    "adopters",
     "security",
     "changelog"
   ]

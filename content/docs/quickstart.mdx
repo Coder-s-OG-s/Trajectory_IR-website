@@ -1,29 +1,22 @@
 ---
-title: Quickstart
-description: Get up and running with Trajectory IR in under 5 minutes, in Go or Python.
+title: Quickstart (Go)
+description: Primary onboarding path — clone Trajectory IR, run Go tests, and seal a minimal trajectory.
 ---
 
-Welcome to Trajectory IR! Go is the primary SDK and the recommended starting point if you're new to the project; Python remains fully supported as the reference implementation. Pick whichever matches your stack below.
+Go is the **primary** SDK. Prefer this path for new work. Python is a [reference / parity port](/docs/quickstart-python).
 
-Trajectory IR acts as a semantic layer for AI agents, wrapping your agent's execution history in a portable, crash-safe format over pluggable durable execution backends: Temporal for Go, or DBOS/Restate for Python.
+## Prerequisites
+
+- Go **1.25.x**
+- Git
 
 ---
 
 import { Steps } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
-
-<Tabs items={['Go', 'Python']}>
-
-<Tab value="Go">
-
-## Prerequisites
-
-- Go 1.25+
-- Git
 
 <Steps>
 
-### 1. Clone and run the test suite
+### 1. Clone and test
 
 ```bash
 git clone https://github.com/Coder-s-OG-s/Trajectory-IR.git
@@ -31,7 +24,9 @@ cd Trajectory-IR/go
 go test ./...
 ```
 
-### 2. Your first durable step
+### 2. Minimal client
+
+Save as `main.go` under a module that depends on the engine repo (or run from `Trajectory-IR/go` examples). This uses the real client surface: `OpenTrajectory` → `Project` → `SealDecision` → `ExecTool` → `CommitStep`.
 
 ```go
 package main
@@ -88,112 +83,28 @@ func main() {
 }
 ```
 
-### 3. Try the runnable demos instead
+### 3. Optional demos
 
-No paid model API needed, these run against a stub:
+From `Trajectory-IR/go`:
 
 ```bash
 go run ./examples/adoption_host
+go run ./examples/adoption_host -sandbox
+go run ./examples/adoption_host -with-package
 go run ./examples/kill_mid_deploy -workdir ./demo-data
 ```
 
-</Steps>
-
-## What's Next?
-- Full walkthrough, live Temporal/Postgres/MinIO setup, and more demos: [go/QUICKSTART.md](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/go/QUICKSTART.md)
-- Inspect a workdir from the terminal, or wire an agent host up to Trajectory IR over MCP, with [`trajirctl`](https://github.com/Coder-s-OG-s/trajirctl)
-- Read the [Infrastructure Design](/docs/infrastructure) to learn how to scale this to `server-s3` or `k8s-fluid`
-
-</Tab>
-
-<Tab value="Python">
-
-## Prerequisites
-
-- Python 3.11+
-- `pip` or [Hatch](https://hatch.pypa.io/) (recommended)
-
-<Steps>
-
-### 1. Installation
-
-Install the Trajectory IR SDK and the official `dbos` durable execution backend package:
-
-```bash
-pip install trajectory-ir dbos
-```
-
-### 2. Initialize the Local Environment
-
-Trajectory IR requires a relational store for its metadata (Node tracking, Seals) and a Content Addressed Storage (CAS) layer for artifacts.
-
-In the `local` profile, we use SQLite and the local filesystem:
-
-```bash
-# Initialize the local SQLite DB and sharded CAS directory
-python -m trajectory_ir init --profile local
-```
-This command creates `~/.trajectory-ir/local.db` and `~/.trajectory-ir/cas/`.
-
-### 3. Your First Durable Agent
-
-Create a file called `agent.py`. In this example, we wrap a standard tool call inside Trajectory IR's durable execution context.
-
-<Callout type="info">
-**Pluggable Backend Architecture Note:** Notice that your code imports solely from `trajectory_ir`. Under the hood, `@Trajectory.workflow()` transparently delegates crash detection and replay to the configured durable backend (such as DBOS in Phase 1A or Restate). This guarantees that switching backends in the future requires **zero modifications** to your application logic!
-</Callout>
-
-```python
-from trajectory_ir.runtime import Trajectory
-from trajectory_ir.effects import EffectClass
-
-# 1. Initialize the Trajectory runtime (auto-launches configured backend like DBOS)
-Trajectory.launch()
-
-# 2. Define a Tool with strict Effect Classification
-@Trajectory.tool(effect_class=EffectClass.NON_IDEMPOTENT_WRITE)
-def deploy_server(server_name: str):
-    print(f"Deploying {server_name}...")
-    return f"Success: {server_name} is live."
-
-# 3. Create an Agent Workflow using the backend-agnostic decorator
-@Trajectory.workflow()
-def run_agent():
-    # Start a new semantic Trajectory
-    traj = Trajectory.start(tenant_id="demo-user")
-    
-    # Execute the tool (Trajectory IR wraps this in a crash-safe durable step)
-    result = deploy_server("prod-web-01")
-    
-    # Append the result to the Trajectory Log
-    traj.append_observation(result)
-    
-    # Export the trajectory as a portable .tir package
-    tir_package = traj.export(mode="thin")
-    print(f"Exported Trajectory IR: {tir_package}")
-
-if __name__ == "__main__":
-    run_agent()
-```
-
-### 4. Run and Verify
-
-Execute your agent:
-
-```bash
-python agent.py
-```
-
-<Callout type="info">
-Because of the **Block-and-Gate** policy, if your agent crashes inside `deploy_server`, the next time you run `python agent.py`, it will recognize the interrupted `NON_IDEMPOTENT_WRITE` and halt execution, requesting human intervention rather than blindly repeating the destructive action.
-</Callout>
+See [Demos](/docs/demos) for what each command shows.
 
 </Steps>
 
-## What's Next?
-- Read the [Infrastructure Design](/docs/infrastructure) to learn how to scale this to `server-s3` or `k8s-fluid`.
-- Read the [Contributing Guide](https://github.com/Coder-s-OG-s/Trajectory_IR-website/blob/main/CONTRIBUTING.md) if you want to help build the project!
+## What's next?
 
-</Tab>
+- [Core concepts](/docs/concepts) — seals, effect classes, `.tir`, sandbox
+- [Demos](/docs/demos)
+- [CLI (trajirctl) & MCP](/docs/cli) — inspect a workdir or wire an MCP host
+- [Python reference quickstart](/docs/quickstart-python)
+- [Architecture](/docs/architecture)
+- [Contributing](/docs/contributing) — engine guide uses DCO (`git commit -s`)
 
-</Tabs>
+Engine source: [go/QUICKSTART.md](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/go/QUICKSTART.md)

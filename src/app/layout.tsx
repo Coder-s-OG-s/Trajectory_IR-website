@@ -26,7 +26,7 @@ const newsreader = Newsreader({
 
 export const metadata = {
   title: 'Trajectory IR Documentation',
-  description: 'An open source durable semantic layer for autonomous AI agents.',
+  description: 'Portable, hash-verifiable intermediate representation for agent execution trajectories.',
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
@@ -34,14 +34,14 @@ export const metadata = {
   },
   openGraph: {
     title: 'Trajectory IR Documentation',
-    description: 'An open source durable semantic layer for autonomous AI agents.',
+    description: 'Portable, hash-verifiable intermediate representation for agent execution trajectories.',
     siteName: 'Trajectory IR',
     images: [{ url: '/logo.png', width: 512, height: 512 }],
   },
   twitter: {
     card: 'summary' as const,
     title: 'Trajectory IR Documentation',
-    description: 'An open source durable semantic layer for autonomous AI agents.',
+    description: 'Portable, hash-verifiable intermediate representation for agent execution trajectories.',
     images: ['/logo.png'],
   },
 };

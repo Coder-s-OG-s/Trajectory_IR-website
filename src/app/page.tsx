@@ -1,391 +1,108 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { DashboardShowcase } from '@/components/dashboard-showcase';
 import { SiteHeader } from '@/components/site-header';
-import { CursorGlow } from '@/components/cursor-glow';
-import { DustParticles } from '@/components/dust-particles';
-import { ProblemStatement } from '@/components/problem-statement';
-import { FeaturePillars } from '@/components/feature-pillars';
-
+import { SiteFooter } from '@/components/site-footer';
 
 export default function Home() {
-  const [showDemoModal, setShowDemoModal] = useState(false);
-  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const openDemoModal = () => {
-    setIsAnimatingOut(false);
-    setShowDemoModal(true);
-  };
-
-  const closeDemoModal = () => {
-    setIsAnimatingOut(true);
-    setTimeout(() => {
-      setShowDemoModal(false);
-      setIsAnimatingOut(false);
-    }, 240);
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showDemoModal) {
-        closeDemoModal();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showDemoModal]);
-
-  // Smooth scroll-triggered background color shift mapped directly to scroll progress
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollY = window.scrollY;
-          // Smoothly shifts background to dark shade as user scrolls into main content
-          const start = 40;
-          const end = 650;
-          const progress = Math.min(Math.max((scrollY - start) / (end - start), 0), 1);
-          const darkness = (progress * 0.94).toFixed(3);
-          const infinityOpacity = (0.5 * (1 - progress)).toFixed(3);
-          if (containerRef.current) {
-            containerRef.current.style.setProperty('--scroll-darkness', darkness);
-            containerRef.current.style.setProperty('--infinity-opacity', infinityOpacity);
-          }
-          document.documentElement.style.setProperty('--scroll-darkness', darkness);
-          document.documentElement.style.setProperty('--infinity-opacity', infinityOpacity);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div ref={containerRef} className="hero-gradient-bg text-white font-sans antialiased min-h-screen w-screen overflow-x-clip relative select-none flex flex-col justify-between">
-
-      {/* Background Ambient Layers (Fixed) */}
-      <CursorGlow />
-      <DustParticles />
-
-      {/* Aesthetic Compact Ethereal Infinity Symbol Background Element (Positioned at z-[2] above dark transition, smoothly fades out on scroll) */}
-      <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[2] w-[460px] sm:w-[560px] lg:w-[660px] h-[320px] transition-opacity duration-150 ease-out"
-        style={{ opacity: 'var(--infinity-opacity, 0.5)' }}
-        aria-hidden="true"
-      >
-        <svg viewBox="0 0 800 400" className="w-full h-full">
-          <defs>
-            {/* Ethereal Silk Plasma Gradient */}
-            <linearGradient id="aestheticSilkPlasma" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-              <stop offset="30%" stopColor="#7dd3fc" stopOpacity="0.85" />
-              <stop offset="50%" stopColor="#ffffff" stopOpacity="0.95" />
-              <stop offset="75%" stopColor="#38bdf8" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#818cf8" stopOpacity="0.85" />
-            </linearGradient>
-
-            {/* Soft Ambient Cyan/Blue Caustic Accent */}
-            <linearGradient id="aestheticAmberCaustic" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.65" />
-              <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.75" />
-              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.7" />
-            </linearGradient>
-
-            {/* Ultra-Soft Ethereal Blur Filters */}
-            <filter id="etherealSoftGlow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="20" result="blur1" />
-              <feGaussianBlur stdDeviation="8" result="blur2" />
-              <feMerge>
-                <feMergeNode in="blur1" />
-                <feMergeNode in="blur2" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <filter id="etherealAmbientHalo" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="36" />
-            </filter>
-          </defs>
-
-          {/* Deep Soft Halo Ambient Light */}
-          <path
-            d="M 400,200 C 250,60 100,60 100,200 C 100,340 250,340 400,200 C 550,60 700,60 700,200 C 700,340 550,340 400,200 Z"
-            fill="none"
-            stroke="url(#aestheticAmberCaustic)"
-            strokeWidth="36"
-            filter="url(#etherealAmbientHalo)"
-            className="opacity-40"
-          />
-
-          {/* Secondary Soft Silk Ribbon Layer */}
-          <path
-            d="M 400,200 C 250,60 100,60 100,200 C 100,340 250,340 400,200 C 550,60 700,60 700,200 C 700,340 550,340 400,200 Z"
-            fill="none"
-            stroke="url(#aestheticAmberCaustic)"
-            strokeWidth="12"
-            strokeLinecap="round"
-            filter="url(#etherealSoftGlow)"
-            className="opacity-75"
-          />
-
-          {/* Primary Ethereal Luminous Silk Stream */}
-          <path
-            d="M 400,200 C 250,60 100,60 100,200 C 100,340 250,340 400,200 C 550,60 700,60 700,200 C 700,340 550,340 400,200 Z"
-            fill="none"
-            stroke="url(#aestheticSilkPlasma)"
-            strokeWidth="18"
-            strokeLinecap="round"
-            filter="url(#etherealSoftGlow)"
-            className="opacity-80"
-          />
-
-          {/* Core Fine Luminous Thread */}
-          <path
-            d="M 400,200 C 250,60 100,60 100,200 C 100,340 250,340 400,200 C 550,60 700,60 700,200 C 700,340 550,340 400,200 Z"
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="5"
-            strokeLinecap="round"
-            className="opacity-90"
-          />
-
-          {/* Subtle Delicate Star Embers */}
-          <circle cx="210" cy="115" r="2" fill="#ffffff" className="opacity-80" />
-          <circle cx="590" cy="285" r="2.5" fill="#7dd3fc" filter="url(#etherealSoftGlow)" />
-          <circle cx="390" cy="190" r="1.5" fill="#ffffff" />
-          <circle cx="410" cy="210" r="2" fill="#7dd3fc" />
-        </svg>
-      </div>
-
-      {/* Hero Section Container (100vh Single Screen View) */}
-      <div className="relative z-10 min-h-screen flex flex-col justify-between">
-        {/* Floating Nav Header */}
-        <SiteHeader />
-
-        {/* Hero Section Container */}
-        <div className="min-h-[calc(100vh-140px)] flex flex-col justify-between">
-          <main className="w-full max-w-[1280px] mx-auto px-8 sm:px-12 flex-1 flex items-center my-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full my-auto">
-
-              {/* Left Column: Headline matching Image 2 reference */}
-              <div className="lg:col-span-7 flex flex-col text-left space-y-0">
-                <a
-                  href="https://github.com/Coder-s-OG-s/Trajectory-IR"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-sky-200/90 hover:text-white transition-colors no-underline mb-4 w-fit"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-300" aria-hidden="true"></span>
-                  Open Source · Apache-2.0 · View on GitHub
-                </a>
-                <h1
-                  className="leading-[1.06] text-4xl sm:text-5xl md:text-6xl lg:text-[4rem]"
-                  style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.035em' }}
-                >
-                  <span className="text-white font-semibold block">An open IR</span>
-                  <span className="text-white font-semibold block">for agent</span>
-                  <span className="text-sky-200/85 font-medium block">execution</span>
-                  <span className="text-sky-200/85 font-medium block">trajectories.</span>
-                </h1>
-              </div>
-
-              {/* Right Column: Text & Liquid Glass CTAs Pushed to Right Side */}
-              <div className="lg:col-span-5 flex flex-col items-start lg:items-end text-left lg:text-right space-y-6 pl-0 lg:pl-6">
-                <p
-                  className="text-base sm:text-lg text-sky-100/90 leading-relaxed max-w-md font-normal"
-                  style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
-                >
-                  A portable intermediate representation for agent execution trajectories, built on top of existing durable execution engines rather than replacing them. Phase 1B is underway, with Go as the primary SDK.
-                </p>
-
-                <div className="flex flex-col items-start lg:items-end gap-3.5 pt-1 w-full max-w-xs">
-                  <Link
-                    href="/docs/quickstart"
-                    className="liquid-glass-pill-solid w-full sm:w-auto px-8 py-3.5 rounded-full text-base font-semibold text-[#06162d] no-underline shadow-lg flex items-center justify-center gap-2 group"
-                    style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
-                  >
-                    <span>Start Building</span>
-                    <span className="text-lg transition-transform duration-200 group-hover:translate-x-1">→</span>
-                  </Link>
-
-                  <Link
-                    href="/docs"
-                    className="liquid-glass-pill w-full sm:w-auto px-8 py-3.5 rounded-full text-base font-medium text-white no-underline flex items-center justify-center"
-                    style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
-                  >
-                    View Documentation
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </main>
-
-          {/* Bottom Floating Liquid Glass Capsule Bar */}
-          <div className="pb-8 flex items-center justify-center pointer-events-none">
-            <button
-              onClick={openDemoModal}
-              className="liquid-glass-dock px-7 py-3 flex items-center gap-4 text-white text-sm font-medium no-underline shadow-2xl group pointer-events-auto cursor-pointer"
-              style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.015em' }}
-            >
-              <img
-                src="/brand-logo.png"
-                alt="Trajectory IR Logo"
-                className="w-5 h-5 object-contain rounded group-hover:scale-110 transition-transform duration-300 shadow-sm"
-              />
-              <span className="opacity-95 tracking-wide font-normal">
-                Get started with demo
-              </span>
-              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-white group-hover:text-[#081d3a] transition-all">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M7 11V3M7 3L3 7M7 3L11 7" />
-                </svg>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Problem Statement: Scroll-Triggered Progressive Typewriter Writing Animation */}
-        <ProblemStatement />
-
-        {/* Feature Pillars: Core Architecture & Guarantees (The Problem We Are Solving) */}
-        <FeaturePillars />
+    <div className="relative min-h-screen font-sans antialiased flex flex-col bg-[linear-gradient(180deg,#060B19_0%,#0A1128_30%,#111D4A_50%,#93C5FD_80%,#BFDBFE_100%)] text-white overflow-x-hidden">
+      <SiteHeader />
 
 
-
-        {/* FROSTED LIQUID GLASS CURTAIN SHEET FOOTER (Matching user reference image 1:1) */}
-        <footer className="liquid-glass-footer-curtain w-full mt-12 pt-16 pb-12 px-8 sm:px-16 text-white border-t border-white/20">
-          <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 pb-16">
-
-            {/* Column 1: Brand Logo & Tagline */}
-            <div className="md:col-span-5 flex flex-col space-y-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/brand-logo.png"
-                  alt="Trajectory IR Logo"
-                  className="w-7 h-7 object-contain rounded-md shadow-md"
-                />
-                <span className="text-3xl font-bold tracking-tight text-white" style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}>
-                  trajectory<span className="text-sky-300 font-normal">_ir</span>
-                </span>
-              </div>
-              <p className="text-sky-100/70 text-sm max-w-sm leading-relaxed font-normal">
-                Trajectory IR creates crash-safe, durable execution infrastructure for AI agents. Never lose state. Never duplicate side-effects.
-              </p>
-            </div>
-
-            {/* Column 2: How It Works */}
-            <div className="md:col-span-2 flex flex-col space-y-3.5">
-              <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">How It Works</h4>
-              <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Core IR Spec</Link></li>
-                <li><Link href="/docs/infrastructure" className="hover:text-white transition-colors no-underline">State Replay</Link></li>
-                <li><Link href="/docs/changelog" className="hover:text-white transition-colors no-underline">Crash-Safe Recovery</Link></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Company */}
-            <div className="md:col-span-2 flex flex-col space-y-3.5">
-              <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">Company</h4>
-              <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Terms</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Privacy</Link></li>
-              </ul>
-            </div>
-
-            {/* Column 4: Socials */}
-            <div className="md:col-span-3 flex flex-col space-y-3.5">
-              <h4 className="text-sm font-semibold text-white/90 tracking-wide uppercase">Socials</h4>
-              <ul className="space-y-2.5 text-sm text-sky-100/70">
-                <li><a href="https://github.com/Coder-s-OG-s" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">GitHub</a></li>
-              </ul>
-            </div>
+      {/* Hero Section */}
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-40 lg:pt-48 pb-32 flex flex-col justify-center">
+        
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-8 w-full">
+          
+          {/* Left Side: Headline */}
+          <div className="w-full lg:w-[30%] flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
+            <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1] drop-shadow-lg">
+              Portable IR for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#DBEAFE] to-[#93C5FD]">agent trajectories.</span>
+            </h1>
           </div>
 
-          {/* Bottom Copyright Row */}
-          <div className="max-w-[1280px] mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sky-100/50 gap-2">
-            <span>Trajectory IR — Apache-2.0 licensed</span>
-            <div className="flex items-center gap-6">
-              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR/issues" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
-                Report an issue
-              </a>
-              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
-                Contributing guide
-              </a>
-              <a href="https://github.com/Coder-s-OG-s/Trajectory-IR" target="_blank" rel="noreferrer" className="hover:text-white transition-colors no-underline">
-                View source on GitHub →
-              </a>
-              <a href="https://www.bestpractices.dev/projects/14075" target="_blank" rel="noreferrer" className="hover:opacity-80 transition-opacity inline-flex items-center">
-                <img src="https://www.bestpractices.dev/projects/14075/badge" alt="OpenSSF Best Practices" className="h-5" />
-              </a>
-            </div>
+          {/* Center: Huge Premium Logo */}
+          <div className="w-full lg:w-[40%] flex justify-center relative order-1 lg:order-2 mb-8 lg:mb-0">
+            <div className="absolute inset-0 bg-[#93C5FD] blur-[100px] opacity-20 rounded-full transform scale-110"></div>
+            <img 
+              src="/logo_transparent.png" 
+              alt="Trajectory IR logo" 
+              className="w-56 h-56 lg:w-80 lg:h-80 object-contain relative z-10 drop-shadow-[0_0_50px_rgba(147,197,253,0.3)]"
+            />
           </div>
 
-          {/* Monumental Liquid Glass Display Typography */}
-          <div
-            className="w-full overflow-hidden flex items-center justify-center pointer-events-none relative pt-4 pb-0 mt-4 h-[100px] sm:h-[150px] md:h-[200px] lg:h-[240px]"
-            aria-hidden="true"
-          >
-            <h2
-              className="text-[7.5vw] sm:text-[9.2vw] md:text-[10.6vw] lg:text-[11.8vw] font-black uppercase tracking-tighter leading-none select-none text-center whitespace-nowrap opacity-50 w-full"
-              style={{
-                fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(186, 230, 253, 0.45) 50%, rgba(56, 189, 248, 0.05) 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                transform: 'translateY(15%)',
-                maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
-                filter: 'drop-shadow(0 -4px 20px rgba(186, 230, 253, 0.25))',
-              }}
-            >
-              TRAJECTORY_IR
-            </h2>
-          </div>
-        </footer>
-      </div>
+          {/* Right Side: Supporting text & CTAs */}
+          <div className="w-full lg:w-[30%] flex flex-col items-center lg:items-end text-center lg:text-right order-3 lg:order-3 pt-4 lg:pt-0">
+            <p className="text-lg text-gray-300 leading-relaxed drop-shadow-md mb-8">
+              Seal decisions. Classify effects. Export a hash-verifiable .tir package — on top of Temporal, DBOS, or Restate.
+            </p>
 
-      {/* Liquid Glass Interactive Demo Modal */}
-      {showDemoModal && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-exit' : 'animate-modal-backdrop-enter'
-            }`}
-          onClick={closeDemoModal}
-        >
-          <div
-            className={`relative w-full max-w-5xl max-h-[85vh] overflow-y-auto custom-scrollbar liquid-glass-card p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl ${isAnimatingOut ? 'animate-modal-card-exit' : 'animate-modal-card-enter'
-              }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/brand-logo.png"
-                  alt="Trajectory IR Logo"
-                  className="w-6 h-6 object-contain rounded shadow-sm"
-                />
-                <span className="text-lg font-semibold text-white">Trajectory IR — Interactive Execution Demo</span>
-              </div>
-              <button
-                onClick={closeDemoModal}
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-lg"
+            <div className="flex flex-col items-center lg:items-end gap-4 w-full">
+              <Link
+                href="/docs/quickstart"
+                className="bg-[rgba(255,255,255,0.85)] backdrop-blur-xl border border-white/40 text-[#060B19] hover:bg-white w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(191,219,254,0.25)] hover:shadow-[0_4px_32px_rgba(191,219,254,0.4)] hover:-translate-y-[1px]"
               >
-                ✕
-              </button>
+                Start with Go
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </Link>
+              <Link
+                href="/docs"
+                className="glass-pill w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-medium transition-all flex items-center justify-center hover:bg-white/10"
+              >
+                Read the docs
+              </Link>
             </div>
-            <DashboardShowcase />
           </div>
+          
         </div>
-      )}
+
+      </main>
+
+      {/* Floating Bottom Bar Container */}
+      <div className="absolute bottom-8 left-0 w-full px-8 flex items-center justify-center z-50 pointer-events-none">
+        
+        {/* Left Side: GitHub */}
+        <div className="absolute left-8 lg:left-12">
+          <Link 
+            href="https://github.com/Coder-s-OG-s/Trajectory-IR" 
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Trajectory IR on GitHub"
+            className="glass-pill pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center text-[#0A1128] hover:text-[#060B19] transition-all hover:-translate-y-1 group"
+          >
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.113.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.814 1.102.814 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Center: Demo Pill */}
+        <Link 
+          href="/docs/demos" 
+          className="glass-pill pointer-events-auto px-8 py-3.5 rounded-full flex items-center gap-3 text-sm font-semibold text-[#0A1128] transition-all group hover:-translate-y-1"
+        >
+          Try a demo
+          <svg className="w-4 h-4 group-hover:-translate-y-1 transition-transform text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+          </svg>
+        </Link>
+
+        {/* Right Side: GitHub Discussions (same control chrome; no Discord invite yet) */}
+        <div className="absolute right-8 lg:right-12">
+          <Link 
+            href="https://github.com/Coder-s-OG-s/Trajectory-IR/discussions" 
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Join GitHub Discussions"
+            className="glass-pill pointer-events-auto w-12 h-12 rounded-full flex items-center justify-center text-[#0A1128] hover:text-[#060B19] transition-all hover:-translate-y-1 group"
+          >
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+
+      <SiteFooter />
     </div>
   );
 }
-
-

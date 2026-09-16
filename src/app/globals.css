@@ -8,20 +8,18 @@
 @theme {
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), monospace;
-  --font-serif: var(--font-serif), Georgia, serif;
-  --font-heading: var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif;
   --color-primary: #ff3e00;
 }
 
 @layer base {
   :root {
-    --color-fd-background: #09090b;
-    --color-fd-card: #121215;
-    --color-fd-popover: #121215;
-    --color-fd-muted: #1c1c21;
-    --color-fd-foreground: #ededed;
-    --color-fd-muted-foreground: #a1a1aa;
-    --color-fd-border: #222227;
+    --color-fd-background: #ffffff;
+    --color-fd-card: #f8f8fa;
+    --color-fd-popover: #ffffff;
+    --color-fd-muted: #f4f4f5;
+    --color-fd-foreground: #09090b;
+    --color-fd-muted-foreground: #71717a;
+    --color-fd-border: #e4e4e7;
     --color-fd-primary: #ff3e00;
   }
 
@@ -84,44 +82,6 @@
   @keyframes fluid-flow {
     0% { background-position: 0% 0%; }
     100% { background-position: 0% 200%; }
-  }
-
-  @keyframes folderRise {
-    0% {
-      opacity: 0;
-      transform: translateY(36px) scale(0.98);
-    }
-    60% {
-      opacity: 0.95;
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  .animate-folder-rise {
-    animation: folderRise 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
-  }
-
-  @keyframes folderFullSlideUp {
-    0% {
-      opacity: 0;
-      transform: translateY(105%);
-    }
-    12% {
-      opacity: 0.9;
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0%);
-    }
-  }
-
-  .animate-folder-full-slide-up {
-    animation: folderFullSlideUp 0.78s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    will-change: transform, opacity;
   }
 
   .fd-step {
@@ -332,11 +292,11 @@
 @keyframes header-dropdown-enter {
   0% {
     opacity: 0;
-    transform: translateY(-6px) scale(0.98);
+    transform: translateX(-50%) translateY(-4px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
@@ -350,13 +310,13 @@
 
 .header-logo:hover {
   transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.35);
 }
 
 .header-apply-btn:hover {
-  background-color: #0284c7 !important;
-  border-color: #0284c7 !important;
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+  background-color: #e55a1b !important;
+  border-color: #e55a1b !important;
+  box-shadow: 0 4px 16px rgba(242, 102, 37, 0.3);
   transform: translateY(-1px);
 }
 
@@ -373,7 +333,7 @@
 }
 
 .footer-social-icon:hover {
-  color: #ffffff;
+  color: #0A1128;
   transform: translateY(-1px);
 }
 
@@ -422,34 +382,63 @@
   }
 }
 
-/* Liquid Glass Design System Utilities with Hardware Compositing & Optical Glass Physics */
-.hero-gradient-bg {
-  background: linear-gradient(180deg, 
-    #020b18 0%, 
-    #061a33 15%, 
-    #10355e 35%, 
-    #25628c 55%, 
-    #4a90b8 72%, 
-    #7bb2d3 88%, 
-    #a2cae0 100%
-  );
-  background-size: 100% 100vh;
-  background-attachment: fixed;
-  position: relative;
-  min-height: 100vh;
-}
 
-.hero-gradient-bg::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(180deg, #05152d 0%, #071c3d 40%, #0a254f 100%);
-  opacity: var(--scroll-darkness, 0);
-  z-index: 1;
+/* Navy Motif & Glass Elements */
+.bg-motif {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 70%);
   pointer-events: none;
-  transition: opacity 0.15s ease-out;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.bg-motif::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0L52.8864 47.1136L100 50L52.8864 52.8864L50 100L47.1136 52.8864L0 50L47.1136 47.1136L50 0Z' fill='rgba(255,255,255,0.02)'/%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.glass-nav {
+  background: rgba(10, 17, 40, 0.4) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom: none !important;
+}
+
+.glass-pill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.glass-pill:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 12px 40px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Merged from main: liquid-glass + docs-page-container (keep docs features working) */
 /* 100% Seamless Header - No cutting rectangle background */
 .liquid-glass-header {
   background: transparent !important;
@@ -665,278 +654,3 @@
 }
 
 
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(2deg); }
-}
-
-.animate-float-slow {
-  animation: float-slow 6s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(1.05); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 8s ease-in-out infinite;
-}
-
-@keyframes marquee-drift-left {
-  0% {
-    transform: translate3d(0%, 0, 0);
-  }
-  100% {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-.animate-marquee-left {
-  display: flex;
-  width: max-content;
-  animation: marquee-drift-left 36s linear infinite;
-  will-change: transform;
-}
-
-@keyframes marquee-drift-right {
-  0% {
-    transform: translate3d(-50%, 0, 0);
-  }
-  100% {
-    transform: translate3d(0%, 0, 0);
-  }
-}
-
-.animate-marquee-right {
-  display: flex;
-  width: max-content;
-  animation: marquee-drift-right 36s linear infinite;
-  will-change: transform;
-}
-
-@keyframes dust-float {
-  0% {
-    transform: translateY(0px) translateX(0px) scale(0.9);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateY(-28px) translateX(14px) scale(1.25);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateY(-56px) translateX(-12px) scale(0.85);
-    opacity: 0.15;
-  }
-}
-
-.animate-dust-float {
-  animation: dust-float infinite ease-in-out alternate;
-}
-
-@keyframes data-pulse-flow {
-  from {
-    stroke-dashoffset: 48;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-data-pulse {
-  animation: data-pulse-flow 1.6s linear infinite;
-}
-
-/* Frosted Liquid Glass Curtain Sheet Footer (Matching reference photo) */
-.liquid-glass-footer-curtain {
-  position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(6, 18, 38, 0.78) 35%, rgba(2, 10, 24, 0.94) 100%);
-  backdrop-filter: blur(50px) saturate(220%) contrast(110%);
-  -webkit-backdrop-filter: blur(50px) saturate(220%) contrast(110%);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 
-    inset 0 2.5px 4px 0 rgba(255, 255, 255, 0.85),
-    0 -32px 80px 0 rgba(0, 10, 30, 0.65);
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
-  transform: translateZ(0);
-  will-change: transform, backdrop-filter;
-}
-
-.liquid-glass-footer-curtain::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 70px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 100%);
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
-  pointer-events: none;
-}
-
-/* Butter-smooth Liquid Glass Modal Entrance & Exit Animations */
-@keyframes modal-backdrop-enter {
-  0% {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-  }
-  100% {
-    opacity: 1;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-}
-
-@keyframes modal-backdrop-exit {
-  0% {
-    opacity: 1;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-  100% {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-  }
-}
-
-@keyframes modal-card-enter {
-  0% {
-    opacity: 0;
-    transform: scale(0.92) translateY(24px);
-    filter: brightness(0.85);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: brightness(1);
-  }
-}
-
-@keyframes modal-card-exit {
-  0% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: brightness(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.95) translateY(16px);
-    filter: brightness(0.85);
-  }
-}
-
-.animate-modal-backdrop-enter {
-  animation: modal-backdrop-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-modal-backdrop-exit {
-  animation: modal-backdrop-exit 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-modal-card-enter {
-  animation: modal-card-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-modal-card-exit {
-  animation: modal-card-exit 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Custom Visible & Draggable Liquid Glass Scrollbar / Slide Bar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 9999px;
-  margin: 12px 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.38);
-  border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.7);
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.38) rgba(255, 255, 255, 0.08);
-}
-
-/* High-Energy Liquid Plasma Effect for [The Problem */
-@keyframes plasma-shift {
-  0% {
-    background-position: 0% 50%;
-    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.75)) drop-shadow(0 0 22px rgba(225, 29, 72, 0.45));
-  }
-  50% {
-    background-position: 100% 50%;
-    filter: drop-shadow(0 0 16px rgba(251, 113, 133, 0.95)) drop-shadow(0 0 35px rgba(192, 38, 211, 0.65));
-  }
-  100% {
-    background-position: 0% 50%;
-    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.75)) drop-shadow(0 0 22px rgba(225, 29, 72, 0.45));
-  }
-}
-
-.plasma-text-flow {
-  background: linear-gradient(
-    115deg,
-    #e11d48 0%,
-    #f43f5e 20%,
-    #ffffff 35%,
-    #fda4af 50%,
-    #c026d3 68%,
-    #fb7185 82%,
-    #f43f5e 100%
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: plasma-shift 3.5s ease-in-out infinite;
-}
-
-/* 3D Isometric Schematic Optic Fiber Pulse Flow Animation */
-@keyframes data-pulse-flow {
-  0% {
-    stroke-dashoffset: 64;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-data-pulse {
-  animation: data-pulse-flow 2s linear infinite;
-}
-
-.animate-data-pulse-fast {
-  animation: data-pulse-flow 1.2s linear infinite;
-}
-
-@keyframes hologram-pulse {
-  0%, 100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
-.animate-hologram-pulse {
-  animation: hologram-pulse 2.5s ease-in-out infinite;
-}
