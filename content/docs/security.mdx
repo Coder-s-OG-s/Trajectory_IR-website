@@ -9,13 +9,13 @@ This page summarizes the engine [SECURITY.md](https://github.com/Coder-s-OG-s/Tr
 
 ## 1. Supported versions
 
-Trajectory IR is on the **0.2.x** line (Phase **1C** harden and adopt).
+Trajectory IR ships **0.2.x** (Phase **1C** harden and adopt; Go primary, Python reference). Older 0.1.x tags remain available but are not the active development line.
 
 | Version | Supported | Notes |
 | ------- | --------- | ----- |
-| v0.2.x  | :white_check_mark: | Active (Go primary; Python parity) |
-| v0.1.x  | :warning: | Prior line — prefer upgrading to 0.2.x |
-| &lt; v0.1  | :x: | Historical prototypes |
+| v0.2.x  | :white_check_mark: | Current (Go primary, Python reference) |
+| v0.1.x  | :warning: | Security fixes only if maintainers agree; prefer upgrading |
+| &lt; v0.1  | :x: | Historical (CAMI/CLOOP prototypes) |
 
 ## 2. Reporting a vulnerability
 
@@ -34,10 +34,11 @@ We aim to acknowledge reports within 48 hours. Follow the [Code of Conduct](http
 
 ### Execution & tool safety
 
-- Safety-boundary bypasses (misclassifying dangerous tools as `PURE` / `READ_ONLY`)
+- Safety-boundary bypasses (misclassifying dangerous tools as `PURE` / `READ_ONLY`); sandbox also rejects `AGENT_SPAWN` and `SENSITIVE`, not just `NON_IDEMPOTENT_WRITE`
 - Block-and-gate evasion on interrupted `NON_IDEMPOTENT_WRITE`
 - Issues in durable backend adapters (`drivers/durable_backend/` on Python; Go Temporal adapters)
 - Claiming a `TOOL_CALL` slot must be atomic so concurrent workers cannot double-run a `NON_IDEMPOTENT_WRITE` tool (R02)
+- Path confinement races: the Go MCP server resolves and validates workspace paths atomically (CWE-367)
 
 ### State & durability
 
@@ -48,8 +49,9 @@ We aim to acknowledge reports within 48 hours. Follow the [Code of Conduct](http
 
 - Sensitive leakage on redacted export
 - Zip bombs / oversized members must be rejected (`TirLimitError`)
-- `import_tir` always verifies; unverified load paths must never write to a durable NodeLog
-- Signature verification gaps for `trajir-pkg-sig-v1` when a `SIGNATURE` member is present
+- `import_tir` always verifies; unverified load paths (`load_tir_unverified` / `LoadUnverified`, gated by `TRAJIR_ALLOW_UNVERIFIED=1`) must never write to a durable NodeLog
+- Optional package signatures (`trajir-pkg-sig-v1`, Ed25519) prove publisher authenticity when a `SIGNATURE` member is present; unsigned packages remain valid by default
+- `verify_package` rejects an empty or misconfigured trust store instead of silently skipping the check
 
 ### Implemented vs planned
 
@@ -60,8 +62,8 @@ We would rather be honest about what's actually built than let this page read as
 | Fail-closed MCP effect mapping | Implemented |
 | Atomic `TOOL_CALL` claim (gate) | Implemented |
 | `.tir` size / path safety limits | Implemented |
-| Redacted export (secret-like keys/values + thoughts) | Implemented (basic heuristic — still review before external sharing) |
-| Package digital signatures (`trajir-pkg-sig-v1`) | Implemented (R09–R11); Sigstore remains future |
+| Redacted export (secret-like keys/values + thoughts) | Implemented (basic heuristic — still review before external sharing), including Go `.tir` export |
+| Package digital signatures (`trajir-pkg-sig-v1`) | Implemented (optional; verify on load when present); Sigstore remains future |
 | Full multi-tenant SaaS isolation | Not a product surface yet; `tenant_id` filter on list/export exists |
 | Fluid / k8s cache poisoning controls | Design only (future profile) |
 

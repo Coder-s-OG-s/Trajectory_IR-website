@@ -94,6 +94,7 @@ const PREFERRED_ORDER = [
   '/docs/api/python',
   '/docs/api/effect-class',
   '/docs/api/tir-package',
+  '/docs/cli',
   '/docs/contributing',
   '/docs/adopters',
   '/docs/security',

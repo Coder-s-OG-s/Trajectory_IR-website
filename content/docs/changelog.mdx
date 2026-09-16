@@ -9,29 +9,57 @@ Site summary of the engine [CHANGELOG](https://github.com/Coder-s-OG-s/Trajector
 
 ### Changed
 
-- Sandbox rejects `AGENT_SPAWN` and `SENSITIVE` in addition to `NON_IDEMPOTENT_WRITE`; error string standardized to `SANDBOX_FORBIDDEN`.
+- Sandbox error string renamed from `SANDBOX_REJECTS_NON_IDEMPOTENT_WRITE` to `SANDBOX_FORBIDDEN`. Callers matching the old substring should update.
+- Sandbox mode now rejects `AGENT_SPAWN` and `SENSITIVE` effects, in addition to `NON_IDEMPOTENT_WRITE`.
 
-## [0.2.2] - 2026-09-07
+## [v0.2.2] - 2026-09-07
 
 ### Added
 
-- In-tree MCP server (`trajir-mcp`) with status / export / import / verify-signature tools
-- Conformance **R09–R11** for `trajir-pkg-sig-v1` (Go + Python sign/verify, cross-language)
-- Phase CI harden: OpenSSF Scorecard, CodeQL, gitleaks, actionlint, SBOM on release
-- CNCF Sandbox process pack (`MAINTAINERS`, `GOVERNANCE`, `ADOPTERS`, scope docs)
+- **MCP**: an in-tree Trajectory IR server (`go/trajir/mcp`, `go/cmd/trajir-mcp`) with tools `trajectory_status`, `trajectory_export_tir`, `trajectory_import_tir`, and `trajectory_verify_signature`. See also [CLI (trajirctl)](/docs/cli).
+- **Package signatures (`trajir-pkg-sig-v1`)**: optional Ed25519 signing and verification on both SDKs (conformance R09–R11). Go `trajir/tir` gets `Sign` / `Verify` and `ExportOptions.SignKey`; Python gets `sign_package` / `verify_package` and `export_tir(..., sign_key=)`. Load verifies a present `SIGNATURE` member; unsigned packages stay valid by default. Go and Python golden vectors match.
+- **CI hardening**: OpenSSF Scorecard, CodeQL for Go and Python, gitleaks, actionlint, zizmor, Go race on core packages, CODEOWNERS, CycloneDX SBOM on release tags.
+- CNCF Sandbox process docs: `MAINTAINERS.md`, `GOVERNANCE.md`, `docs/ROADMAP.md`, `ADOPTERS.md`, `docs/SCOPE_AND_NON_GOALS.md`.
 
 ### Changed
 
-- Package signatures documented as **shipped**; Sigstore remains future
-- SECURITY supported versions aligned to **0.2.x**
+- Go: path-safety helpers moved into `go/trajir/workdir`; `trajir-mcp` confinement behavior unchanged.
+- GitHub Actions pinned to commit digests; `main` requires secret scan and workflow lint.
+- Package signatures documented as **shipped**; Sigstore remains future.
+- SECURITY supported versions aligned to **0.2.x**.
 
-## [0.2.1] - 2026-08-13
+## [v0.2.1] - 2026-08-13
 
-Phase 1C harden-and-adopt patch: live Docker matrix (Postgres + MinIO + Temporal), merge policy / branch protection on `main`, release workflow proof.
+Phase 1C harden-and-adopt patch: merge gates on public `main`, live Docker matrix tooling, and a release workflow proof cut.
 
-## [0.2.0] - 2026-08-11
+### Added
 
-Phase 1B: **Go is the primary SDK**. Python remains the reference / parity port. Go drivers, adoption host demo, deeper CI (including Python/Go `.tir` cross-language round-trip), client honesty fixes.
+- `docker-compose.live.yml` and `docs/LIVE_INTEGRATION_DOCKER.md` for a local Postgres + MinIO + Temporal live matrix.
+- Classic branch protection on `main` with required CI checks.
+- `scripts/run_live_matrix.sh` / `.ps1` for local live smoke testing.
+
+### Changed
+
+- Live compose: dropped a broken `minio/mc` one-shot step in favor of creating the bucket via Python.
+
+## [v0.2.0] - 2026-08-11
+
+Phase 1B: **Go is the primary SDK** and onboarding path. Python remains the reference and parity port.
+
+### Added
+
+- Go adoption host demo with an optional CAS thin package.
+- Go Postgres NodeLog (`trajir/postgres`) and S3-compatible CAS.
+- CI fast/deep gates, Python/Go `.tir` cross-language round-trip, Go coverage floor raised.
+
+### Changed
+
+- Go client `Resume` requires existing NodeLog history.
+- Go client logs `TOOL_CALL` / `TOOL_RESULT` for non-gated tools (parity with Python).
+
+### Fixed
+
+- `govulncheck` clean for pgx and aws-sdk-go-v2 S3 on the Phase 1B path.
 
 ## [0.1.x] - 2026-08
 
