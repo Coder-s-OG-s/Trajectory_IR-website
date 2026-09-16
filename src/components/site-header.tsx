@@ -45,88 +45,130 @@ const navItems: NavItem[] = [
 ];
 
 function DropdownMenu({ items, isOpen, onClose }: { items: DropdownItem[]; isOpen: boolean; onClose: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClose();
-      }
-    }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
   return (
     <div
-      ref={ref}
       className="header-dropdown"
+      role="menu"
       style={{
         position: 'absolute',
-        top: 'calc(100% + 8px)',
+        top: '100%',
         left: '50%',
         transform: 'translateX(-50%)',
         minWidth: '220px',
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(32px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '16px',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
-        padding: '6px 0',
+        paddingTop: '8px',
         zIndex: 100,
-        animation: 'header-dropdown-enter 0.15s ease-out',
       }}
     >
-      {items.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          onClick={onClose}
-          className="header-dropdown-item hover:bg-white/5"
-          style={{
-            display: 'block',
-            padding: '10px 16px',
-            fontSize: '14px',
-            color: '#ffffff',
-            textDecoration: 'none',
-            transition: 'background-color 0.12s ease',
-          }}
-        >
-          <span style={{ fontWeight: 500 }}>{item.label}</span>
-          {item.description && (
-            <span style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
-              {item.description}
-            </span>
-          )}
-        </Link>
-      ))}
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(32px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '16px',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+          padding: '6px 0',
+          animation: 'header-dropdown-enter 0.15s ease-out',
+        }}
+      >
+        {items.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            role="menuitem"
+            onClick={onClose}
+            className="header-dropdown-item hover:bg-white/5"
+            style={{
+              display: 'block',
+              padding: '10px 16px',
+              fontSize: '14px',
+              color: '#ffffff',
+              textDecoration: 'none',
+              transition: 'background-color 0.12s ease',
+            }}
+          >
+            <span style={{ fontWeight: 500 }}>{item.label}</span>
+            {item.description && (
+              <span style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
+                {item.description}
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
 function NavLink({ item }: { item: NavItem }) {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (!item.hasDropdown) return;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (!item.hasDropdown) return;
+    // 150ms buffer prevents accidental closure when moving mouse into the dropdown gap
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [isOpen]);
 
   return (
     <div
+      ref={containerRef}
       style={{ position: 'relative' }}
-      onMouseEnter={() => item.hasDropdown && setIsOpen(true)}
-      onMouseLeave={() => item.hasDropdown && setIsOpen(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link
         href={item.href}
         onClick={(e) => {
           if (item.hasDropdown) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen((prev) => !prev);
           }
         }}
         className="hover:text-white"
+        aria-expanded={item.hasDropdown ? isOpen : undefined}
+        aria-haspopup={item.hasDropdown ? 'menu' : undefined}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -148,6 +190,7 @@ function NavLink({ item }: { item: NavItem }) {
             height="10"
             viewBox="0 0 10 10"
             fill="none"
+            aria-hidden="true"
             style={{
               marginLeft: '2px',
               transition: 'transform 0.15s ease',
@@ -213,7 +256,7 @@ export function SiteHeader() {
         >
           <div className="flex items-center gap-3">
             <img 
-              src="/logo_transparent.png" 
+              src="/logo.png" 
               alt="Trajectory IR" 
               className="w-8 h-8 object-contain"
             />
