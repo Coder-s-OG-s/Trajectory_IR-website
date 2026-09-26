@@ -47,13 +47,16 @@ export const metadata = {
 };
 
 import { UnderConstructionModal } from '@/components/under-construction-modal';
+import { SmoothScrollProvider } from '@/components/smooth-scroll';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable} ${plusJakarta.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>{children}</RootProvider>
-        <UnderConstructionModal />
+        <SmoothScrollProvider>
+          <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>{children}</RootProvider>
+          <UnderConstructionModal />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

@@ -55,7 +55,65 @@ const rows: Row[] = [
   },
 ];
 
-export function ComparisonMatrix() {
+export function ComparisonMatrix({ embedded = false }: { embedded?: boolean }) {
+  const tableContent = (
+    <div className="rounded-3xl border border-white/20 bg-slate-950/70 backdrop-blur-xl overflow-hidden shadow-2xl">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-white/15 bg-white/[0.04]">
+              <th className="p-4 sm:p-6 text-xs sm:text-sm font-semibold text-white/90">Capability</th>
+              <th className="p-4 sm:p-6 text-xs sm:text-sm font-medium text-sky-100/60 text-center w-28 sm:w-44">
+                Unstructured Logs
+              </th>
+              <th className="p-4 sm:p-6 text-xs sm:text-sm font-medium text-sky-100/60 text-center w-28 sm:w-44">
+                Framework Checkpoints
+              </th>
+              <th className="p-4 sm:p-6 text-xs sm:text-sm font-semibold text-sky-300 text-center w-32 sm:w-48 bg-sky-500/10 border-l border-r border-sky-400/20">
+                Trajectory IR (.tir)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/10 text-xs sm:text-sm">
+            {rows.map((row) => (
+              <tr key={row.capability} className="hover:bg-white/[0.03] transition-colors">
+                <td className="p-4 sm:p-6">
+                  <div className="font-semibold text-white mb-1">{row.capability}</div>
+                  <div className="text-xs text-sky-100/65 max-w-lg leading-relaxed">{row.description}</div>
+                </td>
+                <td className="p-4 sm:p-6 text-center">
+                  {row.logs ? (
+                    <span className="text-emerald-400 font-bold">✓</span>
+                  ) : (
+                    <span className="text-white/25">✕</span>
+                  )}
+                </td>
+                <td className="p-4 sm:p-6 text-center">
+                  {row.checkpoints === true && <span className="text-emerald-400 font-bold">✓</span>}
+                  {row.checkpoints === 'partial' && (
+                    <span className="text-amber-300/80 text-[11px] px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
+                      Partial
+                    </span>
+                  )}
+                  {row.checkpoints === false && <span className="text-white/25">✕</span>}
+                </td>
+                <td className="p-4 sm:p-6 text-center bg-sky-500/[0.06] border-l border-r border-sky-400/20">
+                  <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-sky-400/20 text-sky-300 border border-sky-400/40 font-bold text-xs sm:text-sm">
+                    ✓
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return tableContent;
+  }
+
   return (
     <section className="w-full max-w-[1280px] mx-auto px-8 sm:px-12 py-20 relative z-10">
       <div className="text-center max-w-3xl mx-auto mb-14">
@@ -74,58 +132,7 @@ export function ComparisonMatrix() {
         </p>
       </div>
 
-      {/* Comparison Table in Liquid Glass Card */}
-      <div className="liquid-glass-card rounded-3xl border border-white/20 overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/15 bg-white/[0.04]">
-                <th className="p-5 sm:p-6 text-sm font-semibold text-white/90">Capability</th>
-                <th className="p-5 sm:p-6 text-sm font-medium text-sky-100/60 text-center w-36 sm:w-44">
-                  Unstructured Logs
-                </th>
-                <th className="p-5 sm:p-6 text-sm font-medium text-sky-100/60 text-center w-36 sm:w-44">
-                  Framework Checkpoints
-                </th>
-                <th className="p-5 sm:p-6 text-sm font-semibold text-sky-300 text-center w-36 sm:w-48 bg-sky-500/10 border-l border-r border-sky-400/20">
-                  Trajectory IR (.tir)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10 text-sm">
-              {rows.map((row) => (
-                <tr key={row.capability} className="hover:bg-white/[0.03] transition-colors">
-                  <td className="p-5 sm:p-6">
-                    <div className="font-semibold text-white mb-1">{row.capability}</div>
-                    <div className="text-xs text-sky-100/65 max-w-lg leading-relaxed">{row.description}</div>
-                  </td>
-                  <td className="p-5 sm:p-6 text-center">
-                    {row.logs ? (
-                      <span className="text-emerald-400 font-bold">✓</span>
-                    ) : (
-                      <span className="text-white/25">✕</span>
-                    )}
-                  </td>
-                  <td className="p-5 sm:p-6 text-center">
-                    {row.checkpoints === true && <span className="text-emerald-400 font-bold">✓</span>}
-                    {row.checkpoints === 'partial' && (
-                      <span className="text-amber-300/80 text-xs px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
-                        Partial
-                      </span>
-                    )}
-                    {row.checkpoints === false && <span className="text-white/25">✕</span>}
-                  </td>
-                  <td className="p-5 sm:p-6 text-center bg-sky-500/[0.06] border-l border-r border-sky-400/20">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sky-400/20 text-sky-300 border border-sky-400/40 font-bold text-sm">
-                      ✓
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {tableContent}
     </section>
   );
 }

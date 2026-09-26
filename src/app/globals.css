@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+@import 'lenis/dist/lenis.css';
 
 @source "../content";
 @source "../node_modules/fumadocs-ui/dist/**/*.js";
@@ -379,15 +380,6 @@
 
 .header-mobile-toggle {
   display: none;
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  z-index: 60;
-  width: 40px;
-  height: 40px;
-  background-color: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -416,39 +408,15 @@
   .header-mobile-toggle {
     display: none !important;
   }
-
-  .header-mobile-menu {
-    display: none !important;
-  }
 }
 
 /* Liquid Glass Design System Utilities with Hardware Compositing & Optical Glass Physics */
 .hero-gradient-bg {
-  background: linear-gradient(180deg, 
-    #020b18 0%, 
-    #061a33 15%, 
-    #10355e 35%, 
-    #25628c 55%, 
-    #4a90b8 72%, 
-    #7bb2d3 88%, 
-    #a2cae0 100%
-  );
-  background-size: 100% 100vh;
-  background-attachment: fixed;
   position: relative;
   min-height: 100vh;
+  background: transparent;
 }
 
-.hero-gradient-bg::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(180deg, #05152d 0%, #071c3d 40%, #0a254f 100%);
-  opacity: var(--scroll-darkness, 0);
-  z-index: 1;
-  pointer-events: none;
-  transition: opacity 0.15s ease-out;
-}
 
 /* 100% Seamless Header - No cutting rectangle background */
 .liquid-glass-header {
@@ -626,29 +594,6 @@
   box-shadow: 
     inset 0 2.5px 4px 0 rgba(255, 255, 255, 1),
     0 20px 48px 0 rgba(0, 12, 32, 0.45);
-  transform: translateY(-2px) scale(1.02);
-}
-
-.liquid-glass-dock::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
-  border-top-left-radius: 9999px;
-  border-top-right-radius: 9999px;
-  pointer-events: none;
-}
-
-.liquid-glass-dock:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0.28) 100%);
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow: 
-    inset 0 3.5px 5px 0 rgba(255, 255, 255, 1),
-    inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.35),
-    0 34px 72px -8px rgba(0, 16, 44, 0.6);
   transform: translateY(-2px) scale(1.02);
 }
 
@@ -940,3 +885,18 @@
 .animate-hologram-pulse {
   animation: hologram-pulse 2.5s ease-in-out infinite;
 }
+
+/* Lenis Smooth Scroll Configuration */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+

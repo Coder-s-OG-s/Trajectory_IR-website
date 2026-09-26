@@ -176,85 +176,61 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 export function SiteHeader() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on Escape key and lock body scroll
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <header
-      className="liquid-glass-header"
-      style={{
-        position: 'relative',
-        top: 0,
-        zIndex: 50,
-        width: '100%',
-        height: '76px',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'transparent',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '0 32px',
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+    <header className="liquid-glass-header relative top-0 z-50 w-full h-[72px] sm:h-[76px] flex items-center bg-transparent">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-8 w-full flex items-center justify-between">
         {/* Left Brand Logo with Starburst */}
         <Link
           href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            textDecoration: 'none',
-          }}
+          className="flex items-center gap-2.5 no-underline shrink-0"
+          onClick={() => setMobileMenuOpen(false)}
         >
           <img
             src="/brand-logo.png"
             alt="Trajectory IR Logo"
-            className="w-6 h-6 object-contain rounded-md shadow-sm"
+            className="w-5 h-5 sm:w-6 sm:h-6 object-contain rounded-md shadow-sm"
           />
           <span
+            className="text-lg sm:text-xl font-bold text-white tracking-tight"
             style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: '#ffffff',
-              letterSpacing: '-0.025em',
               fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
             }}
           >
-            trajectory<span style={{ opacity: 0.6, fontWeight: 400 }}>_ir</span>
+            trajectory<span className="opacity-60 font-normal">_ir</span>
           </span>
         </Link>
 
-        {/* Center Nav Links */}
-        <nav
-          className="hidden md:flex"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-        >
+        {/* Center Nav Links (Desktop) */}
+        <nav className="hidden md:flex items-center gap-2.5">
           {navItems.map((item) => (
             <NavLink key={item.label} item={item} />
           ))}
         </nav>
 
-        {/* Right Action CTAs */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '20px',
-          }}
-        >
-
+        {/* Right Action CTAs & Mobile Hamburger */}
+        <div className="flex items-center gap-3 sm:gap-5">
           <Link
             href="/docs/quickstart"
-            className="border border-white/35 rounded-full px-5 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all backdrop-blur-md no-underline shadow-md"
+            className="border border-white/35 rounded-full px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-white/10 transition-all backdrop-blur-md no-underline shadow-md whitespace-nowrap"
             style={{
               fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
               letterSpacing: '-0.015em',
@@ -262,8 +238,113 @@ export function SiteHeader() {
           >
             Get Started
           </Link>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="md:hidden w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/25 border border-white/20 flex flex-col items-center justify-center gap-1.5 text-white transition-all cursor-pointer shadow-md"
+            aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span
+              className={`w-4 h-0.5 bg-white rounded-full transition-transform duration-200 ${
+                mobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+              }`}
+            />
+            <span
+              className={`w-4 h-0.5 bg-white rounded-full transition-opacity duration-200 ${
+                mobileMenuOpen ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+            <span
+              className={`w-4 h-0.5 bg-white rounded-full transition-transform duration-200 ${
+                mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+              }`}
+            />
+          </button>
         </div>
       </div>
+
+      {/* Mobile Navigation Drawer / Dropdown */}
+      {mobileMenuOpen && (
+        <>
+          {/* Full-screen Dark Frosted Backdrop */}
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-[#040d1a]/85 backdrop-blur-xl animate-modal-backdrop-enter"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Mobile Navigation Menu Panel with Premium Liquid Glassmorphism */}
+          <div className="md:hidden absolute top-full left-0 right-0 p-4 z-50 animate-modal-card-enter">
+            <div 
+              className="relative p-5 rounded-3xl overflow-hidden space-y-4"
+              style={{
+                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(14, 34, 62, 0.65) 100%), rgba(6, 18, 36, 0.72)',
+                backdropFilter: 'blur(36px) saturate(220%) contrast(105%)',
+                WebkitBackdropFilter: 'blur(36px) saturate(220%) contrast(105%)',
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+                boxShadow: 'inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1.5px 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 24px 0 rgba(255, 255, 255, 0.08), 0 28px 64px -12px rgba(0, 8, 24, 0.65), 0 0 40px 0 rgba(56, 189, 248, 0.16)',
+              }}
+            >
+              {/* Refraction Surface Highlight Sheen */}
+              <div 
+                className="absolute inset-x-0 top-0 h-[40%] pointer-events-none rounded-t-3xl"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 100%)',
+                }}
+                aria-hidden="true"
+              />
+
+              {navItems.map((group) => (
+                <div key={group.label} className="relative z-10 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-semibold px-2">
+                    {group.label}
+                  </div>
+                  <div className="space-y-1">
+                    {group.dropdownItems?.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3.5 py-2.5 rounded-xl text-sm text-white/90 hover:text-white hover:bg-white/12 active:bg-white/20 transition-all no-underline border border-transparent hover:border-white/15"
+                      >
+                        <div className="font-medium text-white">{item.label}</div>
+                        {item.description && (
+                          <div className="text-xs text-sky-100/60 mt-0.5 font-normal">
+                            {item.description}
+                          </div>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <div className="relative z-10 pt-2 border-t border-white/15 flex flex-col gap-2.5">
+                <Link
+                  href="/docs/quickstart"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl bg-sky-400 text-slate-950 font-semibold text-sm no-underline shadow-lg hover:bg-sky-300 active:scale-[0.99] transition-all"
+                  style={{
+                    boxShadow: '0 4px 18px rgba(56, 189, 248, 0.35)',
+                  }}
+                >
+                  Quickstart Guide →
+                </Link>
+                <Link
+                  href="/docs"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl bg-white/10 hover:bg-white/18 active:bg-white/22 text-white font-medium text-sm no-underline transition-all border border-white/25 backdrop-blur-md"
+                >
+                  Documentation Index
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 }

@@ -101,37 +101,37 @@ export function ProblemSection() {
 
   return (
     <div className="w-full relative z-10">
-      {/* 1. Scroll-Pinned / Locked Stage for 3D ScrollTrigger & In-Stage Walkthrough (Height: 900vh) */}
+      {/* 1. Scroll-Pinned / Locked Stage for 3D ScrollTrigger & In-Stage Walkthrough (Height: 360vh on mobile, 900vh on desktop) */}
       <div 
         ref={pinTrackRef} 
         id="problem-3d-stage"
-        className="relative w-full h-[900vh]"
+        className="relative w-full h-[360vh] lg:h-[900vh] touch-pan-y"
       >
         {/* Sticky Lock Viewport: Minimalist Glassmorphism Stage with Fullscreen Zoom Reveal */}
-        <div className="sticky top-0 h-screen w-full overflow-hidden select-none flex items-center justify-center">
+        <div className="sticky top-0 h-screen w-full overflow-hidden select-none flex items-center justify-center touch-pan-y">
           
           {/* 3 Massive Trajectory_IR Background Marquee Ribbons (1: L->R, 2: R->L, 3: L->R) */}
           <div 
-            className="absolute inset-0 w-full h-full flex flex-col justify-between pointer-events-none select-none z-0 overflow-hidden pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-6 sm:pb-8"
+            className="absolute inset-0 w-full h-full flex flex-col justify-between pointer-events-none select-none z-0 overflow-hidden pt-24 sm:pt-32 md:pt-36 lg:pt-40 pb-14 sm:pb-8"
             style={{
-              opacity: Math.max(0.15, 1 - easeZoom * 0.8),
+              opacity: Math.max(0.2, 1 - easeZoom * 0.8),
               maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
             }}
             aria-hidden="true"
           >
-            {/* Ribbon 1: Left to Right (Top Area) */}
-            <div className="w-full overflow-hidden flex items-center opacity-60">
+            {/* Ribbon 1: Left to Right (Top Area - clearly visible above card) */}
+            <div className="w-full overflow-hidden flex items-center opacity-75">
               <div className="animate-marquee-right flex items-center gap-5 sm:gap-6 shrink-0">
                 {[0, 1].map((idx) => (
                   <div key={idx} className="flex items-center gap-5 sm:gap-6 shrink-0">
                     {[0, 1, 2, 3, 4].map((subIdx) => (
                       <span 
                         key={subIdx}
-                        className="text-6xl sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
+                        className="text-[5.5rem] sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
                         style={{
                           fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(186, 230, 253, 0.08) 60%, rgba(56, 189, 248, 0.02) 100%)',
+                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(186, 230, 253, 0.14) 60%, rgba(56, 189, 248, 0.04) 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                         }}
@@ -144,18 +144,18 @@ export function ProblemSection() {
               </div>
             </div>
 
-            {/* Ribbon 2: Right to Left (Middle Area - passes directly behind center card) */}
-            <div className="w-full overflow-hidden flex items-center opacity-80">
+            {/* Ribbon 2: Right to Left (Middle Area - passes across center) */}
+            <div className="w-full overflow-hidden flex items-center opacity-85">
               <div className="animate-marquee-left flex items-center gap-5 sm:gap-6 shrink-0">
                 {[0, 1].map((idx) => (
                   <div key={idx} className="flex items-center gap-5 sm:gap-6 shrink-0">
                     {[0, 1, 2, 3, 4].map((subIdx) => (
                       <span 
                         key={subIdx}
-                        className="text-6xl sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
+                        className="text-[5.5rem] sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
                         style={{
                           fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(186, 230, 253, 0.10) 60%, rgba(56, 189, 248, 0.025) 100%)',
+                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(186, 230, 253, 0.16) 60%, rgba(56, 189, 248, 0.05) 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                         }}
@@ -168,18 +168,18 @@ export function ProblemSection() {
               </div>
             </div>
 
-            {/* Ribbon 3: Left to Right (Bottom Area) */}
-            <div className="w-full overflow-hidden flex items-center opacity-60">
+            {/* Ribbon 3: Left to Right (Bottom Area - clearly visible below card) */}
+            <div className="w-full overflow-hidden flex items-center opacity-75">
               <div className="animate-marquee-right flex items-center gap-5 sm:gap-6 shrink-0">
                 {[0, 1].map((idx) => (
                   <div key={idx} className="flex items-center gap-5 sm:gap-6 shrink-0">
                     {[0, 1, 2, 3, 4].map((subIdx) => (
                       <span 
                         key={subIdx}
-                        className="text-6xl sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
+                        className="text-[5.5rem] sm:text-7xl md:text-8xl lg:text-[9.5rem] xl:text-[10.5rem] 2xl:text-[11.5rem] font-black uppercase tracking-tighter leading-none whitespace-nowrap"
                         style={{
                           fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(186, 230, 253, 0.07) 60%, rgba(56, 189, 248, 0.02) 100%)',
+                          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(186, 230, 253, 0.12) 60%, rgba(56, 189, 248, 0.035) 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                         }}
@@ -195,11 +195,11 @@ export function ProblemSection() {
 
           {/* Top Row: [The Problem meets Solution] with dynamic interactive touch illumination */}
           <div 
-            className="absolute top-10 sm:top-14 left-0 right-0 w-full max-w-[1360px] mx-auto px-8 sm:px-14 flex items-center justify-between text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] select-none z-20 pointer-events-none transition-all duration-300"
+            className="absolute top-6 sm:top-14 left-0 right-0 w-full max-w-[1360px] mx-auto px-4 sm:px-14 flex items-center justify-between text-[1.65rem] sm:text-5xl md:text-6xl lg:text-[4.2rem] select-none z-20 pointer-events-none transition-all duration-300"
             style={{
               fontFamily: "'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif",
               fontWeight: 300,
-              letterSpacing: '-0.035em',
+              letterSpacing: '-0.03em',
               lineHeight: 1.1,
               opacity: Math.max(0, 1 - easeZoom * 2.2),
               transform: `translateY(-${easeZoom * 60}px)`,
@@ -262,14 +262,15 @@ export function ProblemSection() {
 
           {/* Center Card with Scroll Zoom Reveal (Expands from initial card -> 100vw x 100vh full-screen) */}
           <div className={`absolute inset-0 flex items-center justify-center z-10 ${easeZoom > 0.85 ? 'pointer-events-auto' : 'pointer-events-none'} p-0 m-0`}>
-            {/* The Dark Glassmorphic Expanding Box housing the 3D Architecture Model */}
+            {/* The CAD Blueprint Expanding Box housing the 3D Architecture Model */}
             <div 
-              className={`relative bg-[#091526]/95 border border-white/15 backdrop-blur-2xl shadow-2xl flex items-center justify-center overflow-hidden will-change-transform ${easeZoom > 0.85 ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              className={`relative bg-gradient-to-b from-[#071529] via-[#0b203e] to-[#07162b] border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden ${easeZoom > 0.85 ? 'pointer-events-auto' : 'pointer-events-none'}`}
               style={{
                 width: `calc(min(540px, 86vw) * ${1 - easeZoom} + 100vw * ${easeZoom})`,
                 height: `calc(min(280px, 36vh) * ${1 - easeZoom} + 100vh * ${easeZoom})`,
                 borderRadius: `${Math.round(24 * (1 - easeZoom))}px`,
                 borderWidth: `${Math.max(0, 1 - easeZoom)}px`,
+                willChange: 'width, height, border-radius, border-width, transform',
               }}
             >
               {/* Subtle ambient glass reflections fading as it becomes fullscreen */}

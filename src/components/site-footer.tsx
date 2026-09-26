@@ -79,36 +79,36 @@ function SocialIcons() {
 export function SiteFooter() {
   return (
     <footer className="relative z-10 site-footer bg-[#040d1e]/95 text-white w-full border-t border-white/10 backdrop-blur-xl overflow-hidden select-none">
-      <div className="max-w-[1280px] mx-auto px-8 pt-16 pb-8">
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 pt-6 sm:pt-16 pb-4 sm:pb-8">
         
         {/* Main Layout Grid */}
-        <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 mb-16">
+        <div className="flex flex-col lg:flex-row gap-5 sm:gap-16 lg:gap-32 mb-5 sm:mb-16">
           
           {/* Column 1: Logo and Tagline */}
           <div className="flex-shrink-0">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <img
                 src="/brand-logo.png"
                 alt="Trajectory IR Logo"
-                className="w-6 h-6 object-contain rounded-md shadow-sm"
+                className="w-5 h-5 sm:w-6 sm:h-6 object-contain rounded-md shadow-sm"
               />
-              <span className="text-[16px] font-semibold text-white tracking-tight whitespace-nowrap">
+              <span className="text-[15px] sm:text-[16px] font-semibold text-white tracking-tight whitespace-nowrap">
                 trajectory<span className="text-sky-200/60 font-normal">_ir</span>
               </span>
             </div>
-            <p className="text-xs text-sky-200/60 mt-3 max-w-xs leading-relaxed">
+            <p className="text-xs text-sky-200/60 mt-2 sm:mt-3 max-w-xs leading-normal sm:leading-relaxed">
               The durable semantic layer & crash-safe execution engine for production AI agents.
             </p>
           </div>
 
           {/* Columns 2, 3, 4: Links */}
-          <div className="flex-grow w-full max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-10 lg:ml-auto">
+          <div className="flex-grow w-full max-w-3xl grid grid-cols-3 gap-3 sm:gap-10 lg:ml-auto">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <h3 className="text-[14px] font-bold text-white mb-5 tracking-wide">
+                <h3 className="text-xs sm:text-[14px] font-bold text-white mb-2 sm:mb-5 tracking-wide">
                   {column.title}
                 </h3>
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-1.5 sm:gap-3">
                   {column.links.map((link) => (
                     <li key={link.label}>
                       {link.external ? (
@@ -116,14 +116,14 @@ export function SiteFooter() {
                           href={link.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[13px] text-sky-100/70 hover:text-white transition-colors"
+                          className="text-xs sm:text-[13px] text-sky-100/70 hover:text-white transition-colors"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="text-[13px] text-sky-100/70 hover:text-white transition-colors"
+                          className="text-xs sm:text-[13px] text-sky-100/70 hover:text-white transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -137,29 +137,29 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar: Copyright + Socials */}
-        <div className="border-t border-white/10 pt-6 pb-6 flex flex-wrap items-center justify-between gap-4">
-          <span className="text-[13px] text-sky-200/50">
+        <div className="border-t border-white/10 pt-3.5 sm:pt-6 pb-3.5 sm:pb-6 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[11px] sm:text-[13px] text-sky-200/50">
             © {new Date().getFullYear()} Trajectory IR. Built for Cloud Native AI.
           </span>
           <SocialIcons />
         </div>
       </div>
 
-      {/* TRENDING STARTUP FOOTER: Monumental Full-Width Display Typography */}
+      {/* TRENDING STARTUP FOOTER: Monumental Full-Width Display Typography (Half-Submerged) */}
       <div 
-        className="w-full overflow-hidden flex items-center justify-center pointer-events-none relative pt-4 pb-0 mt-4 h-[100px] sm:h-[150px] md:h-[200px] lg:h-[240px]"
+        className="w-full overflow-hidden flex items-center justify-center pointer-events-none relative pt-1 sm:pt-4 pb-0 mt-2 sm:mt-4 h-[52px] xs:h-[64px] sm:h-[150px] md:h-[200px] lg:h-[240px]"
         aria-hidden="true"
       >
         <h2 
-          className="text-[7.5vw] sm:text-[9.2vw] md:text-[10.6vw] lg:text-[11.8vw] font-black uppercase tracking-tighter leading-none select-none text-center whitespace-nowrap opacity-45 w-full"
+          className="text-[10vw] xs:text-[10.5vw] sm:text-[9.2vw] md:text-[10.6vw] lg:text-[11.8vw] font-black uppercase tracking-tighter leading-none select-none text-center whitespace-nowrap opacity-50 sm:opacity-45 w-full"
           style={{
             fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
-            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.3) 55%, rgba(255, 255, 255, 0) 95%)',
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 90%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            transform: 'translateY(15%)',
-            maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 98%)',
+            transform: 'translateY(18%)',
+            maskImage: 'linear-gradient(to bottom, black 0%, black 45%, transparent 92%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 45%, transparent 92%)',
           }}
         >
           TRAJECTORY_IR

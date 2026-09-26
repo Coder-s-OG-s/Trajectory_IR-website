@@ -229,9 +229,20 @@ export function Trajectory3DVisualizer({
     // 10. Animation Loop
     let animationFrameId: number;
     let clock = new THREE.Clock();
+    let isVisible = true;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(container);
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      if (!isVisible) return;
+
       const elapsed = clock.getElapsedTime();
 
       // Determine progress: either scroll-driven (if scrollProgress is provided) or autonomous clock loop
@@ -333,6 +344,7 @@ export function Trajectory3DVisualizer({
       container.removeEventListener('mousemove', handleMouseMove);
       resizeObserver.disconnect();
       renderer.dispose();
+      observer.disconnect();
       particleGeometry.dispose();
       particleMaterial.dispose();
       rootGeo.dispose();

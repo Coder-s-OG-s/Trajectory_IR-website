@@ -23,6 +23,9 @@ export function DustParticles() {
   const particles: Particle[] = React.useMemo(() => {
     if (!mounted) return [];
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const count = isMobile ? 16 : 42;
+
     const colors = [
       'rgba(255, 255, 255, 0.95)',
       'rgba(125, 211, 252, 0.85)', // Sky cyan glow
@@ -30,11 +33,11 @@ export function DustParticles() {
       'rgba(216, 180, 254, 0.8)',  // Ethereal purple glow
     ];
 
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 2.8 + 1,
+      size: isMobile ? Math.random() * 2.0 + 1 : Math.random() * 2.8 + 1,
       opacity: Math.random() * 0.65 + 0.2,
       duration: Math.random() * 14 + 10,
       delay: Math.random() * 6,

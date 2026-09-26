@@ -150,11 +150,11 @@ export function DashboardShowcase() {
     <div className="w-full max-w-4xl mx-auto mt-6 bg-slate-900/90 border border-sky-400/30 shadow-[0_0_25px_rgba(56,189,248,0.15)] rounded-2xl overflow-hidden flex flex-col md:flex-row text-left backdrop-blur-xl">
       
       {/* Sidebar Tabs */}
-      <div className="w-full md:w-56 bg-slate-950/60 border-b md:border-b-0 md:border-r border-white/10 flex flex-col">
-        <div className="px-4 py-3 border-b border-white/10">
+      <div className="w-full md:w-56 bg-slate-950/60 border-b md:border-b-0 md:border-r border-white/10 flex flex-col shrink-0">
+        <div className="px-4 py-2.5 sm:py-3 border-b border-white/10 hidden md:block">
           <span className="text-[11px] font-bold text-sky-200/60 uppercase tracking-wider">Features</span>
         </div>
-        <div className="flex flex-col p-2 gap-1">
+        <div className="flex flex-row md:flex-col p-2 gap-1.5 overflow-x-auto scrollbar-none">
           {Object.values(snippets).map((snippet) => (
             <button
               key={snippet.id}
@@ -162,7 +162,7 @@ export function DashboardShowcase() {
                 setActiveTab(snippet.id);
                 setShowOutput(false);
               }}
-              className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all text-left ${
+              className={`px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-[13px] font-medium transition-all text-left whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === snippet.id
                   ? 'bg-sky-500/15 text-sky-300 shadow-sm border border-sky-400/30'
                   : 'text-sky-100/70 hover:text-white hover:bg-white/5 border border-transparent'

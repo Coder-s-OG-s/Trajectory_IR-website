@@ -104,14 +104,32 @@ export function ProblemStatement() {
     y: -1000,
     active: false,
   });
+  const isVisibleRef = useRef(true);
 
   const [controls, setControls] = useState<FXControls>(DEFAULT_CONTROLS);
   const controlsRef = useRef<FXControls>(DEFAULT_CONTROLS);
   controlsRef.current = controls;
 
   const [progress, setProgress] = useState(0);
+  const progressRef = useRef(0);
+  progressRef.current = progress;
+
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+  // Detect mobile / touch screens to unlock viewport and avoid mobile scroll trap
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile =
+        window.innerWidth < 1024 ||
+        (typeof window !== 'undefined' && ('ontouchstart' in window || (navigator?.maxTouchPoints ?? 0) > 0));
+      setIsMobileScreen(isMobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // The core problem statement narrative
   const headline = "Autonomous agents fail unpredictably in production.";
@@ -143,7 +161,19 @@ export function ProblemStatement() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { rootMargin: '150px' }
+    );
+    if (trackRef.current) observer.observe(trackRef.current);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   // Universal keyboard shortcut (Shift + H) to toggle tuner panel across Mac/Win/Linux
@@ -171,9 +201,12 @@ export function ProblemStatement() {
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    const spacing = 13;
-    const pixelSize = 4.5;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isTouch = typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window);
+    const spacing = isMobile ? 18 : 13;
+    const pixelSize = isMobile ? 3.8 : 4.5;
     let animId: number;
+    let isSleeping = false;
 
     let width = 0;
     let height = 0;
@@ -187,10 +220,23 @@ export function ProblemStatement() {
     let isLogoPixel = new Uint8Array(0);
     let logoWeight = new Float32Array(0);
 
+    let lastGridW = 0;
+    let lastGridH = 0;
+
     const initGrid = () => {
       if (!viewportRef.current || !canvas) return;
-      width = canvas.width = viewportRef.current.clientWidth;
-      height = canvas.height = viewportRef.current.clientHeight;
+      const newW = viewportRef.current.clientWidth;
+      const newH = viewportRef.current.clientHeight;
+
+      // Avoid wiping grid on minor mobile address bar fluctuations (< 80px)
+      if (lastGridW > 0 && Math.abs(newW - lastGridW) < 2 && Math.abs(newH - lastGridH) < 80) {
+        return;
+      }
+      lastGridW = newW;
+      lastGridH = newH;
+
+      width = canvas.width = newW;
+      height = canvas.height = newH;
 
       cols = Math.ceil(width / spacing) + 1;
       rows = Math.ceil(height / spacing) + 1;
@@ -301,6 +347,10 @@ export function ProblemStatement() {
             y: e.clientY - rect.top,
             active: true,
           };
+          if (isSleeping) {
+            isSleeping = false;
+            animId = requestAnimationFrame(render);
+          }
         } else {
           pixelMousePos.current.active = false;
         }
@@ -311,11 +361,44 @@ export function ProblemStatement() {
       pixelMousePos.current.active = false;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (viewportRef.current && e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = viewportRef.current.getBoundingClientRect();
+        if (
+          touch.clientX >= rect.left &&
+          touch.clientX <= rect.right &&
+          touch.clientY >= rect.top &&
+          touch.clientY <= rect.bottom
+        ) {
+          pixelMousePos.current = {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top,
+            active: true,
+          };
+          if (isSleeping) {
+            isSleeping = false;
+            animId = requestAnimationFrame(render);
+          }
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      pixelMousePos.current.active = false;
+    };
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // Render loop
     const render = () => {
+      if (!isVisibleRef.current) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       ctx.clearRect(0, 0, width, height);
 
       const mx = pixelMousePos.current.x;
@@ -444,6 +527,12 @@ export function ProblemStatement() {
         }
       }
 
+      // If mouse is idle and all hot pixels cooled down, sleep the loop to save CPU & battery
+      if (!isMouseActive && hotIndices.length === 0) {
+        isSleeping = true;
+        return;
+      }
+
       animId = requestAnimationFrame(render);
     };
 
@@ -453,6 +542,8 @@ export function ProblemStatement() {
       window.removeEventListener('resize', initGrid);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       cancelAnimationFrame(animId);
     };
   }, []);
@@ -479,13 +570,26 @@ export function ProblemStatement() {
     }
 
     const particles: Particle[] = [];
-    const maxParticles = 260;
-    let animId: number;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxParticles = isMobile ? 45 : 220;
+    let animId: number = 0;
+
+    let lastFluidW = 0;
+    let lastFluidH = 0;
 
     const resize = () => {
       if (viewportRef.current && canvas) {
-        canvas.width = viewportRef.current.clientWidth;
-        canvas.height = viewportRef.current.clientHeight;
+        const newW = viewportRef.current.clientWidth;
+        const newH = viewportRef.current.clientHeight;
+
+        if (lastFluidW > 0 && Math.abs(newW - lastFluidW) < 2 && Math.abs(newH - lastFluidH) < 80) {
+          return;
+        }
+        lastFluidW = newW;
+        lastFluidH = newH;
+
+        canvas.width = newW;
+        canvas.height = newH;
       }
     };
 
@@ -494,6 +598,10 @@ export function ProblemStatement() {
 
     // Render loop
     const render = () => {
+      if (!isVisibleRef.current) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       const cfg = controlsRef.current;
 
       // Check cursor position and spawn wide-radius fluid plumes when cursor advances forward
@@ -515,7 +623,8 @@ export function ProblemStatement() {
             let baseColor: { r: number; g: number; b: number };
 
             if (cfg.colorTheme === 'adaptive') {
-              const isRose = progress < 0.24 || progress >= 0.64;
+              const curP = progressRef.current;
+              const isRose = curP < 0.24 || curP >= 0.64;
               baseColor = isRose
                 ? (Math.random() > 0.35 ? { r: 244, g: 63, b: 94 } : { r: 251, g: 113, b: 133 })
                 : (Math.random() > 0.35 ? { r: 0, g: 210, b: 255 } : { r: 56, g: 189, b: 248 });
@@ -612,14 +721,30 @@ export function ProblemStatement() {
       }
 
       ctx.globalCompositeOperation = 'source-over';
+
+      // If no particles exist and cursor is resting, sleep the loop to save CPU & battery
+      if (particles.length === 0) {
+        animId = 0;
+        return;
+      }
+
       animId = requestAnimationFrame(render);
     };
 
     render();
 
+    // Wake up sleeping render loop on scroll without destroying particles or wiping canvas
+    const wakeUp = () => {
+      if (animId === 0) {
+        animId = requestAnimationFrame(render);
+      }
+    };
+    window.addEventListener('scroll', wakeUp, { passive: true });
+
     return () => {
       window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animId);
+      window.removeEventListener('scroll', wakeUp);
+      if (animId) cancelAnimationFrame(animId);
     };
   }, []);
 
@@ -634,9 +759,9 @@ export function ProblemStatement() {
   const stage2End = activeFrac * 0.74;
   const stage3End = activeFrac;
 
-  const headlineProgress = Math.min(Math.max(progress / stage1End, 0), 1);
-  const paragraphProgress = Math.min(Math.max((progress - stage1End) / (stage2End - stage1End), 0), 1);
-  const conclusionProgress = Math.min(Math.max((progress - stage2End) / (stage3End - stage2End), 0), 1);
+  const headlineProgress = isMobileScreen ? 1 : Math.min(Math.max(progress / stage1End, 0), 1);
+  const paragraphProgress = isMobileScreen ? 1 : Math.min(Math.max((progress - stage1End) / (stage2End - stage1End), 0), 1);
+  const conclusionProgress = isMobileScreen ? 1 : Math.min(Math.max((progress - stage2End) / (stage3End - stage2End), 0), 1);
 
   const visibleHeadlineCount = Math.floor(headlineProgress * headlineLength);
   const visibleParagraphCount = Math.floor(paragraphProgress * paragraphLength);
@@ -658,60 +783,82 @@ export function ProblemStatement() {
 
   return (
     <div className="w-full relative z-10">
-      {/* Scroll Track with dynamically adjustable height from slider */}
+      {/* Scroll Track: dynamic runway on desktop, natural section on mobile */}
       <div 
         ref={trackRef} 
         className="relative w-full"
-        style={{ height: `${controls.trackHeightVh}vh` }}
+        style={{ height: isMobileScreen ? 'auto' : `${controls.trackHeightVh}vh` }}
       >
-        {/* Sticky Lock Viewport */}
+        {/* Sticky Lock Viewport on Desktop, Natural Flow on Mobile */}
         <div 
           ref={viewportRef}
-          className="sticky top-0 h-screen w-full flex flex-col justify-center items-center overflow-hidden select-none"
+          className={
+            isMobileScreen
+              ? "relative w-full min-h-[70vh] flex flex-col justify-center items-center overflow-hidden py-8 sm:py-16 select-none"
+              : "sticky top-0 h-screen h-[100svh] w-full flex flex-col justify-center items-center overflow-hidden select-none touch-pan-y"
+          }
         >
-          {/* Fluid Canvas Overlay Attached To Moving Typewriter Cursor */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 pointer-events-none z-20 w-full h-full"
-            style={{ mixBlendMode: 'screen' }}
-            aria-hidden="true"
-          />
+          {/* Fluid Canvas Overlay Attached To Moving Typewriter Cursor (Desktop only) */}
+          {!isMobileScreen && (
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 pointer-events-none z-20 w-full h-full"
+              style={{
+                mixBlendMode: 'screen',
+                transform: 'translateZ(0)',
+                WebkitTransform: 'translateZ(0)',
+              }}
+              aria-hidden="true"
+            />
+          )}
           
           {/* Interactive Pixel Matrix Grid (Pixels illuminate / burn bright on mouse hover) */}
-          <canvas
-            ref={pixelCanvasRef}
+          <div
             className="absolute inset-0 pointer-events-none select-none z-0 w-full h-full"
             style={{
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)',
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)',
             }}
-            aria-hidden="true"
-          />
+          >
+            <canvas
+              ref={pixelCanvasRef}
+              className="w-full h-full"
+              style={{
+                transform: 'translateZ(0)',
+                WebkitTransform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+              }}
+              aria-hidden="true"
+            />
+          </div>
 
           {/* Content Wrapper */}
-          <div className="relative z-10 w-full max-w-[1240px] mx-auto px-6 sm:px-12 md:px-16 flex flex-col justify-between items-center py-12 sm:py-16 h-full">
+          <div className="relative z-10 w-full max-w-[1240px] mx-auto px-4 xs:px-6 sm:px-12 md:px-16 flex flex-col justify-between items-center py-6 sm:py-16 h-full">
           
           {/* Header Eyebrow Tag */}
-          <div className="w-full flex items-center justify-between mb-8 sm:mb-12 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
+          <div className="w-full flex items-center justify-between mb-6 sm:mb-12 border-b border-white/10 pb-3 sm:pb-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               <span 
-                className="text-xs sm:text-sm uppercase tracking-[0.2em] text-white/50 font-mono"
+                className="text-[11px] sm:text-sm uppercase tracking-[0.2em] text-white/50 font-mono truncate"
               >
                 [01 // THE PRODUCTION CRISIS]
               </span>
             </div>
-            <div className="text-xs sm:text-sm font-mono text-white/40">
-              SCRUB: {Math.round(progress * 100)}%
+            <div className="text-[11px] sm:text-sm font-mono text-white/40 shrink-0">
+              {isMobileScreen ? 'CRISIS OVERVIEW' : `SCRUB: ${Math.round(progress * 100)}%`}
             </div>
           </div>
 
           {/* Typewriter Text Stage */}
-          <div className="w-full space-y-6 sm:space-y-8 text-left">
+          <div className="w-full space-y-4 sm:space-y-8 text-left my-auto">
             
             {/* 1. Main Headline */}
             <div
-              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-light tracking-tight leading-[1.15]"
+              className="text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-light tracking-tight leading-[1.18]"
               style={{
                 fontFamily: "'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                 fontWeight: 300,
@@ -732,7 +879,7 @@ export function ProblemStatement() {
 
             {/* 2. Problem Detail Narrative */}
             <div
-              className="text-base sm:text-xl md:text-2xl text-white/90 font-light leading-relaxed max-w-4xl"
+              className="text-sm xs:text-base sm:text-xl md:text-2xl text-white/90 font-light leading-relaxed max-w-4xl"
               style={{
                 fontFamily: "'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                 fontWeight: 300,
@@ -752,7 +899,7 @@ export function ProblemStatement() {
 
             {/* 3. Hard-hitting Conclusion */}
             <div
-              className="text-sm sm:text-lg md:text-xl text-rose-300/90 font-mono tracking-wide pt-2"
+              className="text-xs xs:text-sm sm:text-lg md:text-xl text-rose-300/90 font-mono tracking-wide pt-1 sm:pt-2"
             >
               <span>{conclusion.slice(0, visibleConclusionCount)}</span>
               {paragraphProgress >= 1 && conclusionProgress < 1 && (
@@ -769,11 +916,11 @@ export function ProblemStatement() {
           </div>
 
           {/* Subtle Bottom Scroll Cue */}
-          <div className="w-full flex items-center justify-between mt-12 sm:mt-16 pt-4 border-t border-white/5 text-white/30 text-xs font-mono">
-            <span>SCROLL TO ADVANCE NARRATIVE</span>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline">NEXT: THE TRANSITION</span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <div className="w-full flex items-center justify-between mt-8 sm:mt-16 pt-3 sm:pt-4 border-t border-white/5 text-white/40 text-[10px] sm:text-xs font-mono">
+            <span className="truncate">{isMobileScreen ? 'SCROLL TO CONTINUE' : 'SCROLL TO ADVANCE NARRATIVE'}</span>
+            <div className="flex items-center gap-2 text-white/30">
+              <span>NEXT: THE TRANSITION</span>
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" className="sm:w-[14px] sm:h-[14px]">
                 <path d="M7 2v10M2 7l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
@@ -783,9 +930,9 @@ export function ProblemStatement() {
     </div>
 
     {/* FLOATING LIVE FX & SCROLL TUNING PANEL */}
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-auto">
+    <div className="fixed bottom-3 sm:bottom-6 right-3 sm:right-6 z-50 flex flex-col items-end pointer-events-auto">
       {panelOpen ? (
-        <div className="w-[340px] sm:w-[390px] max-h-[85vh] overflow-y-auto rounded-2xl bg-[#091526]/95 border border-white/20 backdrop-blur-2xl shadow-2xl p-5 text-white select-none transition-all scrollbar-thin">
+        <div className="w-[calc(100vw-24px)] sm:w-[390px] max-w-[390px] max-h-[80vh] overflow-y-auto rounded-2xl bg-[#091526]/95 border border-white/20 backdrop-blur-2xl shadow-2xl p-4 sm:p-5 text-white select-none transition-all scrollbar-thin">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
             <div className="flex items-center gap-2">
