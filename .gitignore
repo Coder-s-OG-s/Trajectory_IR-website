@@ -46,3 +46,7 @@ CLAUDE.md
 
 # Fumadocs build cache
 .source
+
+# Local website update briefs (do not commit)
+WEBSITE_UPDATE_PROMPT.md
+docs/local/

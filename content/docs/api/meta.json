@@ -2,9 +2,9 @@
   "title": "API Reference",
   "pages": [
     "index",
-    "trajectory",
+    "go",
+    "python",
     "effect-class",
-    "decorators",
-    "tir-export"
+    "tir-package"
   ]
 }

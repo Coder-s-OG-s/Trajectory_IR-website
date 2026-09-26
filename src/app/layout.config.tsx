@@ -26,7 +26,7 @@ export const baseOptions: BaseLayoutProps = {
           cursor: 'pointer',
           marginLeft: '0.2rem',
         }}>
-          <span>0.1.x</span>
+          <span>0.2.x</span>
           <span style={{ fontSize: '0.6rem', color: '#71717a' }}>∨</span>
         </div>
       </div>
@@ -40,12 +40,12 @@ export const baseOptions: BaseLayoutProps = {
       active: 'nested-url',
     },
     {
-      text: 'Tutorials',
-      url: '#',
-      active: 'none',
+      text: 'Demos',
+      url: '/docs/demos',
+      active: 'nested-url',
     },
     {
-      text: 'SDK & Engine Reference',
+      text: 'SDK Reference',
       url: '/docs/api',
       active: 'nested-url',
     },

@@ -1,15 +1,17 @@
 ---
-title: API Reference
-description: Complete Python API reference for the Trajectory-IR SDK.
+title: SDK Reference
+description: Go primary and Python reference client surfaces for Trajectory IR.
 ---
 
 import { Cards, Card } from 'fumadocs-ui/components/card';
 
-This section documents every public class, method, and decorator exposed by the Trajectory-IR Python SDK.
+Trajectory IR ships libraries, not a hosted SaaS. **Go is primary**; Python is the reference / parity port.
 
 <Cards>
-  <Card title="Trajectory Client" href="/docs/api/trajectory" description="The Trajectory dataclass and functions for managing agent execution state." />
-  <Card title="EffectClass Enum" href="/docs/api/effect-class" description="Strict safety classifications for every tool operation." />
-  <Card title="Tool Execution" href="/docs/api/decorators" description="seal_decision(), exec_tool(), and commit_step() for running a tool." />
-  <Card title=".tir Export" href="/docs/api/tir-export" description="Exporting trajectories as portable .tir packages." />
+  <Card title="Go client" href="/docs/api/go" description="OpenTrajectory, Project, SealDecision, ExecTool, CommitStep." />
+  <Card title="Python client" href="/docs/api/python" description="open_trajectory, project, seal_decision, exec_tool, commit_step." />
+  <Card title="EffectClass" href="/docs/api/effect-class" description="All six classes, fail-closed default, sandbox." />
+  <Card title=".tir package" href="/docs/api/tir-package" description="Thin/fat export, hash verify, trajir-pkg-sig-v1." />
 </Cards>
+
+Engine deep dives: [`go/trajir`](https://github.com/Coder-s-OG-s/Trajectory-IR/tree/main/go/trajir) · [master spec](https://github.com/Coder-s-OG-s/Trajectory-IR/blob/main/docs/MASTER_SPECIFICATION.md)

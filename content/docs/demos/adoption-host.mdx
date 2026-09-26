@@ -1,0 +1,33 @@
+---
+title: Adoption host demo
+description: Host seal loop with optional thin .tir package export.
+---
+
+## Goal
+
+See a minimal host loop that projects context, seals a decision, runs tools, and can export a thin `.tir` package.
+
+## Command
+
+```bash
+cd Trajectory-IR/go
+go run ./examples/adoption_host
+```
+
+Optional package export:
+
+```bash
+go run ./examples/adoption_host -with-package
+```
+
+## What to observe
+
+- A sealed plan before tool side effects
+- Append-only trajectory progress
+- With `-with-package`, a portable thin `.tir` you can verify by hash
+
+## Related
+
+- [Sandbox](/docs/demos/sandbox)
+- [Concepts](/docs/concepts)
+- [`.tir` package](/docs/api/tir-package)

@@ -1,0 +1,59 @@
+---
+title: Core concepts
+description: Trajectories, seals, effect classes, resume, block-and-gate, .tir packages, and sandbox — in plain language.
+---
+
+**IR** means **Intermediate Representation** — not “Incident Response” or “Information Retrieval.”
+
+## 1. Trajectory
+
+An append-only sequence of typed nodes that records what the agent planned and did. Nodes get identity from content hashes so another runtime can verify them.
+
+## 2. Seal (`DECISION`)
+
+Before world-changing tools run, the plan is frozen as a sealed `DECISION`. Resume **replays** that seal; it does not re-prompt the model for a new plan (R01).
+
+## 3. Effect classes
+
+Every tool is classified. Unknown or unsafe defaults **fail closed**.
+
+| Class | Meaning |
+|---|---|
+| `PURE` | No side effects; safe to recompute |
+| `READ_ONLY` | Reads external state; no writes |
+| `IDEMPOTENT_WRITE` | Writes safe to retry with the same key |
+| `NON_IDEMPOTENT_WRITE` | Dangerous writes — block-and-gate on interrupt |
+| `AGENT_SPAWN` | Spawns another agent / subprocess-like effect |
+| `SENSITIVE` | Secrets / PII-sensitive operations |
+
+See [EffectClass](/docs/api/effect-class) for sandbox behavior.
+
+## 4. Resume
+
+On crash recovery, the sealed decision is the source of truth. The host does not re-infer a different plan and silently drift.
+
+## 5. Block-and-gate
+
+Interrupted `NON_IDEMPOTENT_WRITE` tools must not auto-retry into a double deploy, double charge, or duplicate email (R02). Execution stops until policy / human resolution.
+
+## 6. `.tir` package
+
+Export a **thin** (metadata + hashes) or **fat** (include artifacts) package. Node IDs are hash-verifiable. Optional package signatures use `trajir-pkg-sig-v1`. Details: [`.tir` package](/docs/api/tir-package).
+
+## 7. Sandbox
+
+Same agent loop, safer mode for demos and CI: dangerous effect classes are rejected before side effects (including `NON_IDEMPOTENT_WRITE`, `AGENT_SPAWN`, and `SENSITIVE`).
+
+```mermaid
+flowchart LR
+  A[PROJECT_CONTEXT] --> B[DECISION seal]
+  B --> C[TOOL_CALL]
+  C --> D[TOOL_RESULT]
+  D --> E[COMMIT_STEP]
+```
+
+## Next
+
+- [Demos](/docs/demos)
+- [Architecture](/docs/architecture)
+- [Go Quickstart](/docs/quickstart)

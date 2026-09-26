@@ -1,0 +1,26 @@
+---
+title: Demos
+description: Runnable Go demos — adoption host, sandbox, and kill-mid-deploy.
+---
+
+All commands assume you cloned the engine and are in `Trajectory-IR/go`.
+
+```bash
+git clone https://github.com/Coder-s-OG-s/Trajectory-IR.git
+cd Trajectory-IR/go
+```
+
+| Demo | Intent |
+|---|---|
+| [Adoption host](/docs/demos/adoption-host) | Host seal loop + optional thin `.tir` |
+| [Sandbox](/docs/demos/sandbox) | Same agent; dangerous writes blocked |
+| [Kill mid deploy](/docs/demos/kill-mid-deploy) | Crash / resume story with sealed plan |
+
+```bash
+go run ./examples/adoption_host
+go run ./examples/adoption_host -sandbox
+go run ./examples/adoption_host -with-package
+go run ./examples/kill_mid_deploy -workdir ./demo-data
+```
+
+Read [Concepts](/docs/concepts) if a term is unfamiliar.

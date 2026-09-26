@@ -1,0 +1,38 @@
+---
+title: Go client
+description: Primary SDK surface — OpenTrajectory, Project, SealDecision, ExecTool, CommitStep.
+---
+
+Package: `github.com/Coder-s-OG-s/Trajectory-IR/go/trajir/client`
+
+## Core flow
+
+| Method | Role |
+|---|---|
+| `client.OpenTrajectory(tenant, id, opts)` | Open or create a trajectory (workdir / NodeLog) |
+| `Project(step, context)` | Project context into the step |
+| `SealDecision(step, plan)` | Freeze the plan before side effects |
+| `ExecTool(step, seq, tool, args)` | Run a classified tool |
+| `CommitStep(step, seq)` | Commit the step |
+| `Resume(...)` | Reattach; requires existing NodeLog history |
+
+Export helpers live under `trajir/tir` (thin/fat `.tir`, optional `trajir-pkg-sig-v1` sign/verify).
+
+## Minimal example
+
+See the full program on [Quickstart (Go)](/docs/quickstart).
+
+```go
+tr, err := client.OpenTrajectory("demo", "qs-1", client.Options{WorkDir: dir})
+// ...
+tr.Project(1, map[string]any{"goal": "hello"})
+tr.SealDecision(1, plan)
+tr.ExecTool(1, 2, tool, map[string]any{"msg": "hi"})
+tr.CommitStep(1, 4)
+```
+
+## Details
+
+- Effects: `trajir/effects`
+- Block-and-gate / tools: `trajir/resume`
+- Source of truth: [go/trajir](https://github.com/Coder-s-OG-s/Trajectory-IR/tree/main/go/trajir)

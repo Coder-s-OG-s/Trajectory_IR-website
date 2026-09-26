@@ -1,0 +1,67 @@
+---
+title: Quickstart (Python reference)
+description: Phase 1A reference / parity port — editable install from git; prefer Go for new features.
+---
+
+<Callout type="info">
+Python is the **reference / parity** port. Prefer **Go** for new Phase 1B/1C features. Until a wheel is on PyPI, **editable install from git** is the supported path.
+</Callout>
+
+## Prerequisites
+
+- Python 3.11+
+- Git
+
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/Coder-s-OG-s/Trajectory-IR.git
+cd Trajectory-IR
+python -m venv .venv
+# Windows: .\.venv\Scripts\activate
+# Unix: source .venv/bin/activate
+pip install -U pip
+pip install -e ".[dev]"
+pytest conformance/ -q
+```
+
+### 2. Minimal client flow
+
+Real public client APIs only:
+
+```python
+from client.python.trajectory_client import (
+    open_trajectory,
+    project,
+    seal_decision,
+    exec_tool,
+    commit_step,
+)
+from trajectory_ir.effects import EffectClass
+from trajectory_ir.runtime.tool import Tool
+
+def echo(msg: str) -> str:
+    return msg
+
+traj = open_trajectory(tenant_id="demo", trajectory_id="qs-1", db_path="qs.sqlite")
+project(traj, step_n=1, context={"goal": "hello"})
+seal_decision(traj, step_n=1, plan={"tool_calls": [{"name": "echo", "args": {"msg": "hi"}}]})
+tool = Tool(name="echo", fn=echo, effect_class=EffectClass.PURE)
+result = exec_tool(traj, step_n=1, call={"args": {"msg": "hi"}}, tool=tool, seq=2)
+print(result.result)  # hi
+commit_step(traj, step_n=1, seq=4)
+```
+
+</Steps>
+
+## Next
+
+- [Go Quickstart](/docs/quickstart) (primary)
+- [Concepts](/docs/concepts)
+- [Python API](/docs/api/python)
