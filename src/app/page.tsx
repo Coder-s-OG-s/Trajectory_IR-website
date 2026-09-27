@@ -8,23 +8,30 @@ import { CursorGlow } from '@/components/cursor-glow';
 import { DustParticles } from '@/components/dust-particles';
 import { ProblemStatement } from '@/components/problem-statement';
 import { FeaturePillars } from '@/components/feature-pillars';
+import { lockScroll, unlockScroll } from '@/lib/scroll-lock';
 
 
 export default function Home() {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const openDemoModal = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
     setIsAnimatingOut(false);
     setShowDemoModal(true);
   };
 
   const closeDemoModal = () => {
     setIsAnimatingOut(true);
-    setTimeout(() => {
+    closeTimeoutRef.current = setTimeout(() => {
       setShowDemoModal(false);
       setIsAnimatingOut(false);
+      closeTimeoutRef.current = null;
     }, 240);
   };
 
@@ -34,15 +41,17 @@ export default function Home() {
         closeDemoModal();
       }
     };
-    if (showDemoModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showDemoModal]);
+
+  useEffect(() => {
+    if (!showDemoModal) return;
+    lockScroll();
+    return () => {
+      unlockScroll();
     };
   }, [showDemoModal]);
 
@@ -328,7 +337,7 @@ export default function Home() {
               <div className="md:col-span-2 flex flex-col space-y-2 sm:space-y-3.5">
                 <h4 className="text-xs sm:text-sm font-semibold text-white/90 tracking-wide uppercase">Company</h4>
                 <ul className="space-y-1.5 sm:space-y-2.5 text-xs sm:text-sm text-sky-100/70">
-                  <li><Link href="/docs" className="hover:text-white transition-colors no-underline">Terms</Link></li>
+                  <li><Link href="/docs/terms" className="hover:text-white transition-colors no-underline">Terms</Link></li>
                   <li><Link href="/docs/privacy" className="hover:text-white transition-colors no-underline">Privacy</Link></li>
                 </ul>
               </div>

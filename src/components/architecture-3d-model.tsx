@@ -624,7 +624,7 @@ export const Architecture3DModel: React.FC<Architecture3DModelProps> = React.mem
             {/* ========================================================================= */}
             {/* 5. CLEAN VERTICAL CONDUITS (Layer 4 -> Layer 3)                           */}
             {/* ========================================================================= */}
-            <g opacity={isWalkthroughActive && effectiveActiveLayer === 3 ? 0.9 : 0.2} className="transition-opacity duration-300">
+            <g opacity={isWalkthroughActive && (effectiveActiveLayer === 3 || effectiveActiveLayer === 4) ? 0.9 : 0.2} className="transition-opacity duration-300">
               <line x1={cx - 70} y1={l4_Y + 14} x2={cx - 70} y2={l3_Y - 14} stroke="rgba(255,255,255,0.4)" strokeWidth="1" strokeDasharray="4 4" />
               <line x1={cx + 70} y1={l4_Y + 14} x2={cx + 70} y2={l3_Y - 14} stroke="rgba(255,255,255,0.4)" strokeWidth="1" strokeDasharray="4 4" />
             </g>

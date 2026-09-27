@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { lockScroll, unlockScroll } from '@/lib/scroll-lock';
 
 interface DropdownItem {
   label: string;
@@ -159,6 +160,7 @@ function NavLink({ item }: { item: NavItem }) {
             height="10"
             viewBox="0 0 10 10"
             fill="none"
+            aria-hidden="true"
             className={`transition-transform duration-200 opacity-75 ${isOpen ? 'rotate-180 text-sky-300' : 'rotate-0'}`}
           >
             <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -187,15 +189,17 @@ export function SiteHeader() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setMobileMenuOpen(false);
     };
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = '';
-    }
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    lockScroll();
+    return () => {
+      unlockScroll();
     };
   }, [mobileMenuOpen]);
 
@@ -203,7 +207,7 @@ export function SiteHeader() {
     <header 
       className="liquid-glass-header z-50 w-full h-[72px] sm:h-[76px] flex items-center"
       style={{
-        position: isDocs ? 'sticky' : 'relative',
+        position: 'sticky',
         top: 0,
         background: isDocs ? 'rgba(6, 11, 25, 0.85)' : 'transparent',
         backdropFilter: isDocs ? 'blur(16px)' : undefined,

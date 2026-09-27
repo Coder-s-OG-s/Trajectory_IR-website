@@ -222,6 +222,7 @@ export function ProblemStatement() {
 
     let lastGridW = 0;
     let lastGridH = 0;
+    let gridGeneration = 0;
 
     const initGrid = () => {
       if (!viewportRef.current || !canvas) return;
@@ -234,6 +235,8 @@ export function ProblemStatement() {
       }
       lastGridW = newW;
       lastGridH = newH;
+      gridGeneration += 1;
+      const myGeneration = gridGeneration;
 
       width = canvas.width = newW;
       height = canvas.height = newH;
@@ -298,6 +301,7 @@ export function ProblemStatement() {
       const brandImg = new Image();
       brandImg.src = '/brand-logo.png';
       brandImg.onload = () => {
+        if (myGeneration !== gridGeneration) return;
         try {
           const offCanvas = document.createElement('canvas');
           offCanvas.width = 150;

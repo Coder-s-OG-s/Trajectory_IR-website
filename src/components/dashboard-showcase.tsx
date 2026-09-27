@@ -131,16 +131,25 @@ export function DashboardShowcase() {
   const [isRunning, setIsRunning] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
   const outputRef = React.useRef<HTMLDivElement>(null);
+  const runTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeSnippet = snippets[activeTab];
+
+  React.useEffect(() => {
+    return () => {
+      if (runTimeoutRef.current) clearTimeout(runTimeoutRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   const handleRun = () => {
     setShowOutput(false);
     setIsRunning(true);
-    setTimeout(() => {
+    runTimeoutRef.current = setTimeout(() => {
       setIsRunning(false);
       setShowOutput(true);
-      setTimeout(() => {
+      scrollTimeoutRef.current = setTimeout(() => {
         outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 60);
     }, 800);

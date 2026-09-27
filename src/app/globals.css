@@ -7,6 +7,7 @@
 @source "../node_modules/fumadocs-ui/dist/**/*.js";
 
 @theme {
+  --breakpoint-xs: 400px;
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), monospace;
   --font-serif: var(--font-serif), Georgia, serif;
@@ -677,19 +678,6 @@
 
 .animate-dust-float {
   animation: dust-float infinite ease-in-out alternate;
-}
-
-@keyframes data-pulse-flow {
-  from {
-    stroke-dashoffset: 48;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-data-pulse {
-  animation: data-pulse-flow 1.6s linear infinite;
 }
 
 /* Frosted Liquid Glass Curtain Sheet Footer (Matching reference photo) */
