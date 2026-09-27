@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface DropdownItem {
   label: string;
@@ -23,16 +24,16 @@ const navItems: NavItem[] = [
     hasDropdown: true,
     dropdownItems: [
       { label: 'Semantic Layer', href: '/docs', description: 'Durable execution for AI agents' },
-      { label: 'Crash-Safe State', href: '/docs/infrastructure', description: 'Automatic side-effect recovery' },
+      { label: 'Crash-Safe State', href: '/docs/architecture', description: 'Automatic side-effect recovery' },
       { label: 'Replay Engine', href: '/docs/api', description: 'Deterministic step playback' },
     ],
   },
   {
     label: 'Architecture',
-    href: '/docs/infrastructure',
+    href: '/docs/architecture',
     hasDropdown: true,
     dropdownItems: [
-      { label: 'Architecture', href: '/docs/infrastructure', description: 'Deep dive into system internals' },
+      { label: 'Architecture', href: '/docs/architecture', description: 'Deep dive into system internals' },
       { label: 'GitHub Repo', href: 'https://github.com/Coder-s-OG-s/Trajectory-IR', description: 'Contribute & view source' },
       { label: 'Community', href: 'https://github.com/Coder-s-OG-s/Trajectory-IR/issues', description: 'Join discussions & issues' },
     ],
@@ -51,7 +52,7 @@ function LiquidDropdownMenu({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 min-w-[260px] pointer-events-auto">
+    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 min-w-[260px] pointer-events-auto" role="menu">
       <div 
         className="liquid-glass-dropdown p-2"
         style={{
@@ -63,6 +64,7 @@ function LiquidDropdownMenu({
           <Link
             key={item.label}
             href={item.href}
+            role="menuitem"
             onClick={onClose}
             className="liquid-glass-dropdown-item block px-3.5 py-2.5 rounded-xl text-sm no-underline group"
           >
@@ -148,7 +150,7 @@ function NavLink({ item }: { item: NavItem }) {
           isOpen ? 'text-white bg-white/15 shadow-sm' : 'text-white/90 hover:text-white hover:bg-white/10'
         }`}
         aria-expanded={isOpen}
-        aria-haspopup={item.hasDropdown ? 'true' : undefined}
+        aria-haspopup={item.hasDropdown ? 'menu' : undefined}
       >
         <span>{item.label}</span>
         {item.hasDropdown && (
@@ -176,6 +178,8 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const isDocs = pathname?.startsWith('/docs');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Close mobile menu on Escape key and lock body scroll
@@ -196,7 +200,17 @@ export function SiteHeader() {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="liquid-glass-header relative top-0 z-50 w-full h-[72px] sm:h-[76px] flex items-center bg-transparent">
+    <header 
+      className="liquid-glass-header z-50 w-full h-[72px] sm:h-[76px] flex items-center"
+      style={{
+        position: isDocs ? 'sticky' : 'fixed',
+        top: 0,
+        background: isDocs ? 'rgba(6, 11, 25, 0.85)' : 'transparent',
+        backdropFilter: isDocs ? 'blur(16px)' : undefined,
+        WebkitBackdropFilter: isDocs ? 'blur(16px)' : undefined,
+        borderBottom: isDocs ? '1px solid rgba(255, 255, 255, 0.05)' : undefined,
+      }}
+    >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-8 w-full flex items-center justify-between">
         {/* Left Brand Logo with Starburst */}
         <Link

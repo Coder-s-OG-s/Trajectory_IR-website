@@ -269,9 +269,10 @@ export const Architecture3DModel: React.FC<Architecture3DModelProps> = React.mem
     : 0;
 
   // Dynamic horizontal and vertical positioning:
-  // On desktop: smoothly shifts model to the right half during walkthrough without clipping (UNCHANGED)
-  // On mobile: perfectly framed in top 42vh viewport with zero clipping and all 5 layers visible
-  const xShift = isWideScreen ? shiftProgress * 16 : 0;
+  // On desktop: shifts diagram cleanly to the right during walkthrough or layer selection
+  // so the left console (45vw) and the 3D isometric stack have spacious, uncluttered breathing room
+  const effectiveShift = Math.max(shiftProgress, manualLayer !== null ? 1 : 0);
+  const xShift = isWideScreen ? effectiveShift * 22 : 0;
   const yShift = 0;
   const modelScale = 1;
 
@@ -313,7 +314,7 @@ export const Architecture3DModel: React.FC<Architecture3DModelProps> = React.mem
         }}
       >
         <svg
-          viewBox={isWideScreen ? "-140 0 1280 680" : "0 150 710 500"}
+          viewBox={isWideScreen ? "-180 0 1320 680" : "0 150 710 500"}
           preserveAspectRatio="xMidYMid meet"
           className="w-full h-full max-lg:max-h-[39vh] lg:max-h-[94vh] block select-none overflow-visible"
           fill="none"
