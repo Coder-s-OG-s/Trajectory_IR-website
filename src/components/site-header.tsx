@@ -203,7 +203,7 @@ export function SiteHeader() {
     <header 
       className="liquid-glass-header z-50 w-full h-[72px] sm:h-[76px] flex items-center"
       style={{
-        position: isDocs ? 'sticky' : 'fixed',
+        position: isDocs ? 'sticky' : 'relative',
         top: 0,
         background: isDocs ? 'rgba(6, 11, 25, 0.85)' : 'transparent',
         backdropFilter: isDocs ? 'blur(16px)' : undefined,

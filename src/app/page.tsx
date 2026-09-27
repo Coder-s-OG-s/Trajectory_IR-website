@@ -202,7 +202,7 @@ export default function Home() {
         <SiteHeader />
 
         {/* Hero Section Container */}
-        <div className="min-h-[calc(100vh-140px)] flex flex-col justify-between">
+        <div className="flex-1 flex flex-col justify-between">
           <main className="w-full max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-6 sm:py-0 flex-1 flex items-center my-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full my-auto">
 
