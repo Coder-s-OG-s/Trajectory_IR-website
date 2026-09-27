@@ -34,8 +34,16 @@ export default function Home() {
         closeDemoModal();
       }
     };
+    if (showDemoModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [showDemoModal]);
 
   // Smooth scroll-triggered background color shift mapped directly to scroll progress
@@ -45,9 +53,10 @@ export default function Home() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollY = window.scrollY;
-          // Smoothly shifts background to dark shade as user scrolls into main content
-          const start = 40;
-          const end = 650;
+          // Smoothly shifts background to dark shade as user scrolls into main content based on viewport height
+          const vh = window.innerHeight || 800;
+          const start = vh * 0.05;
+          const end = vh * 0.75;
           const progress = Math.min(Math.max((scrollY - start) / (end - start), 0), 1);
           const darkness = (progress * 0.94).toFixed(3);
           const infinityOpacity = (0.5 * (1 - progress)).toFixed(3);
@@ -62,8 +71,12 @@ export default function Home() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   return (
