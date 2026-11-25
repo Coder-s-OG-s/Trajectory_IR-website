@@ -78,7 +78,7 @@ const PLUGIN_COMMANDS = [
     tag: 'Repo Hooks',
     icon: <CopilotMark />,
     cmd: 'trajir install copilot',
-    note: '✓ Repo hooks installed · streams runs to ~/.trajir/console-data',
+    note: '✓ Repo hooks installed · dashboard events go to ~/.trajir/console-data (runs stay in .trajir/runs/)',
   },
 ];
 
@@ -376,7 +376,7 @@ export function LatestUpdatesViewport() {
                 className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-sky-200/90 hover:text-white transition-colors no-underline"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-300" aria-hidden="true" />
-                <span>v0.3.0 &amp; main · Agent Plugins</span>
+                <span>main · Agent Hooks &amp; Plugin</span>
               </a>
 
               <h2
@@ -393,10 +393,11 @@ export function LatestUpdatesViewport() {
               </h2>
 
               <p className="text-sm sm:text-base text-sky-100/75 leading-relaxed">
-                Native plugins for Claude Code, Codex, Gemini CLI, Cursor, and Copilot CLI—plus
-                seal-derived idempotency keys, transactional{' '}
+                Claude Code plugin and native hooks for Codex, Gemini CLI, Cursor, and Copilot
+                CLI—plus seal-derived idempotency keys, transactional{' '}
                 <code className="font-mono text-sky-200">.tir</code> imports, and{' '}
-                <span className="text-white font-medium">4.7 ms</span> step latency on Go 1.26.
+                <span className="text-white font-medium">4.7 ms</span> step latency on{' '}
+                <code className="font-mono text-sky-200">main</code>.
               </p>
             </div>
 
@@ -412,7 +413,7 @@ export function LatestUpdatesViewport() {
                   letterSpacing: '-0.015em',
                 }}
               >
-                <span>Plugin Guide</span>
+                <span>Hooks &amp; Plugin Guide</span>
                 <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </a>
 
@@ -561,7 +562,17 @@ export function LatestUpdatesViewport() {
               })}
             </div>
 
-            {/* Main Oval Command Capsule */}
+            {/* Step 1: Full go install @main shown before the agent command */}
+            <div className="px-2 space-y-1">
+              <div className="text-[11px] font-mono text-sky-200/75">
+                1. Install CLI from <code className="text-sky-200">main</code>:
+              </div>
+              <code className="block text-[11px] font-mono text-sky-100/90 break-all">
+                go install github.com/Coder-s-OG-s/Trajectory-IR/go/cmd/trajir@main
+              </code>
+            </div>
+
+            {/* Step 2: Main Oval Command Capsule */}
             <div className="liquid-glass-dock rounded-full p-2 pl-2.5 flex items-center justify-between gap-3 shadow-2xl">
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-md border border-white/40 shadow-[inset_0_1.5px_1px_rgba(255,255,255,0.7),0_4px_16px_rgba(56,189,248,0.2)] text-white flex items-center justify-center shrink-0">
@@ -581,12 +592,15 @@ export function LatestUpdatesViewport() {
               </button>
             </div>
 
-            {/* Subtle 2-line CLI & Verify Note */}
+            {/* Step 3: Agent Note + Export & Verify */}
             <div className="space-y-1 px-2 text-xs text-sky-100/75">
               <div className="text-emerald-300/90 font-mono text-[11px]">{activePlugin.note}</div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-sky-200/70">
-                <span>1. go install .../cmd/trajir@latest</span>
-                <span>2. trajir console · trajir verify run.tir</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-sky-200/75">
+                <span>3. trajir console</span>
+                <span>·</span>
+                <span>trajir export</span>
+                <span>·</span>
+                <span>trajir verify run.tir</span>
               </div>
             </div>
           </div>
