@@ -374,7 +374,7 @@ export function SiteHeader() {
           {/* Website-Standard Liquid Glass CLI Selector Pill (between Architecture & Get Started) */}
           <div
             ref={cliDropdownRef}
-            className="hidden lg:flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.04] hover:bg-white/[0.07] transition-all backdrop-blur-md pl-3 pr-1.5 py-1 shadow-md w-[290px] relative"
+            className="hidden xl:flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.04] hover:bg-white/[0.07] transition-all backdrop-blur-md pl-3 pr-1.5 py-1 shadow-md w-[290px] relative"
             style={{
               fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
               letterSpacing: '-0.015em',
