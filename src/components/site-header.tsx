@@ -18,6 +18,14 @@ interface NavItem {
   dropdownItems?: DropdownItem[];
 }
 
+const CLI_PLUGINS = [
+  { id: 'claude', label: 'Claude Code', cmd: '/plugin marketplace add Coder-s-OG-s/Trajectory-IR' },
+  { id: 'codex', label: 'Codex', cmd: 'trajir install codex' },
+  { id: 'gemini', label: 'Gemini CLI', cmd: 'trajir install gemini' },
+  { id: 'cursor', label: 'Cursor', cmd: 'trajir install cursor' },
+  { id: 'copilot', label: 'Copilot CLI', cmd: 'trajir install copilot' },
+];
+
 const navItems: NavItem[] = [
   {
     label: 'Features',
@@ -84,37 +92,43 @@ function LiquidDropdownMenu({
   );
 }
 
-function NavLink({ item }: { item: NavItem }) {
-  const [isOpen, setIsOpen] = useState(false);
+function NavLink({
+  item,
+  isOpen,
+  onOpen,
+  onScheduleClose,
+  onCloseImmediate,
+  onToggle,
+}: {
+  item: NavItem;
+  isOpen: boolean;
+  onOpen: () => void;
+  onScheduleClose: () => void;
+  onCloseImmediate: () => void;
+  onToggle: () => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
     if (!item.hasDropdown) return;
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    setIsOpen(true);
+    onOpen();
   };
 
   const handleMouseLeave = () => {
     if (!item.hasDropdown) return;
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
-    }, 150); // 150ms buffer prevents accidental closure when moving mouse
+    onScheduleClose();
   };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        onCloseImmediate();
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setIsOpen(false);
+        onCloseImmediate();
       }
     }
 
@@ -126,11 +140,8 @@ function NavLink({ item }: { item: NavItem }) {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
     };
-  }, [isOpen]);
+  }, [isOpen, onCloseImmediate]);
 
   return (
     <div
@@ -144,7 +155,7 @@ function NavLink({ item }: { item: NavItem }) {
         onClick={(e) => {
           if (item.hasDropdown) {
             e.preventDefault();
-            setIsOpen((prev) => !prev);
+            onToggle();
           }
         }}
         className={`inline-flex items-center gap-1.5 text-sm font-medium no-underline px-3.5 py-2 rounded-full transition-all whitespace-nowrap ${
@@ -172,7 +183,7 @@ function NavLink({ item }: { item: NavItem }) {
         <LiquidDropdownMenu
           items={item.dropdownItems}
           isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
+          onClose={onCloseImmediate}
         />
       )}
     </div>
@@ -183,6 +194,75 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isDocs = pathname?.startsWith('/docs');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openNavLabel, setOpenNavLabel] = useState<string | null>(null);
+  const navCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedCli, setSelectedCli] = useState(CLI_PLUGINS[0].id);
+  const [cliMenuOpen, setCliMenuOpen] = useState(false);
+  const [copiedCli, setCopiedCli] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [hoverReveal, setHoverReveal] = useState(false);
+  const cliDropdownRef = useRef<HTMLDivElement>(null);
+  const activeCli = CLI_PLUGINS.find((c) => c.id === selectedCli) ?? CLI_PLUGINS[0];
+
+  useEffect(() => {
+    if (isDocs) return;
+    const onScroll = () => {
+      const scrolled = window.scrollY > 80;
+      setIsScrolled(scrolled);
+      if (!scrolled) setHoverReveal(false);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isDocs]);
+
+  useEffect(() => {
+    if (!cliMenuOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (cliDropdownRef.current && !cliDropdownRef.current.contains(e.target as Node)) {
+        setCliMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setCliMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [cliMenuOpen]);
+
+  const clearNavTimeout = () => {
+    if (navCloseTimeoutRef.current) {
+      clearTimeout(navCloseTimeoutRef.current);
+      navCloseTimeoutRef.current = null;
+    }
+  };
+
+  const handleOpenNav = (label: string) => {
+    clearNavTimeout();
+    setOpenNavLabel(label);
+  };
+
+  const handleScheduleCloseNav = () => {
+    clearNavTimeout();
+    navCloseTimeoutRef.current = setTimeout(() => {
+      setOpenNavLabel(null);
+    }, 150);
+  };
+
+  const handleCloseNavImmediate = React.useCallback(() => {
+    clearNavTimeout();
+    setOpenNavLabel(null);
+  }, []);
+
+  const handleCopyCli = () => {
+    navigator.clipboard.writeText(activeCli.cmd);
+    setCopiedCli(true);
+    setTimeout(() => setCopiedCli(false), 1500);
+  };
 
   // Close mobile menu on Escape key and lock body scroll
   useEffect(() => {
@@ -203,19 +283,53 @@ export function SiteHeader() {
     };
   }, [mobileMenuOpen]);
 
+  const showFloatingHeader = !isDocs && isScrolled;
+  const isFloatingVisible = hoverReveal || openNavLabel !== null || cliMenuOpen || mobileMenuOpen;
+
   return (
-    <header 
-      className="liquid-glass-header z-50 w-full h-[72px] sm:h-[76px] flex items-center"
-      style={{
-        position: 'sticky',
-        top: 0,
-        background: isDocs ? 'rgba(6, 11, 25, 0.85)' : 'transparent',
-        backdropFilter: isDocs ? 'blur(16px)' : undefined,
-        WebkitBackdropFilter: isDocs ? 'blur(16px)' : undefined,
-        borderBottom: isDocs ? '1px solid rgba(255, 255, 255, 0.05)' : undefined,
-      }}
-    >
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-8 w-full flex items-center justify-between">
+    <div className="w-full h-[72px] sm:h-[76px] relative z-50">
+      {/* Top-edge hover trigger when scrolled down */}
+      {showFloatingHeader && (
+        <div
+          onMouseEnter={() => setHoverReveal(true)}
+          className="fixed top-0 left-0 right-0 h-5 z-50"
+          aria-hidden="true"
+        />
+      )}
+
+      <header
+        onMouseEnter={() => {
+          if (showFloatingHeader) setHoverReveal(true);
+        }}
+        onMouseLeave={() => {
+          if (showFloatingHeader && !openNavLabel && !cliMenuOpen) {
+            setHoverReveal(false);
+          }
+        }}
+        className={`liquid-glass-header z-50 w-full h-[72px] sm:h-[76px] flex items-center transition-transform duration-300 ease-out ${
+          showFloatingHeader
+            ? isFloatingVisible
+              ? 'translate-y-0'
+              : '-translate-y-full pointer-events-none'
+            : 'translate-y-0'
+        }`}
+        style={{
+          position: isDocs ? 'sticky' : showFloatingHeader ? 'fixed' : 'relative',
+          top: isDocs || showFloatingHeader ? 0 : undefined,
+          left: showFloatingHeader ? 0 : undefined,
+          right: showFloatingHeader ? 0 : undefined,
+          background: isDocs
+            ? 'rgba(6, 11, 25, 0.85)'
+            : showFloatingHeader
+              ? 'rgba(4, 16, 34, 0.82)'
+              : 'transparent',
+          backdropFilter: isDocs || showFloatingHeader ? 'blur(16px)' : undefined,
+          WebkitBackdropFilter: isDocs || showFloatingHeader ? 'blur(16px)' : undefined,
+          borderBottom:
+            isDocs || showFloatingHeader ? '1px solid rgba(255, 255, 255, 0.08)' : undefined,
+        }}
+      >
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-8 w-full flex items-center justify-between relative">
         {/* Left Brand Logo with Starburst */}
         <Link
           href="/"
@@ -237,15 +351,106 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        {/* Center Nav Links (Desktop) */}
-        <nav className="hidden md:flex items-center gap-2.5">
+        {/* Center Nav Links (Desktop) - True centered */}
+        <nav className="hidden md:flex items-center gap-2.5 md:absolute md:left-1/2 md:-translate-x-1/2">
           {navItems.map((item) => (
-            <NavLink key={item.label} item={item} />
+            <NavLink
+              key={item.label}
+              item={item}
+              isOpen={openNavLabel === item.label}
+              onOpen={() => handleOpenNav(item.label)}
+              onScheduleClose={handleScheduleCloseNav}
+              onCloseImmediate={handleCloseNavImmediate}
+              onToggle={() => {
+                clearNavTimeout();
+                setOpenNavLabel((prev) => (prev === item.label ? null : item.label));
+              }}
+            />
           ))}
         </nav>
 
         {/* Right Action CTAs & Mobile Hamburger */}
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Website-Standard Liquid Glass CLI Selector Pill (between Architecture & Get Started) */}
+          <div
+            ref={cliDropdownRef}
+            className="hidden xl:flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.04] hover:bg-white/[0.07] transition-all backdrop-blur-md pl-3 pr-1.5 py-1 shadow-md w-[290px] relative"
+            style={{
+              fontFamily: "var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif",
+              letterSpacing: '-0.015em',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setCliMenuOpen((prev) => !prev)}
+              aria-expanded={cliMenuOpen}
+              aria-haspopup="menu"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-white/95 hover:text-white shrink-0 cursor-pointer py-0.5"
+            >
+              <span>{activeCli.label}</span>
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                aria-hidden="true"
+                className={`transition-transform duration-200 opacity-75 ${cliMenuOpen ? 'rotate-180 text-sky-300' : 'rotate-0'}`}
+              >
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            <span className="h-3.5 w-px bg-white/25 shrink-0" aria-hidden="true" />
+
+            <code className="flex-1 min-w-0 text-[11px] font-mono text-sky-200/90 truncate">
+              {activeCli.cmd}
+            </code>
+
+            <button
+              type="button"
+              onClick={handleCopyCli}
+              aria-label="Copy install command"
+              className="text-[11px] font-medium text-white/90 hover:text-white border border-white/25 hover:bg-white/10 rounded-full px-2.5 py-0.5 transition-all shrink-0 cursor-pointer"
+            >
+              {copiedCli ? 'Copied' : 'Copy'}
+            </button>
+
+            {cliMenuOpen && (
+              <div className="absolute top-full left-0 pt-2 z-50 min-w-[230px]" role="menu">
+                <div
+                  className="liquid-glass-dropdown p-2"
+                  style={{
+                    animation: 'header-dropdown-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.4)',
+                  }}
+                >
+                  {CLI_PLUGINS.map((cli) => {
+                    const isCurrent = cli.id === selectedCli;
+                    return (
+                      <button
+                        key={cli.id}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setSelectedCli(cli.id);
+                          setCliMenuOpen(false);
+                        }}
+                        className={`liquid-glass-dropdown-item w-full text-left px-3.5 py-2 rounded-xl text-xs cursor-pointer flex items-center justify-between gap-2 ${
+                          isCurrent ? 'bg-white/15 text-white' : 'text-white/90'
+                        }`}
+                      >
+                        <span className="font-semibold">{cli.label}</span>
+                        <span className="text-[10px] font-mono text-sky-200/65 truncate max-w-[110px]">
+                          {cli.cmd}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           <Link
             href="/docs/quickstart"
             className="border border-white/35 rounded-full px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-white/10 transition-all backdrop-blur-md no-underline shadow-md whitespace-nowrap"
@@ -364,6 +569,7 @@ export function SiteHeader() {
         </>
       )}
     </header>
+    </div>
   );
 }
 

@@ -8,6 +8,7 @@ import { CursorGlow } from '@/components/cursor-glow';
 import { DustParticles } from '@/components/dust-particles';
 import { ProblemStatement } from '@/components/problem-statement';
 import { FeaturePillars } from '@/components/feature-pillars';
+import { LatestUpdatesViewport } from '@/components/latest-updates-viewport';
 import { lockScroll, unlockScroll } from '@/lib/scroll-lock';
 
 
@@ -299,6 +300,8 @@ export default function Home() {
         {/* Feature Pillars: Core Architecture & Guarantees (The Problem We Are Solving) */}
         <FeaturePillars />
 
+        {/* New Viewport: Latest Upstream Updates from Coder-s-OG-s/Trajectory-IR */}
+        <LatestUpdatesViewport />
 
         {/* FROSTED LIQUID GLASS CURTAIN SHEET FOOTER (Compact & balanced on mobile, 1:1 original on large screens) */}
         <footer className="liquid-glass-footer-curtain w-full mt-4 sm:mt-12 pt-6 sm:pt-16 pb-3 sm:pb-12 px-5 sm:px-10 lg:px-16 text-white border-t border-white/20">
